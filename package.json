@@ -4,6 +4,7 @@
   "private": true,
   "description": "Example project from an angular.io guide.",
   "scripts": {
+    "init": "npm install npm-run-all --save-dev && npm install -g @angular/cli && npm install npm i -g @angular/cli",
     "lint": "tslint ./src/**/*.ts -t verbose",
     "start": "node patch-webpack.js && ng serve --open",
     "test": "ng test",
@@ -57,7 +58,8 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
-    "typescript": "~3.1.1"
+    "typescript": "~3.1.1",
+    "webpack-dev-server": "^3.2.1"
   },
   "repository": {}
 }
