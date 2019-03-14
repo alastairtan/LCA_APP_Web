@@ -1,0 +1,59 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+    <!--Side navigator buttons-->
+    <div class="nav">
+        <!--Buttons to navigate to and fro previous and next page-->
+        <button class="button-left" (click)="navPrev()"><span>Previous</span></button>
+        <div class="navtitle defaultCursor">
+            <p>
+                Result
+            </p>
+        </div>
+        <button class="button" (click)="navNext()"><span>Next</span></button>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="placeholder defaultCursor">
+                    <p>
+                        Generated results
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Entity</th>
+                            <th *ngFor="let name of this.metadata.arrowNames">{{name}}</th>
+                        </tr>
+                        <tr *ngFor="let row of this.results; let i = index" [attr.data-index]="i">
+                            <td>{{this.metadata.entities[i]}}</td>
+                            <td *ngFor="let cell of row; let j = index" [attr.data-index]="j">{{cell}}</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+            <!-- Show last saved timing at the bottom right hand corner-->
+        </div>
+    </div>
+
+    <span class="showtime">{{lastSaved}}</span>
+    <!-- Included a menu. when hovered over, buttons will appear for user to save their project-->
+    <div class="expand">
+        <!--If the form is not completed, saving is disabled-->
+        <button class="save-button save" (click)="saveToFolder()">
+            Save
+        </button>
+        <button class="save-button saveas" (click)="saveElsewhere()">
+            Save As
+        </button>
+        <button class="save-button saveexit">
+            Save and Exit
+        </button>
+        <button type="button" class="btn btn-sq-sm btn-save menuicon">
+            <i class="fa fa-save fa-2x"></i><br />
+        </button>
+    </div>
+</body>

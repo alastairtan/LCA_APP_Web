@@ -1,0 +1,20 @@
+<style>
+    .btn {
+        margin: 10px;
+    }
+</style>
+<body>
+    <div>
+        <button type="button" class="btn btn-success" (click)="setSessionSt()">Set Session Storage</button>
+        <button type="button" class="btn btn-info" (click)="getSessionSt()">Get Session Storage</button>
+        <button type="button" class="btn btn-danger" (click)="removeSessionSt()">Delete Session Storage</button>
+        <button type="button" class="btn btn-warning" routerLink="/mainMenu">Back to Main Menu</button>
+    </div>
+    <p>Session storage: {{data}}</p>
+
+    <div>
+      <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+        <div class="example-box" *ngFor="let movie of movies" cdkDrag>{{movie}}</div>
+      </div>
+    </div>
+</body>

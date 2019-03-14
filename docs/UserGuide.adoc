@@ -1,0 +1,150 @@
+﻿= CAR^2^E - User Guide
+:toc:
+:toc-title:
+:toc-placement: preamble
+:sectnums:
+:imagesDir: images
+:stylesDir: stylesheets
+:xrefstyle: full
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+endif::[]
+:repoURL: https://github.com/darentzl/LCA_App
+
+By: `SIMTech`      Since: `January 2019`      Licence: `A*Star`
+
+== Introduction
+
+image:logo.png[ align="center"] +
+Carbon Footprint Assessment and Reduction for Resource Efficiency (CAR^2^E) is a multi-platform application that aims to promote Industrial Symbiosis by identifying, prioritising and allocating resources among different companies efficiently and effectively. Companies using CAR^2^E can establish their carbon footprint baseline and strategic sustainability improvement plan, thus increase energy efficiency, reducing material consumption and waste. +
+
+CAR^2^E has a graphical user interface (GUI) which accommodates both mouse and keyboard input. Its main functionality lies in the dragging-and-dropping of life cycle stages and processes of producing an item, which both helps the users visualize the product's life cycle as well as calculate the carbon footprint base line.
+
+This User Guide is meant to provide the necessary information for users, whether new or experienced, who would like to gain more insights about how to use CAR^2^E effectively. The guide consists of the overview of the application and descriptions of its current features.
+
+== Quick Start
+
+<TBC>
+
+[[Features]]
+== Features
+
+=== Create a new project
+
+Creates a brand new project file and discards the previous project. +
+*Steps*:
+
+  . Navigate to Main Menu.
+  . Click Create Project button.
+
+[NOTE]
+====
+Any unsaved project will be overwritten and lost. Remember to save your current project before creating a new one.
+====
+
+=== Import a project from file
+
+Imports an external project from a local .json file. +
+*Steps*:
+
+  . Navigate to Main Menu.
+  . Click Import Project button.
+  . Navigate to the local .json project file.
+  . Click the Import button.
+
+[NOTE]
+====
+Any unsaved project will be overwritten and lost. Remember to save current your project before importing one.
+====
+
+=== Load a Recent project
+
+Loads a project that you have worked on recently. +
+*Prerequisite*: Having worked on a project on this system. +
+*Steps*:
+
+  . Navigate to Main Menu.
+  . Locate the name of your project from the Recents Project list.
+  . Click on your project.
+  
+[NOTE]
+====
+* Any unsaved project will be overwritten and lost. Remember to save your current project before loading one.
+* CAR^2^E only saves up to 5 of your recent projects.
+* CAR^2^E saves your project only by your project name. If you change the project details without changing its name, your old project will be overwritten in the Recent Projects list.
+====
+
+=== Define Goal, Scope and System Boundary
+
+Defines the project's metadata. +
+*Prerequisite*: A project has been created/imported/loaded. +
+*Steps*:
+
+  . Navigate to Goal and Scope.
+  . Define the project's name, goal and the product or service it provides.
+  . Navigate to System Boundary.
+  . Define the project's system boundary and exclusion
+
+=== Add a life cycle stage
+
+Add a life cycle stage to the project. +
+*Prerequisite*: A project has been created/imported/loaded. +
+*Steps*:
+
+  . Navigate to System Boundary.
+  . Click on the green + button in the Life Cycle Stage definition.
+  . Enter the new stage's name as prompted.
+  
+*Shortcut*: Double click on the Life Cycle Stage definition background.
+  
+[NOTE]
+====
+* A stage name cannot be blank.
+* If there is any blank stage in the current list of stages, a new stage cannot be added.
+====
+
+=== Edit a life cycle stage's name
+
+Changes the name of a pre-made life cycle stage of the project. +
+*Prerequisite*: 
+
+  . A project has been created/imported/loaded.
+  . A life cycle stage has been added and named before.
+  
+*Steps*:
+
+  . Navigate to System Boundary.
+  . Click on the yellow edit button (one with the pen icon) next to the stage you want to edit.
+  . Enter the new stage's name as prompted.
+  
+*Shortcut*: Select a stage (seeing it turn blue), then type the edit you want to make.
+  
+[NOTE]
+====
+A stage name cannot be blank.
+====
+
+=== Delete a life cycle stage
+
+Deletes a life cycle stage from the project. +
+*Prerequisite*: 
+
+  . A project has been created/imported/loaded.
+  . A life cycle stage has been added and named before.
+  
+*Steps*:
+
+  . Navigate to System Boundary.
+  . Click on the red delete button (one with the trash bin icon) next to the stage you want to delete.
+  
+*Shortcut*: Right click on the stage you want to delete.
+
+== FAQ
+
+<TBC>
+
+== Appendix
+
+<TBC>

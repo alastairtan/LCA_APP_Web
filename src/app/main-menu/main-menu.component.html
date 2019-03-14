@@ -1,0 +1,65 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <!--Nav Bar Description-->
+    <!--Side navigator buttons-->
+        <!--Buttons to navigate to and fro previous and next page-->
+    <div class="nav">
+      <!--Buttons to navigate to and fro previous and next page-->
+      <button class="button-left" disabled><span></span></button>
+      <div class="navtitle">
+        <p class="defaultCursor">
+          My Dashboard
+        </p>
+      </div>
+      <button class="button" routerLink="/createProject"><span>Next</span></button>
+    </div>
+    <div class="centering">
+        <div class="container">
+            <!--This columnn containes Recent projects and Completed projects for user to navigate-->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="row">
+                <div class="placeholder">
+                  <p class="heading defaultCursor">
+                    Recent Projects
+                  </p>
+                  <ul class="projects">
+                    <li *ngFor="let proj of recentProjects" (click)="importRecentProject(proj)">
+                      {{proj[0]}}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
+                <div class="placeholder">
+                  <p class="heading defaultCursor">
+                    Completed Projects
+                  </p>
+                </div>
+              </div>
+            </div><!-- This column is the panel bar for them to create, import and exit-->
+            <div class="col-md-6">
+              <div class="placeholder2">
+                <div class="buttonplaceholder">
+                  <button type="button" class="btn" (click)="createNewProj()" routerLink="/createProject">
+                    Create Project
+                  </button>
+                  <form novalidate (ngSubmit)="onSubmit()">
+                    <label for="importProj" class="btn btn-secondary">
+                      Import project
+                    </label>
+                    <input id="importProj" type="file" accept=".json" (change)="importProject($event)" style="display:none" />
+                    <button id="submitBtn" type="submit" style="display:none">Submit</button>
+                  </form>
+                  <button type="button" class="btn" routerLink="/projectFooter">
+                    Exit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</body>

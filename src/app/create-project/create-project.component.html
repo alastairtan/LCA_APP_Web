@@ -1,0 +1,111 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+    <!--Side navigator buttons-->
+    <div class="nav">
+        <!--Buttons to navigate to and fro previous and next page-->
+        <button class="button-left" (click)="navPrev()"><span>Previous</span></button>
+        <div class="navtitle defaultCursor">
+            <p>
+                Goals and Scope
+            </p>
+        </div>
+        <button *ngIf="this.currentProject.projectName != ''" class="button" (click)="navNext()"><span>Next</span></button>
+        <button *ngIf="this.currentProject.projectName == ''" class="disabled-button" (click)="showEmptyNameWarning()"><span>Next</span></button>
+    </div>
+    <!--createProject row-->
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        <div class="container">
+            <div class="row">
+                <!--Photo column-->
+                <div class="col-md-6">
+                    <div class="placeholder defaultCursor">
+                        <p>
+                            Project Photo
+                        </p>
+                        <div class="projectPhoto">
+                            <label id="label" for="importPic" class="picture"></label>
+                            <input id="importPic" type="file" accept="image/*" (change)="importPic($event)" style="display:none" />
+                            <div class="content" id="picContent">
+                                <label id="picLabel" for="importPicAgain" style="margin: 1vh auto;">
+                                    <div class="content-overlay" ></div>
+                                        <img id="pic" src={{url}} />
+                                    <div class="content-details fadeIn-top">
+                                        <h3>Click to change photo</h3>
+                                    </div>
+                                </label>
+                                <input id="importPicAgain" type="file" accept="image/*" (change)="importPic($event)" style="display:none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Details column-->
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="placeholder-input defaultCursor">
+                            <p>
+                                Project Name
+                            </p>
+                            <input type="text" id="projectNameInput" class="projectName" formControlName="projectName" (change)="updateProject()" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="placeholder-input defaultCursor">
+                            <p>
+                                Goals
+                            </p>
+                            <div class="grid-container">
+                                <div class="labels">
+                                    Objective
+                                </div>
+                                <textarea rows="3" formControlName="objective" placeholder="Project objectives" (change)="updateProject()" required autocomplete="off"></textarea>
+                            </div>
+                            <div class="grid-container">
+                                <div class="labels">
+                                    Target Audience
+                                </div>
+                                <textarea rows="3" formControlName="targetAudience" placeholder="Target Audience" (change)="updateProject()" required autocomplete="off"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="row">
+                        <div class="placeholder-input defaultCursor">
+                            <p>
+                                Scope
+                            </p>
+                            <div class="grid-container">
+                                <div class="labels">
+                                    Product/Service Name
+                                </div>
+                                <textarea rows="3" formControlName="scopeName" placeholder="Product/Service name" (change)="updateProject()" required autocomplete="off"></textarea>
+                            </div>
+                            <div class="grid-container">
+                                <div class="labels">
+                                    Product/Service Description
+                                </div>
+                                <textarea rows="3" formControlName="scopeDescription" placeholder="Product/Service description" (change)="updateProject()" required autocomplete="off"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- Show last saved timing at the bottom right hand corner-->
+        <span class="showtime">{{lastSaved}}</span>
+    <!-- Included a menu. when hovered over, buttons will appear for user to save their project-->
+        <div class="save-container">
+            <!--If the form is not completed, saving is disabled-->
+            <button *ngIf="this.currentProject.projectName != ''" type="button" class="btn btn-sq-sm btn-save menuicon" (click)="saveElsewhere()">
+                <i class="fa fa-save fa-2x"></i><br />
+            </button>
+            <button *ngIf="this.currentProject.projectName == ''" type="button" class="btn btn-sq-sm disabled-btn-save menuicon">
+                <i class="fa fa-save fa-2x"></i><br />
+            </button>
+        </div>
+
+</body>

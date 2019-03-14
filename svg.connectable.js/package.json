@@ -1,0 +1,55 @@
+{
+  "_args": [
+    [
+      "svg.connectable.js@1.0.1",
+      "C:\\Users\\weiyang\\Documents\\LCA"
+    ]
+  ],
+  "_from": "svg.connectable.js@1.0.1",
+  "_id": "svg.connectable.js@1.0.1",
+  "_inBundle": false,
+  "_integrity": "sha1-nC8x4/04cJHaVTSyWKXq1t0TszI=",
+  "_location": "/svg.connectable.js",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "svg.connectable.js@1.0.1",
+    "name": "svg.connectable.js",
+    "escapedName": "svg.connectable.js",
+    "rawSpec": "1.0.1",
+    "saveSpec": null,
+    "fetchSpec": "1.0.1"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/svg.connectable.js/-/svg.connectable.js-1.0.1.tgz",
+  "_spec": "1.0.1",
+  "_where": "C:\\Users\\weiyang\\Documents\\LCA",
+  "author": {
+    "name": "jillix",
+    "email": "contact@jillix.com"
+  },
+  "bugs": {
+    "url": "https://github.com/jillix/svg.connectable.js/issues"
+  },
+  "description": "A JavaScript library for connecting SVG things.",
+  "homepage": "https://github.com/jillix/svg.connectable.js",
+  "keywords": [
+    "svg",
+    "connectable",
+    "js"
+  ],
+  "license": "MIT",
+  "main": "src/svg.connectable.js",
+  "name": "svg.connectable.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jillix/svg.connectable.js.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.1"
+}

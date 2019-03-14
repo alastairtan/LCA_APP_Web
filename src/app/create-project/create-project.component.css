@@ -1,0 +1,430 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+/*
+    Header CSS
+*/
+p {
+    display: block;
+    background-color: #7c9bc9;
+    text-align: center;
+    font-size: 1.75em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+/*
+    Body
+*/
+body {
+    background-color: #E4E2E9;
+    width: 100%;
+    height: 100%;
+}
+
+/*
+    Insert picture CSS
+*/
+#pic {
+    display: none;
+    width: 25vw;
+    max-height: 60vh;
+}
+
+#pic:hover {
+    background: url("/../assets/img/insert-image-hover.png") no-repeat;
+    opacity: 0.5;
+    transition-timing-function: ease-in;
+}
+
+.projectPhoto {
+    display: flex;
+    justify-content: center;
+}
+
+.picture {
+    max-width: 293px;
+    max-height: 359px;
+    width: 293px;
+    height: 359px;
+    background: url("/../assets/img/insert-image.png") no-repeat;
+    transition: 0.3s;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 9vh;
+}
+
+.picture:hover {
+    background: url("/../assets/img/insert-image-hover.png") no-repeat;
+    transition-timing-function: ease-in;
+}
+
+/*
+    Text hover over image
+*/
+.content {
+    position: relative;
+    margin: auto;
+    overflow: hidden;
+    width: 25vw;
+    max-height: 60vh;
+    object-fit: contain;
+    display: none;
+}
+
+.content .content-overlay {
+    margin-top: 9vh;
+    background: rgba(124,155,200,0.7);
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    opacity: 0;
+    -webkit-transition: all 0.4s ease-in-out 0s;
+    -moz-transition: all 0.4s ease-in-out 0s;
+    transition: all 0.4s ease-in-out 0s;
+}
+
+.content:hover .content-overlay {
+    opacity: 1;
+}
+
+.content-details {
+    position: absolute;
+    text-align: center;
+    padding-left: 1em;
+    padding-right: 1em;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    -webkit-transition: all 0.3s ease-in-out 0s;
+    -moz-transition: all 0.3s ease-in-out 0s;
+    transition: all 0.3s ease-in-out 0s;
+}
+
+.content:hover .content-details {
+    top: 50%;
+    left: 50%;
+    opacity: 1;
+}
+
+.content-details h3 {
+    color: #fff;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    margin-top: 3em;
+    margin-bottom: 0.5em;
+    text-transform: uppercase;
+}
+
+.fadeIn-top {
+    top: 20%;
+}
+
+/*
+    Placeholder for picture
+*/
+.placeholder {
+    background-color: #f7f7f7;
+    width: 100%;
+    height: inherit;
+    margin-top: 1.5em;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    transition: 0.5s;
+}
+
+.placeholder:hover {
+    transform: scale(1.05);
+}
+
+/*
+    placeholder for project name, goals and scope
+*/
+.placeholder-input {
+    background-color: #f7f7f7;
+    width: 100%;
+    height: inherit;
+    margin-top: 1.5em;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    transition: 0.5s;
+}
+
+.placeholder-input:hover {
+    transform: scale(1.05);
+}
+
+.projectName {
+    height:12vh;
+    padding: 10px;
+    text-align: center;
+}
+
+/*
+    Inputs for project name, goals and scope CSS
+*/
+input {
+    width: 100%;
+    height: 6vh;
+    background-color: #f7f7f7;
+    align-self: center;
+    border: none;
+}
+
+/*
+    Labels: Objective, Target Audience, Product/Service Name etc CSS
+*/
+.labels {
+    font-size: 1.25em;
+    height: inherit;
+    text-align: center;
+    align-items: center;
+}
+
+/*
+    CSS for text area of Objective and Product/Service description
+*/
+textarea {
+    resize: none;
+    width: 100%;
+    background-color: #f7f7f7;
+    font-size: 1em;
+    border: none;
+    align-items: center;
+    height: inherit;
+}
+
+.smallInput {
+    padding: 10px;
+    width: 100%;
+    height: 6vh;
+    background-color: #f7f7f7;
+    border: none;
+}
+
+/*
+    Grid container to store labels and inputs for better sizing and relativity
+*/
+.grid-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-auto-rows: 6vh 6vh;
+    margin-top: 3px;
+}
+
+.grid-container:hover .labels {
+    background-color: #7c9bc9;
+    transition: 0.5s;
+}
+/*
+    For button to indicate next step
+*/
+
+.disabled-button {
+    display: block;
+    position: static;
+    background-image: linear-gradient(to left, #c8c4d2 0%, #ada7bc 51%, #928aa6 100%);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    width: inherit;
+    height: 81%;
+    transition: all 0.5s;
+    cursor: not-allowed;
+}
+
+.disabled-button span {
+    display: inline-block;
+    position: relative;
+    font-size: 0.75em;
+    margin-top: 0px;
+    color: black;
+}
+
+.button {
+    display: block;
+    position: static;
+    background-image: linear-gradient(to right, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    width: inherit;
+    height: 81%;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+.button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+    font-size: 0.75em;
+    margin-top: 0px;
+    color: black;
+}
+
+.button span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+
+.button:hover span {
+    padding-right: 25px;
+    background-position: right center;
+}
+
+.button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+/*
+    For button to go back to the previous
+*/
+
+.button-left {
+    display: block;
+    position: static;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    width: inherit;
+    height: 81%;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.button-left span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+    font-size: 0.75em;
+    margin-top: 0px;
+    color: black;
+ }
+
+.button-left span:after {
+    content: '\00ab';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    left: -20px;
+    transition: 0.5s;
+}
+
+.button-left:hover span {
+    padding-left: 25px;
+    background-position: right center;
+}
+
+.button-left:hover span:after {
+    opacity: 1;
+    left: 0;
+}
+
+/*
+    For the title in the nav bar
+*/
+.navtitle p {
+    display: block;
+    background-color: #7c9bc9;
+    text-align: center;
+    font-size: 1.75em;
+    width: inherit;
+    height: auto;
+}
+/*
+    Grid container to store buttons(prev and next) and the title in the nav bar
+*/
+.nav {
+    display: grid;
+    grid-template-columns: 20% auto 20%;
+    grid-template-rows: auto;
+    margin-top: 0;
+}
+/*
+    buttons for the menu, save, save as and save and exit
+*/
+.disabled-save-button {
+    opacity: 0;
+    transition: opacity .35s ease;
+    position: absolute;
+    width: 100px;
+    background-image: linear-gradient(to left, #928aa6 0%, #ada7bc 51%, #c8c4d2 100%);
+    border-radius: 5px;
+    border: none;
+    font-size: 1.5em;
+    cursor: not-allowed;
+}
+
+/*
+    A container for animation purposes
+*/
+.save-container {
+    position: absolute;
+    right: 40px;
+    bottom: 60px;
+    width: 100px;
+    align-items: center;
+}
+
+.menuicon {
+    /*/border-radius: 50%;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;*/
+    width: auto;
+    height: auto;
+    margin-left: 25px;
+}
+
+.btn-save {
+    color: #fff;
+    background-color: #7c9bc8;
+    border-color: #7c9bc8;
+}
+
+.btn-save:hover {
+  transform: scale(1.05);
+}
+
+.disabled-btn-save {
+    color: black;
+    background-color: #ada7bc;
+    border-color: #ada7bc;
+    cursor: not-allowed;
+}
+/*
+    CSS for the text to show after saving
+*/
+.showtime {
+    color: black;
+    font-style: italic;
+    position: absolute;
+    right: 40px;
+    bottom: 20px;
+}
+
+.col-md-6{
+    height: 70vh;
+}
+.row {
+    height: 22vh;
+    margin-bottom:2vh;
+}
+

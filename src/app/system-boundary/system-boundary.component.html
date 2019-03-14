@@ -1,0 +1,130 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body (click)="deselectAll()">
+
+    <!--Side navigator buttons-->
+    <div class="nav">
+        <!--Buttons to navigate to and fro previous and next page-->
+        <button class="button-left" (click)="navPrev()"><span>Previous</span></button>
+        <div class="navtitle defaultCursor">
+            <p>
+                System Boundary
+            </p>
+        </div>
+        <button *ngIf="!hasNoStage()" class="button" (click)="navNext()"><span>Next</span></button>
+        <button *ngIf="hasNoStage()" class="disabled-button" (click)="showNoStageWarning()"><span>Next</span></button>
+    </div>
+
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="placeholder-input defaultCursor">
+                        <p>
+                            System Boundary Description
+                        </p>
+                        <input class="bigInput" type="text" formControlName="systemDescription" (change)="updateProject()" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="placeholder-input defaultCursor">
+                        <p>
+                            Exclusion
+                        </p>
+                        <input class="bigInput" type="text" formControlName="systemExclusion" (change)="updateProject()" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="placeholder defaultCursor">
+                        <p>
+                            Life Cycle Stage definition
+                        </p>
+                        <div cdkDropList class="example-list" (cdkDropListDropped)="dropped($event)"> <!--#zone1 [connectedTo]="zone2"-->
+                            <div id="{{'lifeStageContainer' + i}}" #item
+                                 class="example-box" *ngFor="let lifeStage of this.currentProject.lifeCycleStages; let i = index"
+                                 cdkDrag [attr.data-index]="i" (cdkDragStarted)="started($event)">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="stageName col-md-11" cdkDragHandle (contextmenu)="deleteItem(i)">
+                                            <input id="{{'lifeStage' + i}}" type="text" value="{{lifeStage}}"
+                                                   (blur)="doneEditing(i)" placeholder="Enter new stage name here" />
+                                            <div id="{{'lifeStageValue' + i}}">{{lifeStage}}</div>
+                                        </div>
+                                        <div class="col-md-auto stageEditButtons">
+                                            <button type="button" class="btn btn-sq-xs btn-edit" (click)="editItem(i)">
+                                                <i class="fa fa-edit fa-1x"></i><br />
+                                            </button>
+                                            <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteItem(i)">
+                                                <i class="fa fa-trash fa-1x"></i><br />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="add-container">
+                            <button type="button" class="btn btn-sq-sm btn-add" (click)="showInputField($event)">
+                                <i class="fa fa-plus fa-2x"></i><br />
+                            </button>
+                            <!--<button class="stageButton" (click)="showInputField($event)">
+                        Add
+                    </button>
+                    <cdk-drop #zone2 class="deletecontainer" (dropped)="dropped($event)"
+                              [connectedTo]="zone1">
+                        Delete
+                        <div *ngFor="let movie of delete" cdkDrag>
+
+                        </div>
+                    </cdk-drop>-->
+                        </div>
+                        <!--<input class="addInput" #stageName
+                       (keyup.esc)="removeInputField($event)"
+                       (keyup.enter)="addStage(stageName.value)"
+                       />-->
+                    </div>
+                </div>
+                <!-- Show last saved timing at the bottom right hand corner-->
+                <span class="showtime">{{lastSaved}}</span>
+                <!-- Included a menu. when hovered over, buttons will appear for user to save their project-->
+                <div class="expand">
+                    <!--If the form is not completed, saving is disabled-->
+                    <button *ngIf="!hasNoStage()" class="save-button save" (click)="saveToFolder()">
+                        Save
+                    </button>
+                    <button *ngIf="hasNoStage()" class="disabled-save-button save" (click)="showNoStageWarning()">
+                        Save
+                    </button>
+                    <button *ngIf="!hasNoStage()" class="save-button saveas" (click)="saveElsewhere()">
+                        Save As
+                    </button>
+                    <button *ngIf="hasNoStage()" class="disabled-save-button saveas" (click)="showNoStageWarning()">
+                        Save As
+                    </button>
+                    <button *ngIf="!hasNoStage()" class="save-button saveexit">
+                        Save and Exit
+                    </button>
+                    <button *ngIf="hasNoStage()" class="disabled-save-button saveexit" (click)="showNoStageWarning()">
+                        Save and Exit
+                    </button>
+                    <button *ngIf="!hasNoStage()" type="button" class="btn btn-sq-sm btn-save menuicon">
+                        <i class="fa fa-save fa-2x"></i><br />
+                    </button>
+                    <button *ngIf="hasNoStage()" type="button" class="btn btn-sq-sm disabled-btn-save menuicon">
+                        <i class="fa fa-save fa-2x"></i><br />
+                    </button>
+                </div>
+            </div>
+            
+            
+        </div>
+    </form>
+
+
+
+</body>

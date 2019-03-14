@@ -1,0 +1,511 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+
+/*
+    Header CSS
+*/
+p {
+    display: block;
+    background-color: #7c9bc9;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+    font-size: 1.75em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+/*
+    Body
+*/
+body {
+    background-color: #E4E2E9;
+    width: 100%;
+    height: 100%;
+}
+
+
+/*
+    For button to indicate next step
+*/
+.button {
+    display: block;
+    position: static;
+    background-image: linear-gradient(to right, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    width: inherit;
+    height: 60px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.75em;
+    margin-top: 0px;
+    color: black;
+}
+
+.button span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+
+.button:hover span {
+    padding-right: 25px;
+    background-position: right center;
+}
+
+.button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.disabled-button {
+    display: block;
+    position: static;
+    background-image: linear-gradient(to left, #c8c4d2 0%, #ada7bc 51%, #928aa6 100%);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    width: inherit;
+    height: 60px;
+    transition: all 0.5s;
+    cursor: not-allowed;
+}
+
+.disabled-button span {
+    display: inline-block;
+    position: relative;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.75em;
+    margin-top: 0px;
+    color: black;
+}
+/*
+    For button to go back to the previous
+*/
+
+.button-left {
+    display: block;
+    position: static;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    width: inherit;
+    height: 60px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+    .button-left span {
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        transition: 0.5s;
+        font-family: 'Raleway', sans-serif;
+        font-size: 0.75em;
+        margin-top: 0px;
+        color: black;
+    }
+
+        .button-left span:after {
+            content: '\00ab';
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            left: -20px;
+            transition: 0.5s;
+        }
+
+    .button-left:hover span {
+        padding-left: 25px;
+        background-position: right center;
+    }
+
+        .button-left:hover span:after {
+            opacity: 1;
+            left: 0;
+        }
+
+/*
+    For the title in the nav bar
+*/
+.navtitle p {
+    display: block;
+    background-color: #7c9bc9;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+    font-size: 1.75em;
+    width: inherit;
+    height: auto;
+}
+/*
+    Grid container to store buttons(prev and next) and the title in the nav bar
+*/
+.nav {
+    display: grid;
+    grid-template-columns: 0% 20% auto 20%;
+    grid-template-rows: auto;
+    margin-top: 0;
+}
+
+.processcontainer {
+    display: block;
+    height: 55vh;
+    border: solid 1px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+    margin-top: 1vh;
+}
+
+.processBoxContainer {
+    display: block;
+    height: 55vh;
+}
+
+.processBoxDetailsContainer {
+    display: block;
+    height: 28vh;
+    border: solid 1px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+    margin-top: 1.5vh;
+}
+
+.box-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    border: solid 1px;
+    color: black;
+    width: 100%;
+    height: auto;
+    font-size: medium;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+}
+
+.containerHeader {
+    display: flex;
+    justify-content: space-around;
+    padding: 0;
+}
+
+.material-input {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    border: solid 1px;
+    color: black;
+    width: 100%;
+    height: 2em;
+    font-size: medium;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+}
+/*
+    Add-delete buttons for MaterialInput
+*/
+.btn-sq-xs {
+    margin: 1px;
+    padding: 4px 9px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.btn-add {
+    color: #fff;
+    background-color: #7cc8a9;
+    border-color: #7cc883;
+}
+
+.btn-delete {
+    
+    color: #fff;
+    background-color: #c87c9b;
+    border-color: #c87cc1;
+}
+
+.menuTabs {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    display: block;
+    list-style-type: none;
+}
+
+.menuTabs a {
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+/* Add a color to the active/current link */
+.menuTabs .active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+input {
+    height: 7vh;
+    width: 100%;
+}
+
+/*-------------------------------*/
+/*           Wrappers            */
+/*-------------------------------*/
+
+#wrapper {
+    padding-left: 0;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+    #wrapper.toggled {
+        padding-left: 220px;
+    }
+
+#sidebar-wrapper {
+    z-index: 1000;
+    left: 220px;
+    width: 0;
+    height: 100%;
+    margin-left: -220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #E4E2E9;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+    #sidebar-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+#wrapper.toggled #sidebar-wrapper {
+    width: 220px;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    padding-top: 70px;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    position: absolute;
+    margin-right: -220px;
+}
+
+/*-------------------------------*/
+/*     Sidebar nav styles        */
+/*-------------------------------*/
+
+.sidebar-nav {
+    position: absolute;
+    top: 0;
+    width: 220px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.sidebar-nav > .sidebar-brand {
+    height: 65px;
+    font-size: 20px;
+    line-height: 44px;
+}
+
+.sidebar-nav .dropdown-menu {
+    position: relative;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    background-color: #E4E2E9;
+    box-shadow: none;
+}
+
+.abandoned {
+    overflow: visible;
+    height: 100%;
+    width: 100%;
+    z-index: 3;
+}
+
+.menuButtons {
+    transition: opacity .35s ease;
+    width: inherit;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border-radius: 5px;
+    border: none;
+    font-family: 'Raleway', sans-serif;
+    font-size: 1em;
+}
+
+/*
+    buttons for the menu, save, save as and save and exit
+*/
+.save-button {
+    opacity: 0;
+    transition: opacity .35s ease;
+    position: absolute;
+    width: 100px;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border-radius: 5px;
+    border: none;
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.5em;
+}
+
+.disabled-save-button {
+    opacity: 0;
+    transition: opacity .35s ease;
+    position: absolute;
+    width: 100px;
+    background-image: linear-gradient(to left, #928aa6 0%, #ada7bc 51%, #c8c4d2 100%);
+    border-radius: 5px;
+    border: none;
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.5em;
+    cursor: not-allowed;
+}
+
+.save-button:hover {
+    transform: scale(1.05);
+}
+/*
+    A container for animation purposes
+*/
+.expand {
+    position: absolute;
+    right: 40px;
+    bottom: 60px;
+    width: 100px;
+    align-items: center;
+    transition-delay: 0.35s;
+}
+    /*
+    After hovering, the height of the container must increase to emcompass the shown buttons
+*/
+    .expand:hover {
+        height: 150px;
+    }
+
+ /*
+By hovering over the container, we will make the relevant buttons visible
+*/
+.expand:hover .save {
+    opacity: 1;
+    bottom: 30px;
+}
+
+.expand:hover .saveas {
+    opacity: 1;
+    bottom: 80px;
+}
+
+.expand:hover .saveexit {
+    opacity: 1;
+    bottom: 130px;
+}
+
+.expand:hover .menuicon {
+    opacity: 0;
+}
+
+.menuicon {
+    /*border-radius: 50%;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;*/
+    width: 50px;
+    height: 50px;
+    margin-left: 25px;
+}
+
+.btn-save {
+    color: #fff;
+    background-color: #7c9bc8;
+    border-color: #7c9bc8;
+}
+
+.disabled-btn-save {
+    color: black;
+    background-color: #ada7bc;
+    border-color: #ada7bc;
+    cursor: not-allowed;
+}
+
+/*
+    CSS for the text to show after saving
+*/
+.showtime {
+    color: black;
+    font-style: italic;
+    position: absolute;
+    right: 40px;
+    bottom: 20px;
+    font-family: 'Raleway', sans-serif;
+}
+
+.stage {
+    width: 100%;
+    left: 10em
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 0;
+    width: 50vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.processButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: auto;
+}
+
+#processNameContainer {
+    display: none;
+    height: 28vh;
+    border: solid 1px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+    margin-top: 1vh;
+}
+
+#processNameContainer p {
+    display: block;
+    background-color: #7c9bc9;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+    font-size: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}

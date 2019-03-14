@@ -1,0 +1,475 @@
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body id="body">
+
+    <div id="wrapper" [ngClass]="ref.click === true? 'toggled' :''">
+        <div class="overlay" [ngStyle]="{disply:ref.click === true? 'block' :'none'}"></div>
+
+
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <p>
+                Unallocated Processes
+            </p>
+            <div #svgabandoned id="svgabandoned" class="abandoned">
+            </div>
+        </nav>
+        <!-- /#sidebar-wrapper -->
+        <div class="nav">
+            <!--Buttons to navigate to and fro previous and next page-->
+            <button class="button-left" (click)="navPrev()"><span>Previous</span></button>
+            <div class="navtitle">
+                <p>
+                    Process
+                </p>
+            </div>
+            <button *ngIf="!hasNoProcess()" class="button" (click)="navNext()"><span>Next</span></button>
+            <button *ngIf="hasNoProcess()" class="disabled-button" (click)="showNoProcessWarning()"><span>Next</span></button>
+        </div>
+        <div class="button-container">
+            <button appSidebar #ref="appSidebar" type="button" class="processButtons" data-toggle="offcanvas" (click)="onResize()">
+                Unallocated processes
+            </button>
+            <button (click)="addProcessNodeEvent()" class="processButtons">
+                Add process
+            </button>
+            <button (click)="deleteProcessNodeEvent()" class="processButtons">
+                Delete process
+            </button>
+            <button class="processButtons" (click)="zoomIn()">
+                zoom in
+            </button>
+
+            <button class="processButtons" (click)="zoomOut()">
+                zoom out
+            </button>
+        </div>
+        <div #processcontainer class="processcontainer" (dblclick)="onDblClick()" (window:resize)="onResize($event)">
+            <div class="containerHeader">
+                <div id="{{'lifestage' + i }}" #containerHeader class="box-header" *ngFor="let lifeStage of this.project.lifeCycleStages; let i = index" [attr.data-index]="i">
+                    {{lifeStage}}
+                </div>
+            </div>
+            <div #svg id="svg" class="processBoxContainer">
+            </div>
+        </div>
+        <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" style="display:none">
+            <div class="detailBoxHeader">
+                {{processName}}
+            </div>
+            <div class="detailBoxHeader">
+                {{allocationRule}}
+            </div>
+            <ul class="containerHeader" role="tablist">
+                <div class="menuTabs" *ngFor="let tab of menuBar; let first = first;" [ngClass]="{firstItem: first}" role="presentation" [class.active]="selectedwallet===wallet">
+                    <button class="menuButtons" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
+                </div>
+            </ul>
+
+            <div class="tab-content">
+
+                <div *ngIf="selectedTab === menuBar[0]" role="tabpanel" class="tab-pane active" id="materialInputContainer">
+                    <div class="containerHeader">
+                        <div class="box-header">
+                            Material Name
+                        </div>
+                        <div class="box-header">
+                            Quantity
+                        </div>
+                        <div class="box-header">
+                            Unit
+                        </div>
+                        <div class="box-header">
+                            Carbon Storage
+                        </div>
+                        <div class="box-header">
+                            Activity Data Origin
+                        </div>
+                        <div class="box-header">
+                            Emission Factor Value
+                        </div>
+                        <div class="box-header">
+                            Emission Factor Source
+                        </div>
+                        <div class="box-header">
+                            Remarks
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                <i class="fa fa-plus fa-1x"></i><br />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div #item class=""
+                         *ngFor="let input of this.inputs; let i = index" [attr.data-index]="i">
+                        <div class="containerHeader" id="{{'materialInputForm' + i}}">
+                            <input type="text" name="materialName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                <option value="number">number</option>
+                                <option value="kg">kg</option>
+                                <option value="m3">m3</option>
+                                <option value="litre">litre</option>
+                                <option value="tkm">tkm</option>
+                                <option value="kWh">kWh</option>
+                                <option value="MJ">MJ</option>
+                                <option value="hours">hours</option>
+                            </select>
+                            <input type="text" name="carbonStorage" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="emissionFactorData" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="emissionFactorSource" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <div>
+                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                    <i class="fa fa-trash fa-1x"></i><br />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="selectedTab === menuBar[1]" role="tabpanel" class="tab-pane active" id="outputContainer">
+                    <div class="containerHeader">
+                        <div class="box-header" style="width: 50%">
+                            Functional Unit
+                        </div>
+                        <div class="box-header">
+                            Output Name
+                        </div>
+                        <div class="box-header">
+                            Quantity
+                        </div>
+                        <div class="box-header">
+                            Unit
+                        </div>
+                        <div class="box-header">
+                            Activity Data Origin
+                        </div>
+                        <div class="box-header">
+                            Remarks
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                <i class="fa fa-plus fa-1x"></i><br />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div #item class=""
+                         *ngFor="let output of this.outputs; let i = index" [attr.data-index]="i">
+                        <div class="containerHeader" id="{{'outputForm' + i}}">
+                            <select name="functionalUnit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" style="width: 50%">
+                                <option value="true">true</option>
+                                <option value="false">false</option>
+                            </select>
+                            <input type="text" name="outputName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                <option value="number">number</option>
+                                <option value="kg">kg</option>
+                                <option value="m3">m3</option>
+                                <option value="litre">litre</option>
+                                <option value="tkm">tkm</option>
+                                <option value="kWh">kWh</option>
+                                <option value="MJ">MJ</option>
+                                <option value="hours">hours</option>
+                            </select>
+                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <div>
+                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                    <i class="fa fa-trash fa-1x"></i><br />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="selectedTab === menuBar[2]" role="tabpanel" class="tab-pane active" id="byproductContainer">
+                    <div class="containerHeader">
+                        <div class="box-header" style="width: 50%">
+                            Co-product
+                        </div>
+                        <div class="box-header" style="width: 50%">
+                            Waste
+                        </div>
+                        <div class="box-header">
+                            By-product Name
+                        </div>
+                        <div class="box-header">
+                            Quantity
+                        </div>
+                        <div class="box-header">
+                            Unit
+                        </div>
+                        <div class="box-header">
+                            Activity Data Origin
+                        </div>
+                        <div class="box-header boolean-field">
+                            Downstream Option
+                        </div>
+                        <div class="box-header">
+                            Remarks
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                <i class="fa fa-plus fa-1x"></i><br />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div #item class=""
+                         *ngFor="let byproduct of this.byproducts; let i = index" [attr.data-index]="i">
+                        <div class="containerHeader" id="{{'byproductForm' + i}}">
+                            <select name="coproduct" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" style="width: 50%">
+                                <option value="true">true</option>
+                                <option value="false">false</option>
+                            </select>
+                            <select name="waste" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" style="width: 50%">
+                                <option value="true">true</option>
+                                <option value="false">false</option>
+                            </select>
+                            <input type="text" name="byproductName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                <option value="number">number</option>
+                                <option value="kg">kg</option>
+                                <option value="m3">m3</option>
+                                <option value="litre">litre</option>
+                                <option value="tkm">tkm</option>
+                                <option value="kWh">kWh</option>
+                                <option value="MJ">MJ</option>
+                                <option value="hours">hours</option>
+                            </select>
+                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="downstreamOption" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <div>
+                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                    <i class="fa fa-trash fa-1x"></i><br />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="selectedTab === menuBar[3]" role="tabpanel" class="tab-pane active" id="energyInputContainer">
+                    <div class="containerHeader">
+                        <div class="box-header">
+                            Equipment Name
+                        </div>
+                        <div class="box-header">
+                            Energy Type
+                        </div>
+                        <div class="box-header">
+                            Process Time
+                        </div>
+                        <div class="box-header">
+                            Rating
+                        </div>
+                        <div class="box-header">
+                            Quantity
+                        </div>
+                        <div class="box-header">
+                            Unit
+                        </div>
+                        <div class="box-header">
+                            Activity Data Origin
+                        </div>
+                        <div class="box-header">
+                            Emission Factor Value
+                        </div>
+                        <div class="box-header">
+                            Emission Factor Source
+                        </div>
+                        <div class="box-header">
+                            Remarks
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                <i class="fa fa-plus fa-1x"></i><br />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div #item class=""
+                         *ngFor="let input of this.energy; let i = index" [attr.data-index]="i">
+                        <div class="containerHeader" id="{{'energyInputForm' + i}}">
+                            <input type="text" name="equipmentName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="energyType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="processTime" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="rating" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                <option value="number">number</option>
+                                <option value="kg">kg</option>
+                                <option value="m3">m3</option>
+                                <option value="litre">litre</option>
+                                <option value="tkm">tkm</option>
+                                <option value="kWh">kWh</option>
+                                <option value="MJ">MJ</option>
+                                <option value="hours">hours</option>
+                            </select>
+                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="emissionFactorData" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="emissionFactorSource" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <div>
+                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                    <i class="fa fa-trash fa-1x"></i><br />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="selectedTab === menuBar[4]" role="tabpanel" class="tab-pane active" id="transportationInputContainer">
+                    <div class="containerHeader">
+                        <div class="box-header">
+                            Transportation Type
+                        </div>
+                        <div class="box-header">
+                            Quantity
+                        </div>
+                        <div class="box-header">
+                            Unit
+                        </div>
+                        <div class="box-header">
+                            Activity Data Origin
+                        </div>
+                        <div class="box-header">
+                            Remarks
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                <i class="fa fa-plus fa-1x"></i><br />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div #item class=""
+                         *ngFor="let input of this.transportations; let i = index" [attr.data-index]="i">
+                        <div class="containerHeader" id="{{'transportationInputForm' + i}}">
+                            <input type="text" name="transportationType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                <option value="number">number</option>
+                                <option value="kg">kg</option>
+                                <option value="m3">m3</option>
+                                <option value="litre">litre</option>
+                                <option value="tkm">tkm</option>
+                                <option value="kWh">kWh</option>
+                                <option value="MJ">MJ</option>
+                                <option value="hours">hours</option>
+                            </select>
+                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <div>
+                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                    <i class="fa fa-trash fa-1x"></i><br />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="selectedTab === menuBar[5]" role="tabpanel" class="tab-pane active" id="otherEmissionsContainer">
+                    <div class="containerHeader">
+                        <div class="box-header">
+                            Type of Emission
+                        </div>
+                        <div class="box-header">
+                            Quantity
+                        </div>
+                        <div class="box-header">
+                            Unit
+                        </div>
+                        <div class="box-header">
+                            Activity Data Origin
+                        </div>
+                        <div class="box-header">
+                            Remarks
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                <i class="fa fa-plus fa-1x"></i><br />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div #item class=""
+                         *ngFor="let emission of this.emissions; let i = index" [attr.data-index]="i">
+                        <div class="containerHeader" id="{{'directEmissionForm' + i}}">
+                            <input type="text" name="emissionType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                <option value="number">number</option>
+                                <option value="kg">kg</option>
+                                <option value="m3">m3</option>
+                                <option value="litre">litre</option>
+                                <option value="tkm">tkm</option>
+                                <option value="kWh">kWh</option>
+                                <option value="MJ">MJ</option>
+                                <option value="hours">hours</option>
+                            </select>
+                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                            <div>
+                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                    <i class="fa fa-trash fa-1x"></i><br />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="processNameContainer">
+            <p>
+                Process Name
+            </p>
+
+            <input id="name" value="{{currentlySelectedNodeName}}" />
+
+        </div>
+        <span class="showtime">{{lastSaved}}</span>
+        <!-- Included a menu. when hovered over, buttons will appear for user to save their project-->
+        <div class="expand">
+            <!--If the form is not completed, saving is disabled-->
+            <button *ngIf="!hasNoProcess()" class="save-button save" (click)="saveToFolder()">
+                Save
+            </button>
+            <button *ngIf="hasNoProcess()" class="disabled-save-button save" (click)="showNoProcessWarning()">
+                Save
+            </button>
+            <button *ngIf="!hasNoProcess()" class="save-button saveas" (click)="saveElsewhere()">
+                Save As
+            </button>
+            <button *ngIf="hasNoProcess()" class="disabled-save-button saveas" (click)="showNoProcessWarning()">
+                Save As
+            </button>
+            <button *ngIf="!hasNoProcess()" class="save-button saveexit">
+                Save and Exit
+            </button>
+            <button *ngIf="hasNoProcess()" class="disabled-save-button saveexit" (click)="showNoProcessWarning()">
+                Save and Exit
+            </button>
+            <button *ngIf="!hasNoProcess()" type="button" class="btn btn-sq-sm btn-save menuicon" (click)="editItem(i)">
+                <i class="fa fa-save fa-2x"></i><br />
+            </button>
+            <button *ngIf="hasNoProcess()" type="button" class="btn btn-sq-sm disabled-btn-save menuicon">
+                <i class="fa fa-save fa-2x"></i><br />
+            </button>
+
+        </div>
+    </div>
+    <!-- /#wrapper -->
+    <!--Side navigator buttons-->
+    
+</body>
