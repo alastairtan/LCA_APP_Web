@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@angular/core';
-import { SESSION_STORAGE, LOCAL_STORAGE, StorageService } from 'angular-webstorage-service';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { Project } from "./project";
@@ -66,7 +65,7 @@ export class DataService {
     * @returns returns the path to the saved file
     */
   saveToFolder(filename: string, jsonContent: string) {
-      const fs = require('fs'); // Load the File System to execute our common tasks (CRUD)
+      /*const fs = require('fs'); // Load the File System to execute our common tasks (CRUD)
       //Make a new folder, if not already existed
       fs.mkdir(this.DEFAULT_SAVE_PATH, { recursive: true }, (err) => {
           if (err) {
@@ -82,7 +81,7 @@ export class DataService {
       console.log('File saved to ' + filepath);
       //Save to recent projects
       this.addToRecentProjects(filepath, filename);
-      return filepath;
+      return filepath;*/
     }
 
     /**

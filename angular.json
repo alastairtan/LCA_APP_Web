@@ -27,7 +27,11 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "./node_modules/svg.js/dist/svg.min.js",
+              "./node_modules/svg.draggy.js/src/svg.draggy.js",
+              "./svg.connectable.js/src/svg.connectable.min.js"
+            ]
           },
           "configurations": {
             "production": {

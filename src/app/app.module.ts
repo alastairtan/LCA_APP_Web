@@ -29,7 +29,7 @@ import { ProjectFooterComponent } from './project-footer/project-footer.componen
     MainMenuComponent,
     CreateProjectComponent,
     SystemBoundaryComponent,
-    //ProcessComponent,
+    ProcessComponent,
     SidebarDirective,
     ResultComponent,
     ProjectFooterComponent

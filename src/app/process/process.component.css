@@ -35,7 +35,7 @@ body {
     text-align: center;
     font-size: 28px;
     width: inherit;
-    height: 60px;
+    height: 81%;
     transition: all 0.5s;
     cursor: pointer;
 }
@@ -79,7 +79,7 @@ body {
     text-align: center;
     font-size: 28px;
     width: inherit;
-    height: 60px;
+    height: 81%;
     transition: all 0.5s;
     cursor: not-allowed;
 }
@@ -105,7 +105,7 @@ body {
     text-align: center;
     font-size: 28px;
     width: inherit;
-    height: 60px;
+    height: 81%;
     transition: all 0.5s;
     cursor: pointer;
 }
@@ -157,7 +157,7 @@ body {
 */
 .nav {
     display: grid;
-    grid-template-columns: 0% 20% auto 20%;
+    grid-template-columns: 20% auto 20%;
     grid-template-rows: auto;
     margin-top: 0;
 }
@@ -366,82 +366,22 @@ input {
 }
 
 /*
-    buttons for the menu, save, save as and save and exit
-*/
-.save-button {
-    opacity: 0;
-    transition: opacity .35s ease;
-    position: absolute;
-    width: 100px;
-    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
-    border-radius: 5px;
-    border: none;
-    font-family: 'Raleway', sans-serif;
-    font-size: 1.5em;
-}
-
-.disabled-save-button {
-    opacity: 0;
-    transition: opacity .35s ease;
-    position: absolute;
-    width: 100px;
-    background-image: linear-gradient(to left, #928aa6 0%, #ada7bc 51%, #c8c4d2 100%);
-    border-radius: 5px;
-    border: none;
-    font-family: 'Raleway', sans-serif;
-    font-size: 1.5em;
-    cursor: not-allowed;
-}
-
-.save-button:hover {
-    transform: scale(1.05);
-}
-/*
     A container for animation purposes
 */
-.expand {
+.save-container {
     position: absolute;
     right: 40px;
     bottom: 60px;
     width: 100px;
     align-items: center;
-    transition-delay: 0.35s;
-}
-    /*
-    After hovering, the height of the container must increase to emcompass the shown buttons
-*/
-    .expand:hover {
-        height: 150px;
-    }
-
- /*
-By hovering over the container, we will make the relevant buttons visible
-*/
-.expand:hover .save {
-    opacity: 1;
-    bottom: 30px;
-}
-
-.expand:hover .saveas {
-    opacity: 1;
-    bottom: 80px;
-}
-
-.expand:hover .saveexit {
-    opacity: 1;
-    bottom: 130px;
-}
-
-.expand:hover .menuicon {
-    opacity: 0;
 }
 
 .menuicon {
-    /*border-radius: 50%;
+    /*/border-radius: 50%;
     background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
     border: none;*/
-    width: 50px;
-    height: 50px;
+    width: auto;
+    height: auto;
     margin-left: 25px;
 }
 
@@ -449,6 +389,10 @@ By hovering over the container, we will make the relevant buttons visible
     color: #fff;
     background-color: #7c9bc8;
     border-color: #7c9bc8;
+}
+
+.btn-save:hover {
+    transform: scale(1.05);
 }
 
 .disabled-btn-save {
