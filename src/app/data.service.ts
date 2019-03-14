@@ -164,7 +164,7 @@ export class DataService {
     * Retrieve the value paired with the key from the local storage
     */
     getLocalStorage(key: string) {
-        localStorage.getItem(key);
+        return localStorage.getItem(key);
     }
 
     /**
@@ -185,7 +185,7 @@ export class DataService {
     * Retrieve the value paired with the key from the session storage
     */
     getSessionStorage(key: string) {
-        sessionStorage.getItem(key);
+       return sessionStorage.getItem(key);
     }
 
     /**
@@ -327,7 +327,7 @@ export class DataService {
         var newProject = new Project();
         if (this.currentProject.equals(newProject)) {
             var jsonContent = this.getSessionStorage('currentProject');
-            //this.currentProject.parseData(JSON.parse(jsonContent));
+            this.currentProject.parseData(JSON.parse(jsonContent));
         }
         return this.currentProject;
     }

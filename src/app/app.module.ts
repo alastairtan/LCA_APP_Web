@@ -1,7 +1,8 @@
 import { NgModule }       from '@angular/core';
 import { BrowserModule }  from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule }    from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
+import { DragDropModule } from '@angular/cdk/drag-drop'
 
 import { AppRoutingModule }     from './app-routing.module';
 import { AppComponent }         from './app.component';
@@ -9,6 +10,9 @@ import { AppComponent }         from './app.component';
 import { MainMenuComponent } from './main-menu/main-menu.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { SystemBoundaryComponent } from './system-boundary/system-boundary.component';
+import { ProcessComponent } from './process/process.component';
+import { SidebarDirective } from './process/sidebar.directive';
+import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
 
 @NgModule({
@@ -18,16 +22,16 @@ import { ProjectFooterComponent } from './project-footer/project-footer.componen
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-
-    // The HttpClientInMemoryWebApiModule module intercepts HTTP requests
-    // and returns simulated server responses.
-    // Remove it when a real server is ready to receive requests.
+    DragDropModule
   ],
   declarations: [
     AppComponent,
     MainMenuComponent,
     CreateProjectComponent,
     SystemBoundaryComponent,
+    //ProcessComponent,
+    SidebarDirective,
+    ResultComponent,
     ProjectFooterComponent
   ],
   bootstrap: [ AppComponent ]
