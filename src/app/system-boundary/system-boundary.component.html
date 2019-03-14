@@ -72,50 +72,18 @@
                             <button type="button" class="btn btn-sq-sm btn-add" (click)="showInputField($event)">
                                 <i class="fa fa-plus fa-2x"></i><br />
                             </button>
-                            <!--<button class="stageButton" (click)="showInputField($event)">
-                        Add
-                    </button>
-                    <cdk-drop #zone2 class="deletecontainer" (dropped)="dropped($event)"
-                              [connectedTo]="zone1">
-                        Delete
-                        <div *ngFor="let movie of delete" cdkDrag>
-
                         </div>
-                    </cdk-drop>-->
-                        </div>
-                        <!--<input class="addInput" #stageName
-                       (keyup.esc)="removeInputField($event)"
-                       (keyup.enter)="addStage(stageName.value)"
-                       />-->
                     </div>
                 </div>
                 <!-- Show last saved timing at the bottom right hand corner-->
                 <span class="showtime">{{lastSaved}}</span>
                 <!-- Included a menu. when hovered over, buttons will appear for user to save their project-->
-                <div class="expand">
+                <div class="save-container">
                     <!--If the form is not completed, saving is disabled-->
-                    <button *ngIf="!hasNoStage()" class="save-button save" (click)="saveToFolder()">
-                        Save
-                    </button>
-                    <button *ngIf="hasNoStage()" class="disabled-save-button save" (click)="showNoStageWarning()">
-                        Save
-                    </button>
-                    <button *ngIf="!hasNoStage()" class="save-button saveas" (click)="saveElsewhere()">
-                        Save As
-                    </button>
-                    <button *ngIf="hasNoStage()" class="disabled-save-button saveas" (click)="showNoStageWarning()">
-                        Save As
-                    </button>
-                    <button *ngIf="!hasNoStage()" class="save-button saveexit">
-                        Save and Exit
-                    </button>
-                    <button *ngIf="hasNoStage()" class="disabled-save-button saveexit" (click)="showNoStageWarning()">
-                        Save and Exit
-                    </button>
-                    <button *ngIf="!hasNoStage()" type="button" class="btn btn-sq-sm btn-save menuicon">
+                    <button *ngIf="this.currentProject.projectName != ''" type="button" class="btn btn-sq-sm btn-save menuicon" (click)="saveElsewhere()">
                         <i class="fa fa-save fa-2x"></i><br />
                     </button>
-                    <button *ngIf="hasNoStage()" type="button" class="btn btn-sq-sm disabled-btn-save menuicon">
+                    <button *ngIf="this.currentProject.projectName == ''" type="button" class="btn btn-sq-sm disabled-btn-save menuicon">
                         <i class="fa fa-save fa-2x"></i><br />
                     </button>
                 </div>

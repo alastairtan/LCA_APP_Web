@@ -440,27 +440,8 @@
         </div>
         <span class="showtime">{{lastSaved}}</span>
         <!-- Included a menu. when hovered over, buttons will appear for user to save their project-->
-        <div class="expand">
-            <!--If the form is not completed, saving is disabled-->
-            <button *ngIf="!hasNoProcess()" class="save-button save" (click)="saveToFolder()">
-                Save
-            </button>
-            <button *ngIf="hasNoProcess()" class="disabled-save-button save" (click)="showNoProcessWarning()">
-                Save
-            </button>
-            <button *ngIf="!hasNoProcess()" class="save-button saveas" (click)="saveElsewhere()">
-                Save As
-            </button>
-            <button *ngIf="hasNoProcess()" class="disabled-save-button saveas" (click)="showNoProcessWarning()">
-                Save As
-            </button>
-            <button *ngIf="!hasNoProcess()" class="save-button saveexit">
-                Save and Exit
-            </button>
-            <button *ngIf="hasNoProcess()" class="disabled-save-button saveexit" (click)="showNoProcessWarning()">
-                Save and Exit
-            </button>
-            <button *ngIf="!hasNoProcess()" type="button" class="btn btn-sq-sm btn-save menuicon" (click)="editItem(i)">
+        <div class="save-container">
+            <button *ngIf="!hasNoProcess()" type="button" class="btn btn-sq-sm btn-save menuicon" (click)="saveElsewhere()">
                 <i class="fa fa-save fa-2x"></i><br />
             </button>
             <button *ngIf="hasNoProcess()" type="button" class="btn btn-sq-sm disabled-btn-save menuicon">

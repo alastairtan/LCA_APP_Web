@@ -1100,7 +1100,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * Show a confirmation dialog when user wants to establish a link between two nodes that has existing link
      */
     showLinkExistWarning() {
-        const { dialog } = require("electron").remote;
+        /*const { dialog } = require("electron").remote;
         //Call to the current window to make the dialog a modal
         const { BrowserWindow } = require('electron').remote;
         var WIN = BrowserWindow.getFocusedWindow();
@@ -1112,7 +1112,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             message: 'Unable to establish link',
             detail: 'link already exist',
         };
-        dialog.showMessageBox(WIN, options);
+        dialog.showMessageBox(WIN, options);*/
     }
 
     /**
@@ -1418,7 +1418,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * Show warning when there are no life cycle stage
      */
     showNoProcessWarning() {
-        const { dialog } = require("electron").remote;
+        /*const { dialog } = require("electron").remote;
         //Call to the current window to make the dialog a modal
         const { BrowserWindow } = require('electron').remote;
         var WIN = BrowserWindow.getFocusedWindow();
@@ -1433,7 +1433,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     \nDouble click on a column to create a process in that stage,\
                     \nor re-allocate a process from the "Unallocated processes" sidebar.',
         };
-        var ok = dialog.showMessageBox(WIN, options);
+        var ok = dialog.showMessageBox(WIN, options);*/
     }
 
     /**Save the current project to session storage, and navigate to the previous page */

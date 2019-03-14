@@ -2,7 +2,7 @@
   "_args": [
     [
       "svg.connectable.js@1.0.1",
-      "C:\\Users\\weiyang\\Documents\\LCA"
+      "D:\\Hung\\LCA_App"
     ]
   ],
   "_from": "svg.connectable.js@1.0.1",
@@ -26,7 +26,7 @@
   ],
   "_resolved": "https://registry.npmjs.org/svg.connectable.js/-/svg.connectable.js-1.0.1.tgz",
   "_spec": "1.0.1",
-  "_where": "C:\\Users\\weiyang\\Documents\\LCA",
+  "_where": "D:\\Hung\\LCA_App",
   "author": {
     "name": "jillix",
     "email": "contact@jillix.com"
