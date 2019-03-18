@@ -35,7 +35,7 @@ body {
     text-align: center;
     font-size: 28px;
     width: inherit;
-    height: 81%;
+    height: 100%;
     transition: all 0.5s;
     cursor: pointer;
 }
@@ -79,7 +79,7 @@ body {
     text-align: center;
     font-size: 28px;
     width: inherit;
-    height: 81%;
+    height: 100%;
     transition: all 0.5s;
     cursor: not-allowed;
 }
@@ -105,7 +105,7 @@ body {
     text-align: center;
     font-size: 28px;
     width: inherit;
-    height: 81%;
+    height: 100%;
     transition: all 0.5s;
     cursor: pointer;
 }
@@ -269,84 +269,14 @@ input {
     height: 7vh;
     width: 100%;
 }
-
-/*-------------------------------*/
-/*           Wrappers            */
-/*-------------------------------*/
-
-#wrapper {
-    padding-left: 0;
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    transition: all 0.5s ease;
-}
-
-    #wrapper.toggled {
-        padding-left: 220px;
-    }
-
-#sidebar-wrapper {
-    z-index: 1000;
-    left: 220px;
-    width: 0;
-    height: 100%;
-    margin-left: -220px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: #E4E2E9;
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    transition: all 0.5s ease;
-}
-
-    #sidebar-wrapper::-webkit-scrollbar {
-        display: none;
-    }
-
-#wrapper.toggled #sidebar-wrapper {
-    width: 220px;
-}
-
-#page-content-wrapper {
-    width: 100%;
-    padding-top: 70px;
-}
-
-#wrapper.toggled #page-content-wrapper {
-    position: absolute;
-    margin-right: -220px;
-}
-
-/*-------------------------------*/
-/*     Sidebar nav styles        */
-/*-------------------------------*/
-
-.sidebar-nav {
+.example-container {
     position: absolute;
     top: 0;
-    width: 220px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-.sidebar-nav > .sidebar-brand {
-    height: 65px;
-    font-size: 20px;
-    line-height: 44px;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
-.sidebar-nav .dropdown-menu {
-    position: relative;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    border-radius: 0;
-    border: none;
-    background-color: #E4E2E9;
-    box-shadow: none;
-}
 
 .abandoned {
     overflow: visible;
@@ -452,4 +382,15 @@ input {
     font-size: 1em;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
+}
+
+.navmenu p {
+    display: block;
+    background-color: #7c9bc9;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+    font-size: 1.75em;
+    width: inherit;
+    height: auto;
+    margin-bottom: 0;
 }

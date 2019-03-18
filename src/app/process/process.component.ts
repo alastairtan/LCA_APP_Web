@@ -3,7 +3,7 @@ import { Rect } from './Rect';
 import { Connector } from './Connector';
 import * as SVG from 'svg.js';
 import 'svg.draggy.js';
-import 'svg.connectable.js';
+import '../../../svg.connectable.js/src/svg.connectable.js';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
@@ -120,10 +120,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     ngAfterViewInit() {
         this.draw = SVG('svg');
-        this.abandonedDraw = SVG('svgabandoned');
+        this.abandonedDraw = SVG('svgabandoned').style({background: "white"});
         this.generatingComponents();
         this.generatingProcessNodes();
-        //this.generatingAbandonedNodes();
+        this.generatingAbandonedNodes();
     }
 
     /**

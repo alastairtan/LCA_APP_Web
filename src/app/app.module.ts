@@ -14,6 +14,9 @@ import { ProcessComponent } from './process/process.component';
 import { SidebarDirective } from './process/sidebar.directive';
 import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
+import { MatSidenavModule } from '@angular/material';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 @NgModule({
   imports: [
@@ -22,7 +25,9 @@ import { ProjectFooterComponent } from './project-footer/project-footer.componen
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    DragDropModule
+      DragDropModule,
+      MatSidenavModule,
+      BrowserAnimationsModule
   ],
   declarations: [
     AppComponent,
