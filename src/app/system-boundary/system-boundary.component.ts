@@ -111,18 +111,21 @@ export class SystemBoundaryComponent implements OnInit {
     ngOnInit() {
         this.currentProject = this.dataService.getProject();
         this.updateForm();
-        document.getElementById('lifeStageDiv').oncontextmenu = function () {
+        //Disable right-click on a lifestage
+        let lifeStageDiv = document.getElementById('lifeStageDiv');
+        lifeStageDiv.oncontextmenu = function () {
             return false;
+        }
+        //Double Click event to create new stage
+        lifeStageDiv.ondblclick = (event) => {
+            this.showInputField(event);
         }
     }
 
-    /**
-     * Double Click event to create new stage
-     */
-    @HostListener('dblclick', ['$event'])
+    /*@HostListener('dblclick', ['$event'])
     onDblClick(event) {
         this.showInputField(event);
-    }
+    }*/
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
