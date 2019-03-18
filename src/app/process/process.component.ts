@@ -8,7 +8,6 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
 import { FormGroup, FormControl } from '@angular/forms';
-import { clearTimeout } from 'timers';
 
 import { MaterialInput } from './MaterialInput';
 import { Line } from './Line';
@@ -780,7 +779,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * on window resize 
      * */
     onResize() {
-        clearTimeout(this.waitId);
+        window.clearTimeout(this.waitId);
         //wait for resize to be over
         this.waitId = setTimeout(() => {
             this.doneResize();
@@ -1467,7 +1466,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     undo() {
         var result = this.dataService.undo(this.project);
-        clearTimeout(this.waitId);
+        window.clearTimeout(this.waitId);
         //wait for resize to be over
         this.waitId = setTimeout(() => {
             this.doneResize();
@@ -1489,7 +1488,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     redo() {
         var result = this.dataService.redo(this.project);
-        clearTimeout(this.waitId);
+        window.clearTimeout(this.waitId);
         //wait for resize to be over
         this.waitId = setTimeout(() => {
             this.doneResize();
