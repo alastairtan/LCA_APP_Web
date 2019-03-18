@@ -1,9 +1,9 @@
 import { Component, HostListener, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDragStart } from '@angular/cdk/drag-drop';
 import { FormGroup, FormControl } from '@angular/forms';
-import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 
+import { DataService } from "../data.service";
 import { Project } from '../project';
 
 let NONE_SELECTED = -1;
@@ -28,6 +28,8 @@ export class SystemBoundaryComponent implements OnInit {
     isDraggingCancelled = false;            //A boolean to check if the dragging was initiated during editing
     isEnterPressed = false;                 //A boolean to check upon blurring an input
     selectedStageIndex = NONE_SELECTED;     //store stageindex, -1 if none is selected
+
+    private waitId;
 
     /**Shortcut function for checking if any stage is being selected right now*/
     isNoneSelected() {
@@ -109,15 +111,21 @@ export class SystemBoundaryComponent implements OnInit {
     ngOnInit() {
         this.currentProject = this.dataService.getProject();
         this.updateForm();
+        //Disable right-click on a lifestage
+        let lifeStageDiv = document.getElementById('lifeStageDiv');
+        lifeStageDiv.oncontextmenu = function () {
+            return false;
+        }
+        //Double Click event to create new stage
+        lifeStageDiv.ondblclick = (event) => {
+            this.showInputField(event);
+        }
     }
 
-    /**
-     * Double Click event to create new stage
-     */
-    @HostListener('dblclick', ['$event'])
+    /*@HostListener('dblclick', ['$event'])
     onDblClick(event) {
         this.showInputField(event);
-    }
+    }*/
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -419,9 +427,24 @@ export class SystemBoundaryComponent implements OnInit {
         for (let i = 0; i < this.currentProject.dimensionArray.length; i++) {
             this.currentProject.dimensionArray[i] *= scalingFactor;
         }
-        console.log(this.currentProject.dimensionArray);
         //console.log('Deleted selected item');
-        //console.log(this.project.lifeCycleStages);
+    }
+
+    /**
+     * To counter the global deselectAll function upon clicking on a stage
+     * @param index
+     */
+    onStageClick(index: number) {
+        if (this.selectedStageIndex == index) {
+            //Allow item to be deselected
+            this.selectedStageIndex = NONE_SELECTED;
+            return;
+        }
+        //console.log('Delay selecting item ' + index);
+        window.clearTimeout(this.waitId);
+        this.waitId = setTimeout(() => {
+            this.selectItem(index);
+        }, 75);
     }
 
     /**
@@ -436,7 +459,6 @@ export class SystemBoundaryComponent implements OnInit {
         container.style.border = "1px solid #7c9bc8";
         container.style.background = "#d6e0ee";
         input.style.background = "#d6e0ee";
-        //console.log('Select Item: ' + index);
     }
 
     /**
@@ -458,7 +480,6 @@ export class SystemBoundaryComponent implements OnInit {
         input.placeholder = "Stage name cannot be empty. Please enter a name, or delete this stage.";
         input.focus();
         inputValue.style.display = "none";
-        //console.log('Select Item: ' + index);
     }
 
     /**

@@ -39,7 +39,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <div class="placeholder defaultCursor">
+                    <div id="lifeStageDiv" class="placeholder defaultCursor">
                         <p>
                             Life Cycle Stage definition
                         </p>
@@ -49,7 +49,7 @@
                                  cdkDrag [attr.data-index]="i" (cdkDragStarted)="started($event)">
                                 <div class="container">
                                     <div class="row">
-                                        <div class="stageName col-md-11" cdkDragHandle (contextmenu)="deleteItem(i)">
+                                        <div class="stageName col-md-11" cdkDragHandle (click)="onStageClick(i)" (contextmenu)="deleteItem(i)">
                                             <input id="{{'lifeStage' + i}}" type="text" value="{{lifeStage}}"
                                                    (blur)="doneEditing(i)" placeholder="Enter new stage name here" />
                                             <div id="{{'lifeStageValue' + i}}">{{lifeStage}}</div>
