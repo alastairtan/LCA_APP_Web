@@ -16,7 +16,7 @@ import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
 import { MatSidenavModule } from '@angular/material';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { CookieService } from 'ngx-cookie-service'
 
 @NgModule({
   imports: [
@@ -39,6 +39,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ResultComponent,
     ProjectFooterComponent
   ],
-  bootstrap: [ AppComponent ]
+    bootstrap: [AppComponent],
+    providers: [CookieService]
 })
 export class AppModule { }

@@ -16,6 +16,7 @@ import { Byproduct } from './Byproduct';
 import { EnergyInput } from './EnergyInput';
 import { TransportationInput } from './TransportationInput';
 import { DirectEmission } from './DirectEmission';
+import { CookieService } from 'ngx-cookie-service';
 
 const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
 const OUT_FUNCTIONAL_UNIT = 0, OUT_NAME = 1, OUT_QUANT = 2, OUT_UNIT = 3, OUT_ACTIVITY = 4, OUT_REMARKS = 5;
@@ -110,7 +111,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     constructor(private dataService: DataService,
                 private router: Router,
-                private cd: ChangeDetectorRef) { }
+        private cd: ChangeDetectorRef,
+    private cookies: CookieService) { }
 
     ngOnInit() {
         this.project = this.dataService.getProject();
@@ -1440,6 +1442,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         var jsonContent = this.getJsonData();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/systemBoundary']);
+        this.pushToCookie();
     }
 
     /**Save the current project to session storage, and navigate to the next page */
@@ -1447,8 +1450,23 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         var jsonContent = this.getJsonData();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/result']);
+        this.pushToCookie();
     }
-
+    /**
+     * push data up to cookies
+     * */
+    pushToCookie() {
+        let recentProject: Project[] = JSON.parse(this.cookies.get('recent'));
+        for (let i = 0; i < recentProject.length; i++) {
+            if (recentProject[i].scopeName == this.project.scopeName) {
+                recentProject[i] = this.project;
+                this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
+                return;
+            }
+        }
+        recentProject.push(this.project);
+        this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
+    }
     /**
      * Save the state of the current project, in preparation for an undoable action
      */

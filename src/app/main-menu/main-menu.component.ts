@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
 
 import { Project } from '../project';
 
@@ -13,28 +14,34 @@ export class MainMenuComponent implements OnInit {
 
     RECENT_PROJECT_DISPLAY_LIMIT = 5;
     recentProjects = [];
-
+    projectName = [];
     //Inject data service to share project data among all components, and subscribe to it
     constructor(private dataService: DataService,
                 private router: Router,
-                private cd: ChangeDetectorRef) { }
+        private cd: ChangeDetectorRef,
+        private cookies: CookieService) { }
 
     currentProject: Project = this.dataService.getProject();        //Object containing all data of the current project
 
     ngOnInit() {
-    //Convert the JSON object to an array of objects
-        //var recentProjs = JSON.parse(this.dataService.getLocalStorage('recentProjs'));
-        this.recentProjects = [];
-        /*var fs = require('fs');
-        
-        for (var key in recentProjs) {
-            if (fs.existsSync(recentProjs[key]["filepath"])) {
-                this.recentProjects.push([key, recentProjs[key]["filepath"], recentProjs[key]["lastModified"]]);
-            }
-        }*/
+        const cookieExists: Boolean = this.cookies.check('recent');
+        if (cookieExists) {
+            let recentProjectsJSON = this.cookies.get('recent');
+            this.recentProjects = JSON.parse(recentProjectsJSON);
+        } else {
+            this.recentProjects = [];
+            this.cookies.set('recent', JSON.stringify(this.recentProjects, null, 2));
+        }
+
+        console.log(this.cookies.get('recent'));
         //Sort the array by lastModified
         this.recentProjects = this.recentProjects.sort((p1, p2) => p2[2] - p1[2]);
         this.recentProjects = this.recentProjects.splice(0, this.RECENT_PROJECT_DISPLAY_LIMIT);
+
+        for (let i = 0; i < this.recentProjects.length; i++) {
+            console.log(this.recentProjects[i].projectName);
+            this.projectName.push(this.recentProjects[i].projectName);
+        }
     }
 
     /**Import project data from a json file and share it across all components

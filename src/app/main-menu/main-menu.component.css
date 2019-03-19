@@ -187,3 +187,17 @@ label {
     background-color: #e3e3e3;
     left: .1em;
 }
+
+
+.grid {
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+
+.cards {
+    height: 20vh;
+    width: 18vw;
+    display: block;
+    background-color: white;
+    border-radius: 1vw;
+}
