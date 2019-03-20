@@ -122,11 +122,6 @@ export class SystemBoundaryComponent implements OnInit {
         }
     }
 
-    /*@HostListener('dblclick', ['$event'])
-    onDblClick(event) {
-        this.showInputField(event);
-    }*/
-
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         switch (event.key) {
