@@ -1,0 +1,175 @@
+﻿= CAR^2^E - Developer Guide
+:toc:
+:toc-title:
+:toc-placement: preamble
+:sectnums:
+:imagesDir: images
+:stylesDir: stylesheets
+:xrefstyle: full
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+endif::[]
+:repoURL: https://github.com/pvuhung/LCA_APP_Web
+
+By: `SIMTech`      Since: `January 2019`      Licence: `A*Star`
+
+== Introduction
+
+image:logo.png[ align="center"] +
+Carbon Footprint Assessment and Reduction for Resource Efficiency (CAR^2^E) is a multi-platform application that aims to promote Industrial Symbiosis by identifying, prioritising and allocating resources among different companies efficiently and effectively. Companies using CAR^2^E can establish their carbon footprint baseline and strategic sustainability improvement plan, thus increase energy efficiency, reducing material consumption and waste. +
+
+CAR^2^E has a graphical user interface (GUI) which accommodates both mouse and keyboard input. Its main functionality lies in the dragging-and-dropping of life cycle stages and processes of producing an item, which both helps the users visualize the product's life cycle as well as calculate the carbon footprint base line.
+
+This Developer Guide is meant to provides the necessary information for developers who are interested in contributing to this application. New developers should begin with <<SettingUp>>. Experienced developers might want begin instead with the <<Design>> section to learn more about how CAR^2^E is structured.
+
+
+Understanding the implementation of the features in Fastis will be crucial to be able to modify any feature for further improvements.
+
+[[SettingUp]]
+== Setting up
+This section provides information on setting up the project in order to work on CAR^2^E.
+
+=== Prerequisites
+
+The following programs have to be installed on the computer system before setting up:
+
+. *NodeJS* and *npm*: latest versions
++
+[NOTE]
+Link to install: https://nodejs.org/en/download/ +
+npm is included in the NodeJS installation package
++
+
+. Any *Version Control*
++
+[NOTE]
+Git is recommended
+
+
+=== Setting up the project in your computer
+
+. Fork this repo, and clone the fork to your computer
+. Open a command prompt (Windows Command Prompt, PowerShell, Cygwin, or the Git shell) at the download folder
+. Type `npm run init` and press `Enter`
+.. Wait for npm to download the necessary modules
+
+=== Verifying the setup
+
+The following steps should be done to verify that the setup of CAR^2^E is correct:
+
+. Verify that there is a `node_modules` folder in the root folder
+. Open a command prompt at ths folder
+. Type `npm start` and press `Enter`
++
+[NOTE]
+Only one prompt can be running `npm start` at any one time, +
+because Angular is using port 4200 and blocks it.
+
+[[Design]]
+== Design
+
+This section describes how CAR^2^E is built and how its different components interact and work with each other.
+
+[[Design-Architecture]]
+=== Architecture
+
+The *_Architecture_* Diagram given below (<<Figure1>>) explains the high-level design of CAR^2^E. Given below is a quick overview of each component.
+
+[[Figure1]]
+.Architecture Diagram.
+image::architecture.png[width="600"]
+
+=== Components
+
+<TBC>
+
+=== Data Service
+
+<TBC>
+
+== Implementation
+
+This section describes some noteworthy details on how certain features are implemented.
+
+== Dev Ops
+
+=== Build
+
+We build the app with basic `ng build` function from `npm`.
+
+=== Continuous integration
+
+As of now, there is no continuous integration implemetation. In the future, we plan to use https://travis-ci.org/[Travis CI] and to perform _Continuous Integration_ on our project.
+
+=== Coverage reporting
+
+As of now, there is no coverage report implemetation. In the future, we plan to `@angular/cli` built-in code-coverage on our project.
+
+=== Managing dependencies
+
+All dependencies are listed in `root/package.json` (for modules) and `root/angular.json` (for scripts). Add any other dependencies as necessary, and don't forget to include them in the respective file.
+
+[[GetStartedProgramming]]
+[appendix]
+== Product Scope
+
+*Target user profile*: <TBC>
+
+*Value proposition*: <TBC>
+
+*Feature contribution:* <TBC>
+
+[appendix]
+== User Stories
+
+Priorities: High (must have) - `* * \*`, Medium (nice to have) - `* \*`, Low (unlikely to have) - `*`
+
+[width="59%",cols="22%,<23%,<25%,<30%",options="header",]
+|=======================================================================
+|Priority |As a ... |I want to ... |So that I can...
+|`* * *` |Company with products |Analyze the life-cycle of the products |Calculate impact on the environment of my product
+
+|=======================================================================
+
+_{More to be added}_
+
+[appendix]
+== Use Cases
+
+(For all use cases below, the *System* is the `CAR^2^E` and the *Actor* is the `user`, unless specified otherwise)
+
+[discrete]
+=== Use case: Define Goal, Scope and System Boundary
+
+*MSS*
+
+1.  Navigate to Goal and Scope.
+2.  Define the project's name, goal and the product or service it provides.
+3.  Define the project's system boundary and exclusion.
++
+Use case ends.
+
+_{More to be added}_
+
+[appendix]
+== Non Functional Requirements
+
+.  CAR^2^E should work on any <<mainstream-os,mainstream OS>>.
+.  CAR^2^E should work on any <<mainstream-browser,mainstream browsers>>.
+.  CAR^2^E should be able to hold up to 100 process inputs without a noticeable sluggishness in performance for typical usage.
+.  CAR^2^E should respond within 2 seconds.
+.  CAR^2^E should have an easy to follow user guide.
+.  CAR^2^E should be possible to fixed and debugged in the event of malfunction.
+
+_{More to be added}_
+
+[appendix]
+== Glossary
+
+[[mainstream-os]] Mainstream OS::
+Windows, Linux, Unix, OS-X
+
+[[mainstream-browser]] Mainstream Browsers::
+Chrome, Firefox, Safari, IE/Edge, Opera
