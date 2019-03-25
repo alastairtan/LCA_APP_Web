@@ -3,17 +3,23 @@
 </head>
 <body>
 
-    <!--Side navigator buttons-->
     <div class="nav">
-        <!--Buttons to navigate to and fro previous and next page-->
-        <button class="button-left" (click)="navPrev()"><span>Previous</span></button>
-        <div class="navtitle defaultCursor">
-            <p>
-                Result
+        <button (click)="navPrev()">
+            <p class="navButtonFont">
             </p>
-        </div>
-        <button class="button" (click)="navNext()"><span>Next</span></button>
+        </button>
     </div>
+    <mat-toolbar>
+        <mat-toolbar-row>
+
+            <button class="processButtons" (click)="navPrev()">
+                Previous
+            </button>
+            <button class="processButtons" (click)="navNext()">
+                Done
+            </button>
+        </mat-toolbar-row>
+    </mat-toolbar>
 
     <div class="container">
         <div class="row">

@@ -12,7 +12,7 @@ import { Project } from '../project';
 })
 export class MainMenuComponent implements OnInit {
 
-    RECENT_PROJECT_DISPLAY_LIMIT = 5;
+    RECENT_PROJECT_DISPLAY_LIMIT = 6;
     recentProjects = [];
     projectName = [];
     //Inject data service to share project data among all components, and subscribe to it
@@ -84,17 +84,17 @@ export class MainMenuComponent implements OnInit {
     * Import a recent project data from the recentProject list and share it across all components
     * @param project the project metadata saved within the local storage; it's in the form of {filepath, lastModified}
     */
-    importRecentProject(project) {
+    importRecentProject(name) {
         this.prepareForUndoableAction();
-        /*const fs = require('fs'); // Load the File System to execute our common tasks (CRUD)
-        //project[1] is the filepath
-        let rawData = fs.readFileSync(project[1]);
-        let newData = JSON.parse(rawData);
-        var newProject = new Project();
-        newProject.parseData(newData);
-        this.dataService.setProject(newProject);
-        this.dataService.saveToFolder(project[0], rawData);*/
-        this.router.navigate(['/createProject']);
+        for (let i = 0; i < this.projectName.length; i++) {
+            if (this.projectName[i] == name) {
+                var newProject = new Project();
+                newProject.parseData(this.recentProjects[i]);
+                this.dataService.setProject(newProject);
+                this.router.navigate(['/createProject']);
+            }
+        }
+        
     }
 
     /**

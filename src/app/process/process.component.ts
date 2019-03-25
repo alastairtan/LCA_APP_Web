@@ -36,6 +36,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     @ViewChild('svg') svg: ElementRef;
     @ViewChild('svgabandoned') svgabandoned: ElementRef;
     @ViewChild('name') processName: ElementRef;
+    @ViewChild('sidenav') sidenav: ElementRef;
 
     private mouseX;
     private mouseY;
@@ -121,7 +122,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     ngAfterViewInit() {
         this.draw = SVG('svg');
-        this.abandonedDraw = SVG('svgabandoned').style({background: "white"});
+        this.abandonedDraw = SVG('svgabandoned').style({background: "transparent"});
         this.generatingComponents();
         this.generatingProcessNodes();
         this.generatingAbandonedNodes();
@@ -559,9 +560,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             if (this.project.separatorArray.length == 0 || this.project.separatorArray[i - 1] == undefined) {
                 let startX = this.project.dimensionArray[i-1] * i + 3 * (i - 1);
                 let endX = startX;
-                let endY = this.processContainerHeight - this.headerHeight - 20;
-                line = this.draw.line(startX, 10, endX, endY);
-                line.stroke({ color: '#000', width: 5, linecap: 'round' })
+                let endY = this.processContainerHeight - this.headerHeight - 10;
+                line = this.draw.line(startX, 5, endX, endY);
+                line.stroke({ color: '#000', width: 2, linecap: 'square' })
                 line.data('key', {
                     posX: line.x(),
                     index: i,
@@ -573,10 +574,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let lineObj = this.project.separatorArray[i - 1];
                 accumWidth += this.project.dimensionArray[i - 1]
                 console.log(this.project.dimensionArray);
-                line = this.draw.line(accumWidth, 10, accumWidth, lineObj.endY);
+                line = this.draw.line(accumWidth, 5, accumWidth, lineObj.endY);
                 //update id of the object
                 this.project.separatorArray[i - 1].id = line.node.id;
-                line.stroke({ color: '#000', width: 5, linecap: 'round' })
+                line.stroke({ color: '#000', width: 1, linecap: 'square' })
                 line.data('key', {
                     posX: line.x(),
                     index: i,
@@ -809,12 +810,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         if (this.isAbandonedNodesSelected ){
         }
     }
-
+    
     /**
      * When the mouse double clicks on the process container in process.html, creates a node
      * */
     onDblClick() {
         let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
+        console.log(result[1]);
+        console.log(this.mouseX - this.svgOffsetLeft);
         let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
             [], [], false, this.project.lifeCycleStages[result[0]], "");
         let indexInProcessNodes = this.addRect(rectObj);
@@ -1010,7 +1013,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     sourceAttach: 'perifery',
                     marker: 'default',
                 }, this.tail);
-                conn2.setConnectorColor("#7c9bc9");
+                conn2.setConnectorColor("#ffa384");
                 conn2.connector.style('stroke-width', "3px");
 
                 //deselecting the boxes
@@ -1130,7 +1133,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             sourceAttach: 'perifery',
             marker: 'default',
         }, tail);
-        conn2.setConnectorColor("#7c9bc9");
+        conn2.setConnectorColor("#ffa384");
         conn2.connector.style('stroke-width', "3px");
         conn2.connector.node.id = connectorObj.id;
         conn2.connector.data('key', [this.getCorrespondingRect(head).i, connectorObj.index]);
@@ -1441,7 +1444,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     navPrev() {
         var jsonContent = this.getJsonData();
         this.dataService.setSessionStorage('currentProject', jsonContent);
-        this.router.navigate(['/systemBoundary']);
+        this.router.navigate(['/createProject']);
         this.pushToCookie();
     }
 
@@ -1450,6 +1453,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         var jsonContent = this.getJsonData();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/result']);
+        this.pushToCookie();
+    }
+
+    navHome() {
+        var jsonContent = this.project.toString();
+        this.dataService.setSessionStorage('currentProject', jsonContent);
+        this.router.navigate(['/mainMenu']);
         this.pushToCookie();
     }
     /**

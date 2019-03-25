@@ -183,10 +183,10 @@ export class CreateProjectComponent implements OnInit {
 
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
+        this.pushToCookie();
         var jsonContent = this.currentProject.toString();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/mainMenu']);
-        this.pushToCookie();
     }
     /**
      * push data up to cookies
@@ -194,7 +194,7 @@ export class CreateProjectComponent implements OnInit {
     pushToCookie() {
         let recentProject: Project[] = JSON.parse(this.cookies.get('recent'));
         for (let i = 0; i < recentProject.length; i++) {
-            if (recentProject[i].scopeName == this.currentProject.scopeName) {
+            if (recentProject[i].projectName == this.currentProject.projectName) {
                 recentProject[i] = this.currentProject;
                 this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
                 return;
@@ -207,7 +207,7 @@ export class CreateProjectComponent implements OnInit {
     navNext() {
         var jsonContent = this.currentProject.toString();
         this.dataService.setSessionStorage('currentProject', jsonContent);
-        this.router.navigate(['/systemBoundary']);
+        this.router.navigate(['/process']);
         this.pushToCookie();
     }
 

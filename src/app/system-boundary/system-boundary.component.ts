@@ -305,12 +305,13 @@ export class SystemBoundaryComponent implements OnInit {
             this.doneEditingWhileDragged(index);
             return;
         }
-        //console.log('Completing edit on item ' + index);
+        
         this.isEditing = false;
         this.selectedStageIndex = NONE_SELECTED;
         if (index >= this.currentProject.lifeCycleStages.length) {
             return;
         }
+        console.log('Completing edit on item ' + index);
         const input: HTMLInputElement = <HTMLInputElement>document.getElementById('lifeStage' + index);
         const inputValue: HTMLInputElement = <HTMLInputElement>document.getElementById('lifeStageValue' + index);
         var trimmedValue = input.value.trim().replace(/\s\s+/g, ' ');       //Remove leading, middle, and trailing space
@@ -489,7 +490,7 @@ export class SystemBoundaryComponent implements OnInit {
      * @param index
      */
     deselectItem(index: number) {
-        //console.log('Deselecting item ' + index);
+        console.log('Deselecting item ' + index);
         const container: HTMLElement = document.getElementById('lifeStageContainer' + index);
         const input: HTMLInputElement = <HTMLInputElement>document.getElementById('lifeStage' + index);
         if (container == null || input == null) {
@@ -498,9 +499,11 @@ export class SystemBoundaryComponent implements OnInit {
             this.redSelectItem(index);
             return;
         }
+        console.log('what');
         container.style.border = "none";
         container.style.borderBottom = "1px solid #ccc";
         container.style.background = "#fff";
+        input.style.display = 'none';
         input.style.background = "#fff";
         input.style.border = "none";
     }

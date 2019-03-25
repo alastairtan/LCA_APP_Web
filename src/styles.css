@@ -1,68 +1,62 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway');
 /* Master Styles */
 html, body {
-  height: 100vh;
+    height: 100vh;
+    background-color: #f9fafc;
 }
-h1 {
-  color: #369;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 250%;
+
+.nav {
+    display: block;
+    background-color: #191919;
+    height: 5vh;
 }
-h2, h3 {
-  color: #444;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: lighter;
+
+.navTitle {
+    font-family: sans-serif;
+    font-size: 1vw;
+    margin-left: 2vw;
+    margin-top: 1.25vh;
+    margin-bottom: 1.25vh;
+    font-weight: bold;
+    color: #e6e8e6;
 }
-body {
-  margin: 2em;
+
+
+.verticalCenter {
+    margin-top: auto;
+    margin-bottom: auto;
 }
-body, input[text], button {
-  color: #888;
-  font-family: Cambria, Georgia;
+
+input {
+    border-width: 3px;
+    border-color: #f9fafc;
+    border-style: solid;
+    width: 80%;
 }
-a {
-  cursor: pointer;
-  cursor: ;
+
+textarea {
+    display:block;
+    border-width: 3px;
+    border-color: #f9fafc;
+    border-style: solid;
+    width: 80%;
+}
+
+
+.navButtonFont {
+    font-family: sans-serif;
+    font-size: 1vw;
+    margin-top: auto;
+    margin-bottom: auto;
+    font-weight: bold;
+    margin-left: 0.5vw;
+    margin-right: 0.5vw;
 }
 button {
-  font-family: Arial;
-  background-color: #eee;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+    background-color: #ffa384;
+    border: none;
 }
+
 button:hover {
-  background-color: #cfd8dc;
-}
-button:disabled {
-  background-color: #eee;
-  color: #aaa;
-  cursor: auto;
-}
-
-/* Navigation link styles */
-nav a {
-  padding: 5px 10px;
-  text-decoration: none;
-  margin-right: 10px;
-  margin-top: 10px;
-  display: inline-block;
-  background-color: #eee;
-  border-radius: 4px;
-}
-nav a:visited, a:link {
-  color: #607D8B;
-}
-nav a:hover {
-  color: #039be5;
-  background-color: #CFD8DC;
-}
-nav a.active {
-  color: #039be5;
-}
-
-/* everywhere else */
-* {
-  font-family: 'Raleway', sans-serif;
+    background-color: #f98761;
 }

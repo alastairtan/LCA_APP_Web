@@ -1,203 +1,86 @@
-@import url('https://fonts.googleapis.com/css?family=Raleway');
 .centering {
     align-items: center;
 }
 
-html, body {
-  height: 100vh;
-}
-
-.btn {
-    width: 40%;
-    margin-left: 30%;
-    margin-right: auto;
-    margin-top: 2em;
-    font-size: 1em;
-    align-self: center;
-    background-color: #dcdcdc;
-}
-
-img {
-    margin: 30px;
-    width: 400px;
-}
-
-p {
-    display: block;
-    background-color: #7c9bc9;
-    text-align: center;
-    font-size: 1.75em;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-}
-
 body {
-    background-color: #E4E2E9;
-    width: 100%;
+    background-color: #f9fafc;
 }
-
-/*
-    For the placeholder to put ongoing and completed
-*/
-.placeholder {
-    background-color: #f7f7f7;
-    width: 100%;
-    height: 40vh;
-    margin-top: 1.5em;
-}
-
-/*
-    placeholder to put creating new project type
-*/
-.placeholder2 {
-    display: inline-block;
-    background-color: #f7f7f7;
-    width: 100%;
-    margin-top: 1.5em;
-    align-items: center;
-    align-content: center;
-    height: 82.5vh;
-}
-
-.buttonplaceholder {
-    width: auto;
-    margin-top: 29vh;
-}
-
-/*
-    For button to indicate next step
-*/
-.button {
-  display: block;
-  position: static;
-  background-image: linear-gradient(to right, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
-  border: none;
-  color: #FFFFFF;
-  text-align: center;
-  font-size: 28px;
-  width: inherit;
-  height: 81%;
-  transition: all 0.5s;
-  cursor: pointer;
-}
-
-label {
-  border: none;
-  color: black;
-}
-
-.button span {
-    cursor: pointer;
-    display: inline-block;
-    position: relative;
-    transition: 0.5s;
-    font-size: 0.75em;
-    margin-top: 0px;
-    color: black;
-}
-
-.button span:after {
-    content: '\00bb';
-    position: absolute;
-    opacity: 0;
-    top: 0;
-    right: -20px;
-    transition: 0.5s;
-}
-
-.button:hover span {
-    padding-right: 25px;
-    background-position: right center;
-}
-
-.button:hover span:after {
-    opacity: 1;
-    right: 0;
-}
-/*
-    For button to go back to the previous
-*/
-
-.button-left {
-    display: block;
-    position: static;
-    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
-    border: none;
-    color: #FFFFFF;
-    text-align: center;
-    font-size: 28px;
-    width: inherit;
-    height: 81%;
-    transition: all 0.5s;
-    cursor: default;
-}
-
-/*
-    For the title in the nav bar
-*/
-.navtitle p {
-    display: block;
-    background-color: #7c9bc9;
-    text-align: center;
-    font-size: 1.75em;
-    width: inherit;
-    height: auto;
-}
-/*
-    Grid container to store buttons(prev and next) and the title in the nav bar
-*/
-.nav {
-    display: grid;
-    grid-template-columns: 20% auto 20%;
-    grid-template-rows: auto;
-    margin-top: 0;
-}
-
-/* For the list of projects*/
-.projects {
-    margin: 0 0 2em 0;
-    list-style-type: none;
-    padding: 0;
-    align-items: center;
-    align-content: center;
-}
-
-.projects li {
-    cursor: pointer;
-    background-color: #dcdcdc;
-    margin: .5em;
-    padding: .4em;
-    height: 2.2em;
-    border-radius: 4px;
-}
-
-.projects li:hover {
-    color: #7c9bc9;
-    background-color: #e3e3e3;
-    left: .1em;
-}
-
-.projects .text {
-    position: relative;
-    top: -3px;
-}
-
-.btn:hover {
-    color: #7c9bc9;
-    background-color: #e3e3e3;
-    left: .1em;
-}
-
 
 .grid {
     display: grid;
     grid-template-columns: auto auto auto;
+    margin-top: 3vh;
+    margin-left: 1.5vw;
 }
 
 .cards {
-    height: 20vh;
-    width: 18vw;
+    height: 25vh;
+    width: 85%;
     display: block;
     background-color: white;
     border-radius: 1vw;
+    margin-left:auto;
+    margin-right: auto;
+    margin-top: 5vh;
+}
+
+.cards:hover {
+    background-color: #e7f2f8;
+}
+
+.cards p {
+    font-family: sans-serif;
+    margin-top: 1vh;
+    margin-left: 1vh;
+}
+
+.buttonsContainer {
+    display:flex;
+    align-items: center;
+}
+
+button {
+    background-color: #ffa384;
+    border-radius: 4px;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    border: hidden;
+    height: 4vh;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.title {
+    font-family: sans-serif;
+    font-size: 3vw;
+    font-weight: bold;
+    margin-top: 2vh;
+}
+
+label {
+    background-color: #ffa384;
+    border-radius: 4px;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    border: hidden;
+    height: 4vh;
+    color: black;
+}
+
+    label:hover {
+        opacity: 0.8;
+    }
+
+.btn-add {
+    height: 33px;
+    width: 39px;
+}
+
+.add-container {
+    background-color: transparent;
+    display: flex;
+    padding: 10px 47.8%;
+    max-height: 60px;
 }
