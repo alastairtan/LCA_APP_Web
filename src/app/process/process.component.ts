@@ -18,7 +18,6 @@ import { TransportationInput } from './TransportationInput';
 import { DirectEmission } from './DirectEmission';
 import { CookieService } from 'ngx-cookie-service';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
-import { DialogComponent } from '../dialog/dialog.component';
 
 const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
 const OUT_FUNCTIONAL_UNIT = 0, OUT_NAME = 1, OUT_QUANT = 2, OUT_UNIT = 3, OUT_ACTIVITY = 4, OUT_REMARKS = 5;
@@ -33,8 +32,25 @@ const EMISSION_TYPE = 0, EMISSION_QUANT = 1, EMISSION_UNIT = 2, EMISSION_ACTIVIT
 })
 
 export class Dialog {
-    constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
+    text: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+    this.text = data.text}
     
+}
+
+@Component({
+    selector: 'app-confirmationDialog',
+    templateUrl: '../dialog/confirmationDialog.html'
+})
+
+export class confirmationDialog {
+    text: String;
+    action: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+        this.text = data.text;
+        this.action = data.action;
+    }
+
 }
 
 @Component({
@@ -129,7 +145,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     
     ngOnInit() {
         this.project = this.dataService.getProject();
-        
+        let pc = document.getElementById('processcontainer');
+        pc.oncontextmenu = function () {
+            return false;
+        }
     }
 
     ngAfterViewInit() {
@@ -850,7 +869,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             dialogConfig.autoFocus = true;
             dialogConfig.data = {
                 id: 1,
-                title: 'Angular For Beginners'
+                text: 'Click "Edit" to start adding processes and linking up processes'
             };
             const dialogRef = this.dialog.open(Dialog, dialogConfig);
             dialogRef.afterClosed().subscribe(result => {
@@ -1232,54 +1251,70 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     removeRect(rect: SVG.Rect) {
         if (this.isEdit) {
 
-
-            var choseYes = this.dataService.showDeleteConfirmation();
-            if (!choseYes) {
-                return;
-            }
-            this.prepareForUndoableAction();
-
-
-            for (let i = 0; i < this.project.processNodes.length; i++) {
-                for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
-                    let next = this.project.processNodes[i].getNext()[j];
-                    if (rect.node.id == next) {
-                        SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
-                        this.project.processNodes[i].getNext().splice(j, 1);
-                        this.project.processNodes[i].getConnectors().splice(j, 1);
-                        j--;
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = true;
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                id: 1,
+                text: 'Confirm deletion of process?',
+                action: 'delete'
+            };
+            const dialogRef = this.dialog.open(confirmationDialog, dialogConfig);
+            dialogRef.afterClosed().subscribe(result => {
+                console.log(' Dialog was closed')
+                console.log(result)
+                if (result) {
+                    var choseYes = this.dataService.showDeleteConfirmation();
+                    if (!choseYes) {
+                        return;
                     }
-                }
-            }
-            let removedIndex = null;
-            for (let i = 0; i < this.project.processNodes.length; i++) {
-                if (this.project.processNodes[i].getId() == rect.node.id) {
-                    //remove processlinks
-                    for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
+                    this.prepareForUndoableAction();
 
-                        //logic to be resolved
-                        if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
-                            SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
+
+                    for (let i = 0; i < this.project.processNodes.length; i++) {
+                        for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
+                            let next = this.project.processNodes[i].getNext()[j];
+                            if (rect.node.id == next) {
+                                SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
+                                this.project.processNodes[i].getNext().splice(j, 1);
+                                this.project.processNodes[i].getConnectors().splice(j, 1);
+                                j--;
+                            }
                         }
                     }
-                    removedIndex = i;
-                } else if (removedIndex != null && i != 0) {
-                    //changing all index of remaning nodes
-                    SVG.get(this.project.processNodes[i].id).data('key', i - 1);
-                }
+                    let removedIndex = null;
+                    for (let i = 0; i < this.project.processNodes.length; i++) {
+                        if (this.project.processNodes[i].getId() == rect.node.id) {
+                            //remove processlinks
+                            for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
 
-                //after reaching the end, we then remove the node that was meant to remove
-                if (i == this.project.processNodes.length - 1) {
-                    this.project.processNodes.splice(removedIndex, 1);
-                    rect.remove();
-                }
+                                //logic to be resolved
+                                if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
+                                    SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
+                                }
+                            }
+                            removedIndex = i;
+                        } else if (removedIndex != null && i != 0) {
+                            //changing all index of remaning nodes
+                            SVG.get(this.project.processNodes[i].id).data('key', i - 1);
+                        }
 
-            }
-            if (this.head == rect) {
-                this.head = null;
-            } else if (this.tail = rect) {
-                this.tail = null;
-            }
+                        //after reaching the end, we then remove the node that was meant to remove
+                        if (i == this.project.processNodes.length - 1) {
+                            this.project.processNodes.splice(removedIndex, 1);
+                            rect.remove();
+                        }
+
+                    }
+                    if (this.head == rect) {
+                        this.head = null;
+                    } else if (this.tail = rect) {
+                        this.tail = null;
+                    }
+                }
+            });
+
+           
         }
     }
 
@@ -1416,9 +1451,23 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     /**
-     * Show warning when there are no life cycle stage
+     * Show warning when there are no process nodes allocated
      */
     showNoProcessWarning() {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            id: 1,
+            text: 'You cannot proceed or save without any allocated process.\n\
+                    \nDouble click on a column to create a process in that stage,\
+                    \nor re-allocate a process from the "Unallocated processes" sidebar.'
+        };
+        const dialogRef = this.dialog.open(Dialog, dialogConfig);
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(' Dialog was closed')
+            console.log(result)
+        });
         /*const { dialog } = require("electron").remote;
         //Call to the current window to make the dialog a modal
         const { BrowserWindow } = require('electron').remote;
@@ -1456,10 +1505,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     /**Save the current project to session storage, and navigate to the next page */
     navNext() {
-        var jsonContent = this.getJsonData();
-        this.dataService.setSessionStorage('currentProject', jsonContent);
-        this.router.navigate(['/result']);
-        this.pushToCookie();
+        if (this.project.processNodes.length == 0) {
+            this.showNoProcessWarning();
+        } else {
+            var jsonContent = this.getJsonData();
+            this.dataService.setSessionStorage('currentProject', jsonContent);
+            this.router.navigate(['/result']);
+            this.pushToCookie();
+        }
     }
 
     navHome() {

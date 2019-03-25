@@ -10,7 +10,7 @@ import { AppComponent }         from './app.component';
 import { MainMenuComponent } from './main-menu/main-menu.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { SystemBoundaryComponent } from './system-boundary/system-boundary.component';
-import { ProcessComponent, Dialog } from './process/process.component';
+import { ProcessComponent, Dialog, confirmationDialog } from './process/process.component';
 import { SidebarDirective } from './process/sidebar.directive';
 import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
@@ -43,11 +43,12 @@ import { DialogComponent } from './dialog/dialog.component'
     ResultComponent,
     ProjectFooterComponent,
       DialogComponent,
-      Dialog
+      Dialog,
+      confirmationDialog
   ],
     bootstrap: [AppComponent],
     providers: [CookieService,
         { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { hasBackdrop: false } }],
-    entryComponents: [Dialog]
+    entryComponents: [Dialog, confirmationDialog]
 })
 export class AppModule { }
