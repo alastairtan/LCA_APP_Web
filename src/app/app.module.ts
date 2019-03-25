@@ -14,10 +14,11 @@ import { ProcessComponent } from './process/process.component';
 import { SidebarDirective } from './process/sidebar.directive';
 import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
-import { MatSidenavModule, MatIconModule, MatMenu, MatMenuItem } from '@angular/material';
+import { MatSidenavModule, MatDialogModule } from '@angular/material';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CookieService } from 'ngx-cookie-service'
+import { CookieService } from 'ngx-cookie-service';
+import { DialogComponent } from './dialog/dialog.component'
 
 @NgModule({
   imports: [
@@ -29,7 +30,8 @@ import { CookieService } from 'ngx-cookie-service'
       DragDropModule,
       MatSidenavModule,
       BrowserAnimationsModule,
-      MatToolbarModule
+      MatToolbarModule,
+      MatDialogModule
   ],
   declarations: [
     AppComponent,
@@ -39,9 +41,11 @@ import { CookieService } from 'ngx-cookie-service'
     ProcessComponent,
     SidebarDirective,
     ResultComponent,
-    ProjectFooterComponent
+    ProjectFooterComponent,
+    DialogComponent
   ],
     bootstrap: [AppComponent],
-    providers: [CookieService]
+    providers: [CookieService],
+    entryComponents: [DialogComponent]
 })
 export class AppModule { }

@@ -17,6 +17,8 @@ import { EnergyInput } from './EnergyInput';
 import { TransportationInput } from './TransportationInput';
 import { DirectEmission } from './DirectEmission';
 import { CookieService } from 'ngx-cookie-service';
+import { MatDialog } from '@angular/material'
+import { DialogComponent } from '../dialog/dialog.component';
 
 const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
 const OUT_FUNCTIONAL_UNIT = 0, OUT_NAME = 1, OUT_QUANT = 2, OUT_UNIT = 3, OUT_ACTIVITY = 4, OUT_REMARKS = 5;
@@ -99,6 +101,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     transportations: TransportationInput[] = [];
     emissions: DirectEmission[] = [];
 
+    constructor(private dataService: DataService,
+        private router: Router,
+        private cd: ChangeDetectorRef,
+        private cookies: CookieService, public dialog: MatDialog) { }
     /**
      * Check if this.project.processNodes is empty, 
      * for the purpose of disallowing users from proceeding
@@ -110,12 +116,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         return !hasProcess;
     }
-
-    constructor(private dataService: DataService,
-                private router: Router,
-        private cd: ChangeDetectorRef,
-    private cookies: CookieService) { }
-
+    
     ngOnInit() {
         this.project = this.dataService.getProject();
         
@@ -833,6 +834,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
             this.createProcessNodes(indexInProcessNodes, result[1], true);
+        } else {
+            this.dialog.open(DialogComponent, { data: { name: 'Note' }})
         }
     }
 
