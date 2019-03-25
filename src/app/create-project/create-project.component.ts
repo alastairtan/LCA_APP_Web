@@ -4,6 +4,7 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 
 import { Project } from '../project';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-create-project',
@@ -28,7 +29,8 @@ export class CreateProjectComponent implements OnInit {
     //Inject data service to share project data among all components, and subscribe to it
     constructor(private dataService: DataService,
                 private router: Router,
-                private cd: ChangeDetectorRef) { }
+        private cd: ChangeDetectorRef,
+        private cookies: CookieService) { }
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -181,16 +183,32 @@ export class CreateProjectComponent implements OnInit {
 
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
+        this.pushToCookie();
         var jsonContent = this.currentProject.toString();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/mainMenu']);
     }
-
+    /**
+     * push data up to cookies
+     * */
+    pushToCookie() {
+        let recentProject: Project[] = JSON.parse(this.cookies.get('recent'));
+        for (let i = 0; i < recentProject.length; i++) {
+            if (recentProject[i].projectName == this.currentProject.projectName) {
+                recentProject[i] = this.currentProject;
+                this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
+                return;
+            }
+        }
+        recentProject.push(this.currentProject);
+        this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
+    }
     /**Save the current project to session storage, and navigate to the next page */
     navNext() {
         var jsonContent = this.currentProject.toString();
         this.dataService.setSessionStorage('currentProject', jsonContent);
-        this.router.navigate(['/systemBoundary']);
+        this.router.navigate(['/process']);
+        this.pushToCookie();
     }
 
     /**

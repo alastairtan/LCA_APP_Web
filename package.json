@@ -32,6 +32,7 @@
     "core-js": "^2.5.4",
     "file-system": "^2.2.2",
     "font-awesome": "^4.7.0",
+    "ngx-cookie-service": "^2.1.0",
     "rxjs": "^6.3.0",
     "svg.connectable.js": "^1.0.1",
     "svg.draggy.js": "^1.1.1",

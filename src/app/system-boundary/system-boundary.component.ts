@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 
 import { DataService } from "../data.service";
 import { Project } from '../project';
+import { CookieService } from 'ngx-cookie-service';
 
 let NONE_SELECTED = -1;
 
@@ -105,7 +106,8 @@ export class SystemBoundaryComponent implements OnInit {
     //Inject data service to share project data among all components, and subscribe to it
     constructor(private dataService: DataService,
                 private router: Router,
-                private cd: ChangeDetectorRef) { }
+        private cd: ChangeDetectorRef,
+        private cookies: CookieService) { }
 
     //Upon init, read the project data from dataService
     ngOnInit() {
@@ -298,12 +300,13 @@ export class SystemBoundaryComponent implements OnInit {
             this.doneEditingWhileDragged(index);
             return;
         }
-        //console.log('Completing edit on item ' + index);
+        
         this.isEditing = false;
         this.selectedStageIndex = NONE_SELECTED;
         if (index >= this.currentProject.lifeCycleStages.length) {
             return;
         }
+        console.log('Completing edit on item ' + index);
         const input: HTMLInputElement = <HTMLInputElement>document.getElementById('lifeStage' + index);
         const inputValue: HTMLInputElement = <HTMLInputElement>document.getElementById('lifeStageValue' + index);
         var trimmedValue = input.value.trim().replace(/\s\s+/g, ' ');       //Remove leading, middle, and trailing space
@@ -482,7 +485,7 @@ export class SystemBoundaryComponent implements OnInit {
      * @param index
      */
     deselectItem(index: number) {
-        //console.log('Deselecting item ' + index);
+        console.log('Deselecting item ' + index);
         const container: HTMLElement = document.getElementById('lifeStageContainer' + index);
         const input: HTMLInputElement = <HTMLInputElement>document.getElementById('lifeStage' + index);
         if (container == null || input == null) {
@@ -491,9 +494,11 @@ export class SystemBoundaryComponent implements OnInit {
             this.redSelectItem(index);
             return;
         }
+        console.log('what');
         container.style.border = "none";
         container.style.borderBottom = "1px solid #ccc";
         container.style.background = "#fff";
+        input.style.display = 'none';
         input.style.background = "#fff";
         input.style.border = "none";
     }
@@ -566,6 +571,7 @@ export class SystemBoundaryComponent implements OnInit {
         var jsonContent = this.currentProject.toString();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/createProject']);
+        this.pushToCookie();
     }
 
     /**Save the current project to session storage, and navigate to the next page */
@@ -574,8 +580,24 @@ export class SystemBoundaryComponent implements OnInit {
         var jsonContent = this.currentProject.toString();
         this.dataService.setSessionStorage('currentProject', jsonContent);
         this.router.navigate(['/process']);
+        this.pushToCookie();
     }
 
+    /**
+     * push data up to cookies
+     * */
+    pushToCookie() {
+        let recentProject: Project[] = JSON.parse(this.cookies.get('recent'));
+        for (let i = 0; i < recentProject.length; i++) {
+            if (recentProject[i].scopeName == this.currentProject.scopeName) {
+                recentProject[i] = this.currentProject;
+                this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
+                return;
+            }
+        }
+        recentProject.push(this.currentProject);
+        this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
+    }
     /**
      * Save the state of the current project, in preparation for an undoable action
      */
