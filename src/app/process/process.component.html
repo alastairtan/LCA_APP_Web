@@ -430,18 +430,14 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div *ngIf="selectedTab === menuBar[6]" role="tabpanel" class="tab-pane active" id="otherEmissionsContainer">
 
+
+                                    <input id="name" value="{{currentlySelectedNodeName}}" />
+                                </div>
                             </div>
                         </div>
 
-                        <div id="processNameContainer">
-                            <p>
-                                Process Name
-                            </p>
-
-                            <input id="name" value="{{currentlySelectedNodeName}}" />
-
-                        </div>
                     </div>
                 </div>
                 
