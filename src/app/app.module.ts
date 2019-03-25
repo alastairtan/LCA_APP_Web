@@ -14,7 +14,8 @@ import { ProcessComponent } from './process/process.component';
 import { SidebarDirective } from './process/sidebar.directive';
 import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
-import { MatSidenavModule } from '@angular/material';
+import { MatSidenavModule, MatIconModule, MatMenu, MatMenuItem } from '@angular/material';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CookieService } from 'ngx-cookie-service'
 
@@ -27,7 +28,8 @@ import { CookieService } from 'ngx-cookie-service'
     HttpClientModule,
       DragDropModule,
       MatSidenavModule,
-      BrowserAnimationsModule
+      BrowserAnimationsModule,
+      MatToolbarModule
   ],
   declarations: [
     AppComponent,
