@@ -69,7 +69,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private size = 100;
 
     private waitId;
-    menuBar = ['Material Input', 'Output', 'Byproduct', 'Energy Input', 'Transportation Input', 'Other Direct Emissions'];
+    menuBar = ['Material Input', 'Output', 'Byproduct', 'Energy Input', 'Transportation Input', 'Other Direct Emissions', 'Process Name'];
     selectedTab = this.menuBar[0];
     isOpen = false;
 
@@ -145,20 +145,20 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * Get the details of the process node and display it in the input form
      * @param array keydata of a connector [index of rect, index of connector]
      */
-    getDetails(array) {
+    getDetails() {
         //get corresponding arrows 
-        let connectorObj = this.project.processNodes[this.currentlySelectedConnector[0]].getConnectors()[this.currentlySelectedConnector[1]];
-        this.inputs = connectorObj.materialInput;
-        this.outputs = connectorObj.outputs;
-        this.byproducts = connectorObj.byproducts;
-        this.energy = connectorObj.energyInputs;
-        this.transportations = connectorObj.transportations;
-        this.emissions = connectorObj.directEmissions;
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
+        this.inputs = rectObj.materialInput;
+        this.outputs = rectObj.outputs;
+        this.byproducts = rectObj.byproducts;
+        this.energy = rectObj.energyInputs;
+        this.transportations = rectObj.transportations;
+        this.emissions = rectObj.directEmissions;
         this.cd.detectChanges();                    //Detect change and update the DOM
         switch (this.selectedTab) {
             case this.menuBar[0]:           //Material Input
                 //Get details for all material inputs
-                for (let j = 0; j < connectorObj.materialInput.length; j++) {
+                for (let j = 0; j < rectObj.materialInput.length; j++) {
                     var inputArray = document.getElementById('materialInputForm' + j).childNodes;
                     //Get all HTML input elements
                     var materialNameInput   = <HTMLInputElement>inputArray[MAT_NAME];
@@ -170,18 +170,18 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var emissionSourceInput = <HTMLInputElement>inputArray[MAT_EMISSION_SOURCE];
                     var remarksInput        = <HTMLInputElement>inputArray[MAT_REMARKS];
                     //Update all the inputs' value to be the same as the actual value in the processNode
-                    materialNameInput.value = connectorObj.materialInput[j].materialName;
-                    quantityInput.value = connectorObj.materialInput[j].quantity;
-                    unitInput.value = connectorObj.materialInput[j].unit;
-                    carbonStorageInput.value = connectorObj.materialInput[j].carbonStorage;
-                    activityDataInput.value = connectorObj.materialInput[j].activityDataOrigin;
-                    emissionDataInput.value = connectorObj.materialInput[j].emissionFactorData;
-                    emissionSourceInput.value = connectorObj.materialInput[j].emissionFactorSource;
-                    remarksInput.value = connectorObj.materialInput[j].remarks;
+                    materialNameInput.value = rectObj.materialInput[j].materialName;
+                    quantityInput.value = rectObj.materialInput[j].quantity;
+                    unitInput.value = rectObj.materialInput[j].unit;
+                    carbonStorageInput.value = rectObj.materialInput[j].carbonStorage;
+                    activityDataInput.value = rectObj.materialInput[j].activityDataOrigin;
+                    emissionDataInput.value = rectObj.materialInput[j].emissionFactorData;
+                    emissionSourceInput.value = rectObj.materialInput[j].emissionFactorSource;
+                    remarksInput.value = rectObj.materialInput[j].remarks;
                 }
                 break;
             case this.menuBar[1]:       //Output
-                for (let j = 0; j < connectorObj.outputs.length; j++) {
+                for (let j = 0; j < rectObj.outputs.length; j++) {
                     var inputArray = document.getElementById("outputForm" + j).childNodes;
                     //Get all HTML input elements
                     var functionalUnitInput = <HTMLInputElement>inputArray[OUT_FUNCTIONAL_UNIT];
@@ -191,16 +191,16 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var activityDataInput   = <HTMLInputElement>inputArray[OUT_ACTIVITY];
                     var remarksInput        = <HTMLInputElement>inputArray[OUT_REMARKS];
                     //Update all the actual value in the processNode to be the same as the inputs' value
-                    functionalUnitInput.value = connectorObj.outputs[j].functionalUnit.toString();
-                    outputNameInput.value = connectorObj.outputs[j].outputName;
-                    quantityInput.value = connectorObj.outputs[j].quantity;
-                    unitInput.value = connectorObj.outputs[j].unit;
-                    activityDataInput.value = connectorObj.outputs[j].activityDataOrigin;
-                    remarksInput.value = connectorObj.outputs[j].remarks;
+                    functionalUnitInput.value = rectObj.outputs[j].functionalUnit.toString();
+                    outputNameInput.value = rectObj.outputs[j].outputName;
+                    quantityInput.value = rectObj.outputs[j].quantity;
+                    unitInput.value = rectObj.outputs[j].unit;
+                    activityDataInput.value = rectObj.outputs[j].activityDataOrigin;
+                    remarksInput.value = rectObj.outputs[j].remarks;
                 }
                 break;
             case this.menuBar[2]:       //Byproduct
-                for (let j = 0; j < connectorObj.byproducts.length; j++) {
+                for (let j = 0; j < rectObj.byproducts.length; j++) {
                     var inputArray = document.getElementById("byproductForm" + j).childNodes;
                     //Get all HTML input elements
                     var coproductInput      = <HTMLInputElement>inputArray[BY_COPRODUCT];
@@ -212,18 +212,18 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var downstreamInput     = <HTMLInputElement>inputArray[BY_DOWNSTREAM];
                     var remarksInput        = <HTMLInputElement>inputArray[BY_REMARKS];
                     //Update all the actual value in the processNode to be the same as the inputs' value
-                    coproductInput.value = connectorObj.byproducts[j].coproduct.toString();
-                    wasteInput.value = connectorObj.byproducts[j].waste.toString();
-                    byproductNameInput.value = connectorObj.byproducts[j].byproductName;
-                    quantityInput.value = connectorObj.byproducts[j].quantity;
-                    unitInput.value = connectorObj.byproducts[j].unit;
-                    downstreamInput.value = connectorObj.byproducts[j].downstreamOption;
-                    activityDataInput.value = connectorObj.byproducts[j].activityDataOrigin;
-                    remarksInput.value = connectorObj.byproducts[j].remarks;
+                    coproductInput.value = rectObj.byproducts[j].coproduct.toString();
+                    wasteInput.value = rectObj.byproducts[j].waste.toString();
+                    byproductNameInput.value = rectObj.byproducts[j].byproductName;
+                    quantityInput.value = rectObj.byproducts[j].quantity;
+                    unitInput.value = rectObj.byproducts[j].unit;
+                    downstreamInput.value = rectObj.byproducts[j].downstreamOption;
+                    activityDataInput.value = rectObj.byproducts[j].activityDataOrigin;
+                    remarksInput.value = rectObj.byproducts[j].remarks;
                 }
                 break;
             case this.menuBar[3]:       //Energy Input
-                for (let j = 0; j < connectorObj.energyInputs.length; j++) {
+                for (let j = 0; j < rectObj.energyInputs.length; j++) {
                     var inputArray = document.getElementById("energyInputForm" + j).childNodes;
                     //Get all HTML input elements
                     var equipmentNameInput  = <HTMLInputElement>inputArray[ENER_EQUIP_NAME];
@@ -237,20 +237,20 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var byproductNameInput  = <HTMLInputElement>inputArray[ENER_EMISSION_SOURCE];
                     var remarksInput        = <HTMLInputElement>inputArray[ENER_REMARKS];
                     //Update all the actual value in the processNode to be the same as the inputs' value
-                    equipmentNameInput.value = connectorObj.energyInputs[j].equipmentName;
-                    energyTypeInput.value = connectorObj.energyInputs[j].energyType;
-                    processTimeInput.value = connectorObj.energyInputs[j].processTime;
-                    ratingInput.value = connectorObj.energyInputs[j].rating;
-                    quantityInput.value = connectorObj.energyInputs[j].quantity;
-                    unitInput.value = connectorObj.energyInputs[j].unit;
-                    activityDataInput.value = connectorObj.energyInputs[j].activityDataOrigin;
-                    wasteInput.value = connectorObj.energyInputs[j].emissionFactorData;
-                    byproductNameInput.value = connectorObj.energyInputs[j].emissionFactorSource;
-                    remarksInput.value = connectorObj.energyInputs[j].remarks;
+                    equipmentNameInput.value = rectObj.energyInputs[j].equipmentName;
+                    energyTypeInput.value = rectObj.energyInputs[j].energyType;
+                    processTimeInput.value = rectObj.energyInputs[j].processTime;
+                    ratingInput.value = rectObj.energyInputs[j].rating;
+                    quantityInput.value = rectObj.energyInputs[j].quantity;
+                    unitInput.value = rectObj.energyInputs[j].unit;
+                    activityDataInput.value = rectObj.energyInputs[j].activityDataOrigin;
+                    wasteInput.value = rectObj.energyInputs[j].emissionFactorData;
+                    byproductNameInput.value = rectObj.energyInputs[j].emissionFactorSource;
+                    remarksInput.value = rectObj.energyInputs[j].remarks;
                 }
                 break;
             case this.menuBar[4]:       //Transportation Input
-                for (let j = 0; j < connectorObj.transportations.length; j++) {
+                for (let j = 0; j < rectObj.transportations.length; j++) {
                     var inputArray = document.getElementById("transportationInputForm" + j).childNodes;
                     //Get all HTML input elements
                     var transportTypeInput  = <HTMLInputElement>inputArray[TRANS_TYPE];
@@ -259,15 +259,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var activityDataInput   = <HTMLInputElement>inputArray[TRANS_ACTIVITY];
                     var remarksInput        = <HTMLInputElement>inputArray[TRANS_REMARKS];
                     //Update all the actual value in the processNode to be the same as the inputs' value
-                    transportTypeInput.value = connectorObj.transportations[j].transportationType;
-                    quantityInput.value = connectorObj.transportations[j].quantity;
-                    unitInput.value = connectorObj.transportations[j].unit;
-                    activityDataInput.value = connectorObj.transportations[j].activityDataOrigin;
-                    remarksInput.value = connectorObj.transportations[j].remarks;
+                    transportTypeInput.value = rectObj.transportations[j].transportationType;
+                    quantityInput.value = rectObj.transportations[j].quantity;
+                    unitInput.value = rectObj.transportations[j].unit;
+                    activityDataInput.value = rectObj.transportations[j].activityDataOrigin;
+                    remarksInput.value = rectObj.transportations[j].remarks;
                 }
                 break;
             case this.menuBar[5]:       //Direct Emission
-                for (let j = 0; j < connectorObj.directEmissions.length; j++) {
+                for (let j = 0; j < rectObj.directEmissions.length; j++) {
                     var inputArray = document.getElementById("directEmissionForm" + j).childNodes;
                     //Get all HTML input elements
                     var emissionTypeInput   = <HTMLInputElement>inputArray[EMISSION_TYPE];
@@ -276,13 +276,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var activityDataInput   = <HTMLInputElement>inputArray[EMISSION_ACTIVITY];
                     var remarksInput        = <HTMLInputElement>inputArray[EMISSION_REMARKS];
                     //Update all the actual value in the processNode to be the same as the inputs' value
-                    emissionTypeInput.value = connectorObj.directEmissions[j].emissionType;
-                    quantityInput.value = connectorObj.directEmissions[j].quantity;
-                    unitInput.value = connectorObj.directEmissions[j].unit;
-                    activityDataInput.value = connectorObj.directEmissions[j].activityDataOrigin;
-                    remarksInput.value = connectorObj.directEmissions[j].remarks;
+                    emissionTypeInput.value = rectObj.directEmissions[j].emissionType;
+                    quantityInput.value = rectObj.directEmissions[j].quantity;
+                    unitInput.value = rectObj.directEmissions[j].unit;
+                    activityDataInput.value = rectObj.directEmissions[j].activityDataOrigin;
+                    remarksInput.value = rectObj.directEmissions[j].remarks;
                 }
                 break;
+            case this.menuBar[6]:
+                let inputDiv = document.getElementById('name');
+                let HTMLInput = <HTMLInputElement>inputDiv;
+                this.currentlySelectedNodeName = rectObj.processName;
         }
     }
 
@@ -291,9 +295,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param rect the currently selected node
      * @param divId the HTML id of the input form
      */
-    saveAndClearDetails(array) {
+    saveAndClearDetails() {
         //get corresponding arrows 
-        let connectorObj = this.project.processNodes[array[0]].getConnectors()[array[1]];
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         this.prepareForUndoableAction();
         //Update all material inputs
         switch (this.selectedTab) {
@@ -319,7 +323,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.inputs[j].emissionFactorSource = emissionSourceInput.value;
                     this.inputs[j].remarks = remarksInput.value;
                 }
-                connectorObj.materialInput = this.inputs;
+                rectObj.materialInput = this.inputs;
                 break;
             case this.menuBar[1]:       //Output
                 for (let j = 0; j < this.outputs.length; j++) {
@@ -339,7 +343,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.outputs[j].activityDataOrigin = activityDataInput.value;
                     this.outputs[j].remarks = remarksInput.value;
                 }
-                connectorObj.outputs = this.outputs;
+                rectObj.outputs = this.outputs;
                 break;
             case this.menuBar[2]:       //Byproduct
                 for (let j = 0; j < this.byproducts.length; j++) {
@@ -363,7 +367,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.byproducts[j].activityDataOrigin = activityDataInput.value;
                     this.byproducts[j].remarks = remarksInput.value;
                 }
-                connectorObj.byproducts = this.byproducts;
+                rectObj.byproducts = this.byproducts;
                 break;
             case this.menuBar[3]:       //Energy Input
                 for (let j = 0; j < this.energy.length; j++) {
@@ -391,7 +395,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.energy[j].emissionFactorSource = byproductNameInput.value;
                     this.energy[j].remarks = remarksInput.value;
                 }
-                connectorObj.energyInputs = this.energy;
+                rectObj.energyInputs = this.energy;
                 break;
             case this.menuBar[4]:       //Transportation Input
                 for (let j = 0; j < this.transportations.length; j++) {
@@ -409,7 +413,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.transportations[j].activityDataOrigin = activityDataInput.value;
                     this.transportations[j].remarks = remarksInput.value;
                 }
-                connectorObj.transportations = this.transportations;
+                rectObj.transportations = this.transportations;
                 break;
             case this.menuBar[5]:       //Direct Emission
                 for (let j = 0; j < this.emissions.length; j++) {
@@ -427,10 +431,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.emissions[j].activityDataOrigin = activityDataInput.value;
                     this.emissions[j].remarks = remarksInput.value;
                 }
-                connectorObj.directEmissions = this.emissions;
+                rectObj.directEmissions = this.emissions;
                 break;
+            case this.menuBar[6]:
+                let inputDiv = document.getElementById('name');
+                let HTMLInput = <HTMLInputElement>inputDiv;
+                rectObj.processName = HTMLInput.value;
+                HTMLInput.value = "";
         }
-        this.project.processNodes[array[0]].getConnectors[array[1]] = connectorObj;
+        this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
 
     /**
@@ -439,37 +448,37 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     addDetail(tab: string) {
         this.prepareForUndoableAction();
-        this.saveAndClearDetails(this.currentlySelectedConnector);
-        let connectorObj = this.project.processNodes[this.currentlySelectedConnector[0]].getConnectors()[this.currentlySelectedConnector[1]];
+        this.saveAndClearDetails();
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         switch (tab) {
             case this.menuBar[0]:   //Material Input
                 this.inputs.push(new MaterialInput());
-                connectorObj.materialInput = this.inputs;
+                rectObj.materialInput = this.inputs;
                 console.log(this.project.processNodes);
                 break;
             case this.menuBar[1]:   //Output
                 this.outputs.push(new Output());
-                connectorObj.outputs = this.outputs;
+                rectObj.outputs = this.outputs;
                 break;
             case this.menuBar[2]:   //Byproduct
                 this.byproducts.push(new Byproduct());
-                connectorObj.byproducts = this.byproducts;
+                rectObj.byproducts = this.byproducts;
                 break;
             case this.menuBar[3]:   //Energy Input
                 this.energy.push(new EnergyInput());
-                connectorObj.energyInputs = this.energy;
+                rectObj.energyInputs = this.energy;
                 break;
             case this.menuBar[4]:   //Transportation Input
                 this.transportations.push(new TransportationInput());
-                connectorObj.transportations = this.transportations;
+                rectObj.transportations = this.transportations;
                 break;
             case this.menuBar[5]:   //Direct Emission
                 this.emissions.push(new DirectEmission());
-                connectorObj.directEmissions = this.emissions;
+                rectObj.directEmissions = this.emissions;
                 break;
         }
-        this.project.processNodes[this.currentlySelectedConnector[0]].getConnectors[this.currentlySelectedConnector[1]] = connectorObj;
-        this.getDetails(this.currentlySelectedConnector);
+        this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
+        this.getDetails();
     }
 
     /**
@@ -511,7 +520,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 connectorObj.directEmissions = this.emissions;
                 break;
         }
-        this.getDetails(this.currentlySelectedNode);
+        this.getDetails();
     }
 
     /**
@@ -682,7 +691,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             //Arrow key events for ease of navigation
             case 'Enter': case 'Escape':
                 if (document.activeElement.nodeName != 'BODY') {
-                    this.saveAndClearDetails(this.currentlySelectedConnector);
+                    this.saveAndClearDetails();
                     var focusedElement = <HTMLInputElement>document.activeElement;
                     focusedElement.blur();
                 }
@@ -693,7 +702,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     break;
                 }
                 if (this.currentlySelectedNode != null) {
-                    this.saveAndClearDetails(this.currentlySelectedConnector);
+                    this.saveAndClearDetails();
                 }
                 this.navPrev();
                 break;
@@ -702,7 +711,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     break;
                 }
                 if (this.currentlySelectedNode != null) {
-                    this.saveAndClearDetails(this.currentlySelectedConnector);
+                    this.saveAndClearDetails();
                 }
                 this.navNext();
                 break;
@@ -819,7 +828,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         console.log(result[1]);
         console.log(this.mouseX - this.svgOffsetLeft);
         let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
-            [], [], false, this.project.lifeCycleStages[result[0]], "");
+            [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
         let indexInProcessNodes = this.addRect(rectObj);
         this.createProcessNodes(indexInProcessNodes,result[1], true);
     }
@@ -865,7 +874,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
                 let r = new Rect(this.mouseX - this.svgOffsetLeft - this.svgabandoned.nativeElement.offsetWidth, this.mouseY - this.svgOffsetTop,
-                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isClicked, this.lifeCycleStages[0], rectObj.processName);
+                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isClicked, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 this.project.processNodes[rect.data('key')] = r;
                 this.transferedRect = this.createProcessNodes(rect.data('key'), 0, false);
             } else {
@@ -888,7 +897,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let result = this.allocatingLifeStages(rect.x());
                 let rectObj = this.project.processNodes[rect.data('key')];
                 this.project.processNodes[rect.data('key')] = new Rect(rect.x() - this.svgabandoned.nativeElement.offsetWidth - result[1], rect.y(), rectObj.id, rectObj.nextId,
-                    rectObj.connectors, rectObj.isClicked, this.lifeCycleStages[result[0]], rectObj.processName);
+                    rectObj.connectors, rectObj.isClicked, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 
                 rect.remove();
                 //TODO:
@@ -970,7 +979,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.prepareForUndoableAction();
             let result = this.allocatingLifeStages(rect.x());
             let oldObj = this.project.processNodes[rect.data('key')];
-            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isClicked, this.lifeCycleStages[result[0]], oldObj.processName);
+            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isClicked, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
             this.updateRect(rect.data('key'), rectObj);
         });
 
@@ -1041,28 +1050,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 
                 this.head = null;
                 this.tail = null;
-                
-                //enter details for the connector when clicked on it
-                conn2.connector.node.onclick = (event) => {
-                    if (this.currentlySelectedNode != null) {
-                        var processNameContainer = document.getElementById('processNameContainer');
-                        processNameContainer.style.display = "none";
-                    }
-                    var materialInputContainer = document.getElementById('processBoxDetailsContainer');
-                    let array = conn2.connector.data('key');
-                    var materialInputContainer = document.getElementById('processBoxDetailsContainer');
-                    if (this.currentlySelectedConnector == undefined || this.currentlySelectedConnector[1] == array[1]) {
-                        this.currentlySelectedConnector = array;
-                        this.getDetails(conn2.connector.data('key'));
-                        this.selectedTab = this.menuBar[0];
-                        materialInputContainer.style.display = "block";
-                    } else {
-                        this.onSelectedConnectorChange(this.currentlySelectedConnector);
-                        this.currentlySelectedConnector = array;
-                        this.getDetails(array);
-                    }
-
-                }
 
                 //remove the arrow if right clicked of it
                 conn2.connector.on('contextmenu', (event) => {
@@ -1137,76 +1124,36 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         conn2.connector.style('stroke-width', "3px");
         conn2.connector.node.id = connectorObj.id;
         conn2.connector.data('key', [this.getCorrespondingRect(head).i, connectorObj.index]);
-
-        //removing connector when clicked on the arrows
-        conn2.connector.node.onclick = (event) => {
-            if (this.currentlySelectedNode != null) {
-                var processNameContainer = document.getElementById('processNameContainer');
-                processNameContainer.style.display = "none";
-            }
-            let array = conn2.connector.data('key');
-            var materialInputContainer = document.getElementById('processBoxDetailsContainer');
-            this.selectedTab = this.menuBar[0];
-            if (this.currentlySelectedConnector == undefined || this.currentlySelectedConnector[1] == array[1]) {
-                this.currentlySelectedConnector = array;
-                this.getDetails(conn2.connector.data('key'));
-                materialInputContainer.style.display = "block";
-            } else {
-                this.onSelectedConnectorChange(this.currentlySelectedConnector);
-                this.currentlySelectedConnector = array;
-                this.getDetails(array);
-            }
-           
-        }
-
+        
+        //removing connector on right click
         conn2.connector.on('contextmenu', (event) => {
             this.removeConnector(conn2.connector.data('key'));
             conn2.connector.remove();
         });
     }
 
-    /**
-     * On change of selection of connectors 
-     * @param array array[index of head node in processNode array, index of connector in connector Array in head node object]
-     */
-    onSelectedConnectorChange(array) {
-        if (this.currentlySelectedConnector != this.project.processNodes[array[0]].getConnectors()[array[1]].id) {
-            this.saveAndClearDetails(array);
-        }
-    }
+   
     /**
      * When there is a change in selection of nodes, display the correct containers/ remove the correct containers
      * 
      * @param rect the node that was clicked on
      */
     onSelectedNodeChange(rect: SVG.Rect) {
-        if (this.currentlySelectedNode == null) {
-            this.currentlySelectedNode = rect;
-            console.log('i am here');
-            let rectObj = this.project.processNodes[rect.data('key')];
-            this.currentlySelectedNode = rect;
-            this.currentlySelectedNodeName = rectObj.processName;
-            if (this.currentlySelectedConnector != null) {
-                var materialInputContainer = document.getElementById('processBoxDetailsContainer');
-                materialInputContainer.style.display = "none";
-            }
-            var processNameContainer = document.getElementById('processNameContainer');
-            processNameContainer.style.display = "block";
-
-        } else  {
-            console.log(this.currentlySelectedNode);
-            //save process name
-            let inputDiv = document.getElementById('name');
-            let HTMLInput = <HTMLInputElement>inputDiv;
-            this.project.processNodes[this.currentlySelectedNode.data('key')].processName = HTMLInput.value;
-            HTMLInput.value = "";
-
-            //hide processname and edition
-            var processNameContainer = document.getElementById('processNameContainer');
-            processNameContainer.style.display = "none";
+        if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
+            document.getElementById('processBoxDetailsContainer').style.display = 'none';
+            this.saveAndClearDetails();
             this.currentlySelectedNode = null;
-            this.currentlySelectedNodeName = "";
-        } 
+        } else if (rect != this.currentlySelectedNode && this.currentlySelectedNode != null) {
+            this.saveAndClearDetails();
+            this.currentlySelectedNode = rect;
+            this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
+            this.getDetails();
+        } else {
+            this.currentlySelectedNode = rect;
+            this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
+            this.selectedTab = this.menuBar[0];
+            document.getElementById('processBoxDetailsContainer').style.display = 'block';
+        }
 
     }
 
@@ -1334,9 +1281,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param tab string passed from process.html to set this.selectedTab to the tab that is changed/clicked
      */
     changeTab(tab) {
-        this.saveAndClearDetails(this.currentlySelectedConnector);
+        this.saveAndClearDetails();
         this.selectedTab = tab;
-        this.getDetails(this.currentlySelectedNode);
+        this.getDetails();
     }
 
     /**
@@ -1344,7 +1291,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * */
     addProcessNodeEvent() {
         let stageIndex = 0;
-        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, this.project.lifeCycleStages[stageIndex], "");
+        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
         let index = this.addRect(rectObj);
         this.createProcessNodes(index,0, true);
     }
@@ -1506,7 +1453,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             return;
         }
         this.project = this.dataService.getProject();
-        this.getDetails(this.currentlySelectedNode);
+        this.getDetails();
         this.cd.detectChanges();
         
     }
@@ -1528,7 +1475,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             return;
         }
         this.project = this.dataService.getProject();
-        this.getDetails(this.currentlySelectedNode);
+        this.getDetails();
         this.cd.detectChanges();
         
     }
