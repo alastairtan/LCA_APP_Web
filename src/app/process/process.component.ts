@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
 import { Rect } from './Rect';
 import { Connector } from './Connector';
 import * as SVG from 'svg.js';
@@ -17,7 +17,7 @@ import { EnergyInput } from './EnergyInput';
 import { TransportationInput } from './TransportationInput';
 import { DirectEmission } from './DirectEmission';
 import { CookieService } from 'ngx-cookie-service';
-import { MatDialog } from '@angular/material'
+import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
 import { DialogComponent } from '../dialog/dialog.component';
 
 const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
@@ -26,6 +26,16 @@ const BY_COPRODUCT = 0, BY_WASTE = 1, BY_NAME = 2, BY_QUANT = 3, BY_UNIT = 4, BY
 const ENER_EQUIP_NAME = 0, ENER_TYPE = 1, ENER_PROCESS_TIME = 2, ENER_RATING = 3, ENER_QUANT = 4, ENER_UNIT = 5, ENER_ACTIVITY = 6, ENER_EMISSION_DATA = 7, ENER_EMISSION_SOURCE = 8, ENER_REMARKS = 9;
 const TRANS_TYPE = 0, TRANS_QUANT = 1, TRANS_UNIT = 2, TRANS_ACTIVITY = 3, TRANS_REMARKS = 4;
 const EMISSION_TYPE = 0, EMISSION_QUANT = 1, EMISSION_UNIT = 2, EMISSION_ACTIVITY = 3, EMISSION_REMARKS = 4;
+
+@Component({
+    selector: 'app-dialog',
+    templateUrl: '../dialog/dialog.component.html'
+})
+
+export class Dialog {
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
+    
+}
 
 @Component({
     selector: 'app-process',
@@ -835,7 +845,18 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let indexInProcessNodes = this.addRect(rectObj);
             this.createProcessNodes(indexInProcessNodes, result[1], true);
         } else {
-            this.dialog.open(DialogComponent, { data: { name: 'Note' }})
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = true;
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                id: 1,
+                title: 'Angular For Beginners'
+            };
+            const dialogRef = this.dialog.open(Dialog, dialogConfig);
+            dialogRef.afterClosed().subscribe(result => {
+                console.log(' Dialog was closed')
+                console.log(result)
+            });
         }
     }
 
