@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway');
-/* Master Styles */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 html, body {
     height: 100vh;
     background-color: #f9fafc;

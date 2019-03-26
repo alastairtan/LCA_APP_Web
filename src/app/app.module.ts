@@ -10,14 +10,15 @@ import { AppComponent }         from './app.component';
 import { MainMenuComponent } from './main-menu/main-menu.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { SystemBoundaryComponent } from './system-boundary/system-boundary.component';
-import { ProcessComponent } from './process/process.component';
+import { ProcessComponent, Dialog, confirmationDialog } from './process/process.component';
 import { SidebarDirective } from './process/sidebar.directive';
 import { ResultComponent } from './result/result.component';
 import { ProjectFooterComponent } from './project-footer/project-footer.component';
-import { MatSidenavModule, MatIconModule, MatMenu, MatMenuItem } from '@angular/material';
+import { MatSidenavModule, MatDialogModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CookieService } from 'ngx-cookie-service'
+import { CookieService } from 'ngx-cookie-service';
+import { DialogComponent } from './dialog/dialog.component'
 
 @NgModule({
   imports: [
@@ -29,7 +30,8 @@ import { CookieService } from 'ngx-cookie-service'
       DragDropModule,
       MatSidenavModule,
       BrowserAnimationsModule,
-      MatToolbarModule
+      MatToolbarModule,
+      MatDialogModule
   ],
   declarations: [
     AppComponent,
@@ -39,9 +41,14 @@ import { CookieService } from 'ngx-cookie-service'
     ProcessComponent,
     SidebarDirective,
     ResultComponent,
-    ProjectFooterComponent
+    ProjectFooterComponent,
+      DialogComponent,
+      Dialog,
+      confirmationDialog
   ],
     bootstrap: [AppComponent],
-    providers: [CookieService]
+    providers: [CookieService,
+        { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { hasBackdrop: false } }],
+    entryComponents: [Dialog, confirmationDialog]
 })
 export class AppModule { }

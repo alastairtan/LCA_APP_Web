@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, ChangeDetectorRef, Inject } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDragStart } from '@angular/cdk/drag-drop';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { DataService } from "../data.service";
 import { Project } from '../project';
 import { CookieService } from 'ngx-cookie-service';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig } from '@angular/material';
+import { confirmationDialog } from '../process/process.component';
 
 let NONE_SELECTED = -1;
 
@@ -107,7 +109,7 @@ export class SystemBoundaryComponent implements OnInit {
     constructor(private dataService: DataService,
                 private router: Router,
         private cd: ChangeDetectorRef,
-        private cookies: CookieService) { }
+        private cookies: CookieService, public dialog: MatDialog) { }
 
     //Upon init, read the project data from dataService
     ngOnInit() {
@@ -411,21 +413,36 @@ export class SystemBoundaryComponent implements OnInit {
      * @param index index of the stage within the lifeCycleStages array
      */
     deleteItem(index: number) {
-        var choseYes = this.dataService.showDeleteConfirmation();
-        if (!choseYes) {
-            return;
-        }
-        this.prepareForUndoableAction();
-        moveItemInArray(this.currentProject.lifeCycleStages, index, this.currentProject.lifeCycleStages.length - 1);
-        this.currentProject.lifeCycleStages.pop();
-        let deletedWidth = this.currentProject.dimensionArray[index];
-        this.currentProject.dimensionArray.splice(index, 1);
-        this.currentProject.separatorArray.splice(index - 1, 1);
-        let scalingFactor = this.currentProject.processDimension / deletedWidth;
-        for (let i = 0; i < this.currentProject.dimensionArray.length; i++) {
-            this.currentProject.dimensionArray[i] *= scalingFactor;
-        }
-        //console.log('Deleted selected item');
+
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            id: 1,
+            text: 'Confirm deletion of life cycle stage?',
+            action: 'delete'
+        };
+        const dialogRef = this.dialog.open(confirmationDialog, dialogConfig);
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(' Dialog was closed')
+            console.log(result)
+            if (result) {
+                var choseYes = this.dataService.showDeleteConfirmation();
+                if (!choseYes) {
+                    return;
+                }
+                this.prepareForUndoableAction();
+                moveItemInArray(this.currentProject.lifeCycleStages, index, this.currentProject.lifeCycleStages.length - 1);
+                this.currentProject.lifeCycleStages.pop();
+                let deletedWidth = this.currentProject.dimensionArray[index];
+                this.currentProject.dimensionArray.splice(index, 1);
+                this.currentProject.separatorArray.splice(index - 1, 1);
+                let scalingFactor = this.currentProject.processDimension / deletedWidth;
+                for (let i = 0; i < this.currentProject.dimensionArray.length; i++) {
+                    this.currentProject.dimensionArray[i] *= scalingFactor;
+                }
+            }
+        })
     }
 
     /**
