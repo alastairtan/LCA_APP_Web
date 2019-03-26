@@ -84,13 +84,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private transferedRect: SVG.Rect = null;
     private currentlySelectedNode;
     currentlySelectedNodeName;
+    private currentlySelectedText: SVG.Text = null;
     private processContainerWidth;
     private arrayOfSeparators: Line[] = [];
     // [the current width that changed, index of the lifecycle stage]
     // [the current width - 1 that changed, index of the lifecycle stage]
     private currentOnResizeWidthArray: number[][] = [[]];
     private previousDimensionArray: number[] = [];
-    private currentlySelectedConnector;
     private isEdit: Boolean = false;
 
     //current container Width
@@ -469,6 +469,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let HTMLInput = <HTMLInputElement>inputDiv;
                 rectObj.processName = HTMLInput.value;
                 HTMLInput.value = "";
+                this.currentlySelectedText.text(rectObj.processName);
+               
+
         }
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
@@ -524,31 +527,31 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             return;
         }
         this.prepareForUndoableAction();
-        let connectorObj = this.project.processNodes[this.currentlySelectedConnector[0]].getCategories()[this.currentlySelectedConnector[1]];
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         switch (tab) {
             case this.menuBar[0]:   //Material Input
                 this.inputs.splice(index, 1);
-                connectorObj.materialInput = this.inputs;
+                rectObj.materialInput = this.inputs;
                 break;
             case this.menuBar[1]:   //Output
                 this.outputs.splice(index, 1);
-                connectorObj.outputs = this.outputs;
+                rectObj.outputs = this.outputs;
                 break;
             case this.menuBar[2]:   //Byproduct
                 this.byproducts.splice(index, 1);
-                connectorObj.byproducts = this.byproducts;
+                rectObj.byproducts = this.byproducts;
                 break;
             case this.menuBar[3]:   //Energy Input
                 this.energy.splice(index, 1);
-                connectorObj.energyInputs = this.energy;
+                rectObj.energyInputs = this.energy;
                 break;
             case this.menuBar[4]:   //Transportation Input
                 this.transportations.splice(index, 1);
-                connectorObj.transportations = this.transportations;
+                rectObj.transportations = this.transportations;
                 break;
             case this.menuBar[5]:   //Direct Emission
                 this.emissions.splice(index, 1);
-                connectorObj.directEmissions = this.emissions;
+                rectObj.directEmissions = this.emissions;
                 break;
         }
         this.getDetails();
@@ -987,6 +990,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     createProcessNodes(index, width, isDoubleClick: Boolean) {
         let r = this.project.processNodes[index];
         let rect = this.draw.rect(100, 50);
+        let text = this.draw.text(r.processName)
         if (isDoubleClick) {
             rect.attr({
                 x: r.getX() + width,
@@ -996,6 +1000,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 'stroke-width': 1,
             });
             r.setId(rect.node.id);
+
+            
         } else {
             //scaling 
             let index = this.project.lifeCycleStages.indexOf(r.getCategories());
@@ -1008,18 +1014,33 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 class: Rect,
                 fill: '#FFF',
                 'stroke-width': 1,
+                text: "test"
             });
             r.setX(x);
         }
+
+        
         rect.data('key', index);    //saving the index of the data for this node pointing to project.processNodes
         rect.draggy();
+
+        console.log(rect.y(), text.y());
+
+        text.attr({
+            id: rect.node.id + "text"
+        });
+        
+        text.move(rect.x() + 25, rect.y() + 12.5);
+
         //if onclick set the border color
         if (!rect.data('key').isClicked) {
             rect.stroke({ color: '#000000' });
         } else {
             rect.stroke({ color: '#4e14e0' });
         }
-
+        //while dragging move the text as well 
+        rect.on('dragmove', (event) => {
+            text.move(rect.x() + 25, rect.y() + 12.5)
+        });
         //At the end of the dragging, check which category is the box in
         rect.on('dragend', (event) => {
             this.prepareForUndoableAction();
@@ -1106,7 +1127,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
                 }
                 this.updateRect(rect.data('key'), rectObj);
-                this.onSelectedNodeChange(rect);
+                this.onSelectedNodeChange(rect, text);
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -1202,18 +1223,21 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * 
      * @param rect the node that was clicked on
      */
-    onSelectedNodeChange(rect: SVG.Rect) {
+    onSelectedNodeChange(rect: SVG.Rect, text: SVG.Text) {
         if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
             document.getElementById('processBoxDetailsContainer').style.display = 'none';
             this.saveAndClearDetails();
             this.currentlySelectedNode = null;
+            this.currentlySelectedText = null;
         } else if (rect != this.currentlySelectedNode && this.currentlySelectedNode != null) {
             this.saveAndClearDetails();
             this.currentlySelectedNode = rect;
+            this.currentlySelectedText = text;
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
             this.getDetails();
         } else {
             this.currentlySelectedNode = rect;
+            this.currentlySelectedText = text;
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
             this.selectedTab = this.menuBar[0];
             document.getElementById('processBoxDetailsContainer').style.display = 'block';
