@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from "../data.service";
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Project } from "../project"
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-project-footer',
@@ -10,33 +11,80 @@ import { Project } from "../project"
 })
 export class ProjectFooterComponent implements OnInit {
 
-    data = "empty";
+    form1: FormGroup; form2: FormGroup; form3: FormGroup; form4: FormGroup; form5: FormGroup; form6: FormGroup;
+    list1: FormArray; list2: FormArray; list3: FormArray; list4: FormArray; list5: FormArray; list6: FormArray; 
 
-    constructor(private dataService: DataService) { }
+    inputMenuBar = ['Material', 'Energy', 'Transport'];
+    outputMenuBar = ['Output', 'Byproduct', 'Others'];
+    selectedTab = this.inputMenuBar[0];
+
+
+    constructor(private fb: FormBuilder) { }
 
     ngOnInit() {
-        var p = JSON.parse('{ "name":"John", "age":30, "city":"New York"}');
-        p['newField'] = "what";
-
-        for (var key in p) {
-            if (p.hasOwnProperty(key)) {
-                console.log(key + " -> " + p[key]);
-            }
-        }
+        this.form1 = this.createEmptyForm();
+        this.list1 = this.form1.get('inputs') as FormArray;
+        this.form2 = this.createEmptyForm();
+        this.list2 = this.form2.get('inputs') as FormArray;
+        this.form3 = this.createEmptyForm();
+        this.list3 = this.form3.get('inputs') as FormArray;
+        this.form4 = this.createEmptyForm();
+        this.list4 = this.form4.get('inputs') as FormArray;
+        this.form5 = this.createEmptyForm();
+        this.list5 = this.form5.get('inputs') as FormArray;
+        this.form6 = this.createEmptyForm();
+        this.list6 = this.form6.get('inputs') as FormArray;
     }
 
-    movies = [
-        'Episode I - The Phantom Menace',
-        'Episode II - Attack of the Clones',
-        'Episode III - Revenge of the Sith',
-        'Episode IV - A New Hope',
-        'Episode V - The Empire Strikes Back',
-        'Episode VI - Return of the Jedi',
-        'Episode VII - The Force Awakens',
-        'Episode VIII - The Last Jedi'
-    ];
+    createEmptyForm(): FormGroup {
+        return this.fb.group({
+            name: [null, Validators.compose([Validators.required])], //process name
+            inputs: this.fb.array([this.createEmptyInput()])
+        });
+    }
 
-    drop(event: CdkDragDrop<string[]>) {
-        moveItemInArray(this.movies, event.previousIndex, event.currentIndex);
+    // input formgroup
+    createEmptyInput(): FormGroup {
+        return this.fb.group({
+            type: [null],
+            quantity: [null],
+            unit: [null],
+            dataOrigin: [null],
+            remarks: [null],
+        });
+    }
+
+    get inputs1FormGroup() {
+        return this.form1.get('inputs') as FormArray;
+    }
+
+    get inputs2FormGroup() {
+        return this.form2.get('inputs') as FormArray;
+    }
+
+    // add a contact form group
+    addInput(list: FormArray) {
+        list.push(this.createEmptyInput());
+    }
+
+    // remove contact from group
+    removeInput(list:FormArray, index:number) {
+        // this.contactList = this.form.get('contacts') as FormArray;
+        list.removeAt(index);
+    }
+
+    // get the formgroup under contacts form array
+    getInputsFormGroup(list:FormArray, index:number): FormGroup {
+        // this.contactList = this.form.get('contacts') as FormArray;
+        const formGroup = list.controls[index] as FormGroup;
+        return formGroup;
+    }
+
+    // method triggered when form is submitted
+    submit(form: FormGroup) {
+        console.log({
+            material: this.form1.value,
+            energy: this.form2.value
+        });
     }
 }

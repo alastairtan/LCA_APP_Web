@@ -65,7 +65,7 @@ export class ResultComponent implements OnInit {
         for (var i = 0; i < this.project.processNodes.length; i++) {
             for (var j = 0; j < this.project.processNodes[i].connectors.length; j++) {
                 var arrow = this.project.processNodes[i].connectors[j];
-                for (var k = 0; k < arrow.materialInput.length; k++) {
+                /*for (var k = 0; k < arrow.materialInput.length; k++) {
                     this.addToMatrix(arrowIndex, arrow.materialInput[k].materialName, parseFloat(arrow.materialInput[k].quantity), arrow.materialInput[k].unit, true);
                 }
                 for (var k = 0; k < arrow.outputs.length; k++) {
@@ -82,7 +82,7 @@ export class ResultComponent implements OnInit {
                 }
                 for (var k = 0; k < arrow.directEmissions.length; k++) {
                     this.addToMatrix(arrowIndex, arrow.directEmissions[k].emissionType, parseFloat(arrow.directEmissions[k].quantity), arrow.directEmissions[k].unit, false);
-                }
+                }*/
                 arrowIndex++;
             }
         }

@@ -1,3 +1,9 @@
+.nav-float-right {
+    color: white;
+    position: absolute;
+    right: 0%;
+    height: 100%;
+}
 
 .processcontainer {
     display: block;
