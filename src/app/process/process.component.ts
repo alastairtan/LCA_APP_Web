@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
 import { Rect } from './Rect';
 import { Connector } from './Connector';
 import * as SVG from 'svg.js';
@@ -17,6 +17,7 @@ import { EnergyInput } from './EnergyInput';
 import { TransportationInput } from './TransportationInput';
 import { DirectEmission } from './DirectEmission';
 import { CookieService } from 'ngx-cookie-service';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
 
 const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
 const OUT_FUNCTIONAL_UNIT = 0, OUT_NAME = 1, OUT_QUANT = 2, OUT_UNIT = 3, OUT_ACTIVITY = 4, OUT_REMARKS = 5;
@@ -24,6 +25,33 @@ const BY_COPRODUCT = 0, BY_WASTE = 1, BY_NAME = 2, BY_QUANT = 3, BY_UNIT = 4, BY
 const ENER_EQUIP_NAME = 0, ENER_TYPE = 1, ENER_PROCESS_TIME = 2, ENER_RATING = 3, ENER_QUANT = 4, ENER_UNIT = 5, ENER_ACTIVITY = 6, ENER_EMISSION_DATA = 7, ENER_EMISSION_SOURCE = 8, ENER_REMARKS = 9;
 const TRANS_TYPE = 0, TRANS_QUANT = 1, TRANS_UNIT = 2, TRANS_ACTIVITY = 3, TRANS_REMARKS = 4;
 const EMISSION_TYPE = 0, EMISSION_QUANT = 1, EMISSION_UNIT = 2, EMISSION_ACTIVITY = 3, EMISSION_REMARKS = 4;
+
+@Component({
+    selector: 'app-dialog',
+    templateUrl: '../dialog/dialog.component.html'
+})
+
+export class Dialog {
+    text: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+    this.text = data.text}
+    
+}
+
+@Component({
+    selector: 'app-confirmationDialog',
+    templateUrl: '../dialog/confirmationDialog.html'
+})
+
+export class confirmationDialog {
+    text: String;
+    action: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+        this.text = data.text;
+        this.action = data.action;
+    }
+
+}
 
 @Component({
     selector: 'app-process',
@@ -63,6 +91,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private currentOnResizeWidthArray: number[][] = [[]];
     private previousDimensionArray: number[] = [];
     private currentlySelectedConnector;
+    private isEdit: Boolean = false;
 
     //current container Width
     private currentContainerWidth;
@@ -98,6 +127,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     transportations: TransportationInput[] = [];
     emissions: DirectEmission[] = [];
 
+    constructor(private dataService: DataService,
+        private router: Router,
+        private cd: ChangeDetectorRef,
+        private cookies: CookieService, public dialog: MatDialog) { }
     /**
      * Check if this.project.processNodes is empty, 
      * for the purpose of disallowing users from proceeding
@@ -109,15 +142,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         return !hasProcess;
     }
-
-    constructor(private dataService: DataService,
-                private router: Router,
-        private cd: ChangeDetectorRef,
-    private cookies: CookieService) { }
-
+    
     ngOnInit() {
         this.project = this.dataService.getProject();
-        
+        let pc = document.getElementById('processcontainer');
+        pc.oncontextmenu = function () {
+            return false;
+        }
     }
 
     ngAfterViewInit() {
@@ -824,13 +855,28 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * When the mouse double clicks on the process container in process.html, creates a node
      * */
     onDblClick() {
-        let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
-        console.log(result[1]);
-        console.log(this.mouseX - this.svgOffsetLeft);
-        let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
-            [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
-        let indexInProcessNodes = this.addRect(rectObj);
-        this.createProcessNodes(indexInProcessNodes,result[1], true);
+        if (this.isEdit) {
+            let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
+            console.log(result[1]);
+            console.log(this.mouseX - this.svgOffsetLeft);
+            let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
+                [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
+            let indexInProcessNodes = this.addRect(rectObj);
+            this.createProcessNodes(indexInProcessNodes, result[1], true);
+        } else {
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = true;
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                id: 1,
+                text: 'Click "Edit" to start adding processes and linking up processes'
+            };
+            const dialogRef = this.dialog.open(Dialog, dialogConfig);
+            dialogRef.afterClosed().subscribe(result => {
+                console.log(' Dialog was closed')
+                console.log(result)
+            });
+        }
     }
 
     //check if a node has been decategorised
@@ -985,81 +1031,99 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
         //click event to connect two process block together
         rect.click((event) => {
-            //get rect object 
-            let rectObj = this.project.processNodes[rect.data('key')];
-            //check if the node is clicked
-            //true: change the border color to black remove pointer to the node
-            //false: change the border to blue, point to the node
-            if (rectObj.isClicked) {
-                rect.stroke({ color: '#000000' });
-                rectObj.isClicked = false;
-                this.head = null;
-            } else {
-                rect.stroke({ color: '#4e14e0' });
-                rectObj.isClicked = true;
-                if (this.head == null) {
-                    this.head = rect;
+            if (this.isEdit) {
+                //get rect object 
+                let rectObj = this.project.processNodes[rect.data('key')];
+                //check if the node is clicked
+                //true: change the border color to black remove pointer to the node
+                //false: change the border to blue, point to the node
+                if (rectObj.isClicked) {
+                    rect.stroke({ color: '#000000' });
+                    rectObj.isClicked = false;
+                    this.head = null;
                 } else {
-                    this.tail = rect;
+                    rect.stroke({ color: '#ffa384' });
+                    rectObj.isClicked = true;
+                    if (this.head == null) {
+                        this.head = rect;
+                    } else {
+                        this.tail = rect;
+                    }
                 }
-            }
 
-            //If two nodes are selected remove the details and connect them together
-            //remove pointer
-            if (this.head != null && this.tail != null && this.head != this.tail) {
-                if (this.checkIfLinkExist()) {
+                //If two nodes are selected remove the details and connect them together
+                //remove pointer
+                if (this.head != null && this.tail != null && this.head != this.tail) {
+                    if (this.checkIfLinkExist()) {
+                        //deselecting the boxes
+                        this.head.stroke({ color: '#000000' });
+                        this.tail.stroke({ color: '#000000' })
+                        this.head = null;
+                        this.tail = null;
+                        return;
+                    }
+                    //creating arrow connectable
+                    let conn2 = this.head.connectable({
+                        type: 'angled',
+                        targetAttach: 'perifery',
+                        sourceAttach: 'perifery',
+                        marker: 'default',
+                    }, this.tail);
+                    conn2.setConnectorColor("#ffa384");
+                    conn2.connector.style('stroke-width', "3px");
+
                     //deselecting the boxes
                     this.head.stroke({ color: '#000000' });
-                    this.tail.stroke({ color: '#000000' })
+                    this.tail.stroke({ color: '#000000' });
+                    //pushing connectors and nextId into the objects
+                    this.prepareForUndoableAction();
+                    let headObj = this.project.processNodes[this.head.data('key')];
+                    let nextIdArray: string[] = headObj.nextId;
+                    let connectorsArray = headObj.connectors;
+                    nextIdArray.push(rectObj.id);
+                    //creating a new connector object
+                    connectorsArray.push(new Connector(conn2.connector.node.id, this.getCorrespondingRect(this.head).i, connectorsArray.length, [], [], [], [], [], []));
+                    //[index of head in processNodes, index of connector in head]
+                    conn2.connector.data('key', [this.getCorrespondingRect(this.head).i, connectorsArray.length - 1]);
+
+                    //set connectorArray and nextIdArray for head object
+                    headObj.nextId = nextIdArray;
+                    headObj.connectors = connectorsArray;
+                    headObj.isClicked = false;
+
+                    //update tail
+                    rectObj.isClicked = false;
+                    this.updateRect(this.head.data('key'), headObj);
+
                     this.head = null;
                     this.tail = null;
-                    return;
+
+                    //remove the arrow if right clicked of it
+                    conn2.connector.on('contextmenu', (event) => {
+                        this.removeConnector(conn2.connector.data('key'));
+                        conn2.connector.remove();
+                    })
+
                 }
-                //creating arrow connectable
-                let conn2 = this.head.connectable({
-                    type: 'angled',
-                    targetAttach: 'perifery',
-                    sourceAttach: 'perifery',
-                    marker: 'default',
-                }, this.tail);
-                conn2.setConnectorColor("#ffa384");
-                conn2.connector.style('stroke-width', "3px");
-
-                //deselecting the boxes
-                this.head.stroke({ color: '#000000' });
-                this.tail.stroke({ color: '#000000' });
-                //pushing connectors and nextId into the objects
-                this.prepareForUndoableAction();
-                let headObj = this.project.processNodes[this.head.data('key')];
-                let nextIdArray: string[] = headObj.nextId;
-                let connectorsArray = headObj.connectors;
-                nextIdArray.push(rectObj.id);
-                //creating a new connector object
-                connectorsArray.push(new Connector(conn2.connector.node.id, this.getCorrespondingRect(this.head).i, connectorsArray.length, [], [], [], [], [], []));
-                //[index of head in processNodes, index of connector in head]
-                conn2.connector.data('key', [this.getCorrespondingRect(this.head).i, connectorsArray.length - 1]);
-
-                //set connectorArray and nextIdArray for head object
-                headObj.nextId = nextIdArray;
-                headObj.connectors = connectorsArray;
-                headObj.isClicked = false;
-
-                //update tail
-                rectObj.isClicked = false;
-                this.updateRect(this.head.data('key'), headObj);
+                this.updateRect(rect.data('key'), rectObj);
+                this.onSelectedNodeChange(rect);
+            } else {
+                if (this.currentlySelectedNode == null) {
+                    this.currentlySelectedNode = rect;
+                    this.currentlySelectedNode.stroke({ color: '#ffa384' })
+                } else {
+                    this.currentlySelectedNode.stroke({ color: '#000000' })
+                    this.saveAndClearDetails();
+                    this.currentlySelectedNode = rect;
+                    this.currentlySelectedNode.stroke({ color: '#ffa384' })
+                }
+                this.head = this.currentlySelectedNode;
+                this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
+                this.selectedTab = this.menuBar[0];
+                document.getElementById('processBoxDetailsContainer').style.display = 'block';
+                this.getDetails();
                 
-                this.head = null;
-                this.tail = null;
-
-                //remove the arrow if right clicked of it
-                conn2.connector.on('contextmenu', (event) => {
-                    this.removeConnector(conn2.connector.data('key'));
-                    conn2.connector.remove();
-                })
-
             }
-            this.updateRect(rect.data('key'), rectObj);
-            this.onSelectedNodeChange(rect);
         });
 
         //removing the processNode
@@ -1163,10 +1227,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param rect A rect Object
      */
     addRect(rect: Rect) {
-        
-        this.prepareForUndoableAction();
-        this.project.processNodes.push(rect);
-        return this.project.processNodes.length - 1;
+        if (this.isEdit) {
+            this.prepareForUndoableAction();
+            this.project.processNodes.push(rect);
+            return this.project.processNodes.length - 1;
+        }
     }
     /**
      * remove the connector details from the rect object
@@ -1184,52 +1249,72 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param rect A rect object
      */
     removeRect(rect: SVG.Rect) {
-        var choseYes = this.dataService.showDeleteConfirmation();
-        if (!choseYes) {
-            return;
-        }
-        this.prepareForUndoableAction();
+        if (this.isEdit) {
+
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = true;
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                id: 1,
+                text: 'Confirm deletion of process?',
+                action: 'delete'
+            };
+            const dialogRef = this.dialog.open(confirmationDialog, dialogConfig);
+            dialogRef.afterClosed().subscribe(result => {
+                console.log(' Dialog was closed')
+                console.log(result)
+                if (result) {
+                    var choseYes = this.dataService.showDeleteConfirmation();
+                    if (!choseYes) {
+                        return;
+                    }
+                    this.prepareForUndoableAction();
 
 
-        for (let i = 0; i < this.project.processNodes.length; i++) {
-            for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
-                let next = this.project.processNodes[i].getNext()[j];
-                if (rect.node.id == next) {
-                    SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
-                    this.project.processNodes[i].getNext().splice(j, 1);
-                    this.project.processNodes[i].getConnectors().splice(j, 1);
-                    j--;
-                }
-            }
-        }
-        let removedIndex = null;
-        for (let i = 0; i < this.project.processNodes.length; i++) {
-            if (this.project.processNodes[i].getId() == rect.node.id) {
-                //remove processlinks
-                for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
+                    for (let i = 0; i < this.project.processNodes.length; i++) {
+                        for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
+                            let next = this.project.processNodes[i].getNext()[j];
+                            if (rect.node.id == next) {
+                                SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
+                                this.project.processNodes[i].getNext().splice(j, 1);
+                                this.project.processNodes[i].getConnectors().splice(j, 1);
+                                j--;
+                            }
+                        }
+                    }
+                    let removedIndex = null;
+                    for (let i = 0; i < this.project.processNodes.length; i++) {
+                        if (this.project.processNodes[i].getId() == rect.node.id) {
+                            //remove processlinks
+                            for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
 
-                    //logic to be resolved
-                    if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
-                        SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
+                                //logic to be resolved
+                                if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
+                                    SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
+                                }
+                            }
+                            removedIndex = i;
+                        } else if (removedIndex != null && i != 0) {
+                            //changing all index of remaning nodes
+                            SVG.get(this.project.processNodes[i].id).data('key', i - 1);
+                        }
+
+                        //after reaching the end, we then remove the node that was meant to remove
+                        if (i == this.project.processNodes.length - 1) {
+                            this.project.processNodes.splice(removedIndex, 1);
+                            rect.remove();
+                        }
+
+                    }
+                    if (this.head == rect) {
+                        this.head = null;
+                    } else if (this.tail = rect) {
+                        this.tail = null;
                     }
                 }
-                removedIndex = i;
-            } else if (removedIndex != null && i != 0) {
-                //changing all index of remaning nodes
-                SVG.get(this.project.processNodes[i].id).data('key', i - 1);
-            }
+            });
 
-            //after reaching the end, we then remove the node that was meant to remove
-            if (i == this.project.processNodes.length - 1) {
-                this.project.processNodes.splice(removedIndex, 1);
-                rect.remove();
-            }
-
-        }
-        if (this.head == rect) {
-            this.head = null;
-        } else if (this.tail = rect) {
-            this.tail = null;
+           
         }
     }
 
@@ -1366,9 +1451,23 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     /**
-     * Show warning when there are no life cycle stage
+     * Show warning when there are no process nodes allocated
      */
     showNoProcessWarning() {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            id: 1,
+            text: 'You cannot proceed or save without any allocated process.\n\
+                    \nDouble click on a column to create a process in that stage,\
+                    \nor re-allocate a process from the "Unallocated processes" sidebar.'
+        };
+        const dialogRef = this.dialog.open(Dialog, dialogConfig);
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(' Dialog was closed')
+            console.log(result)
+        });
         /*const { dialog } = require("electron").remote;
         //Call to the current window to make the dialog a modal
         const { BrowserWindow } = require('electron').remote;
@@ -1387,6 +1486,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         var ok = dialog.showMessageBox(WIN, options);*/
     }
 
+    editMode() {
+        if (this.isEdit) {
+            this.isEdit = false;
+            document.getElementById('editButton').style.backgroundColor = 'transparent'
+        } else {
+            document.getElementById('editButton').style.backgroundColor = '#ffa384'
+            this.isEdit = true;
+        }
+    }
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
         var jsonContent = this.getJsonData();
@@ -1397,10 +1505,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     /**Save the current project to session storage, and navigate to the next page */
     navNext() {
-        var jsonContent = this.getJsonData();
-        this.dataService.setSessionStorage('currentProject', jsonContent);
-        this.router.navigate(['/result']);
-        this.pushToCookie();
+        if (this.project.processNodes.length == 0) {
+            this.showNoProcessWarning();
+        } else {
+            var jsonContent = this.getJsonData();
+            this.dataService.setSessionStorage('currentProject', jsonContent);
+            this.router.navigate(['/result']);
+            this.pushToCookie();
+        }
     }
 
     navHome() {

@@ -34,6 +34,9 @@
                                 <button (click)="deleteProcessNodeEvent()" class="processButtons">
                                     Delete process
                                 </button>
+                                <button id="editButton"class="processButtons" (click)="editMode()">
+                                    Edit
+                                </button>
                                 <button class="processButtons" (click)="zoomIn()">
                                     Zoom in
                                 </button>
@@ -44,11 +47,11 @@
                                 <button class="processButtons" (click)="navNext()">
                                     Done
                                 </button>
-                            </mat-toolbar-row>
+                            </mat-toolbar-row>  
                         </mat-toolbar>
                     </div>
                     <div class="row">
-                        <div #processcontainer class="processcontainer" (dblclick)="onDblClick()" (window:resize)="onResize($event)">
+                        <div id="processcontainer" #processcontainer class="processcontainer" (dblclick)="onDblClick()" (window:resize)="onResize($event)">
                             <div class="containerHeader">
                                 <div id="{{'lifestage' + i }}" #containerHeader class="box-header" *ngFor="let lifeStage of this.project.lifeCycleStages; let i = index" [attr.data-index]="i">
                                     {{lifeStage}}
