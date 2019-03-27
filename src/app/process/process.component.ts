@@ -19,12 +19,6 @@ import { DirectEmission } from './DirectEmission';
 import { CookieService } from 'ngx-cookie-service';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
 
-const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
-const OUT_FUNCTIONAL_UNIT = 0, OUT_NAME = 1, OUT_QUANT = 2, OUT_UNIT = 3, OUT_ACTIVITY = 4, OUT_REMARKS = 5;
-const BY_COPRODUCT = 0, BY_WASTE = 1, BY_NAME = 2, BY_QUANT = 3, BY_UNIT = 4, BY_ACTIVITY = 5, BY_DOWNSTREAM = 6, BY_REMARKS = 7;
-const ENER_EQUIP_NAME = 0, ENER_TYPE = 1, ENER_PROCESS_TIME = 2, ENER_RATING = 3, ENER_QUANT = 4, ENER_UNIT = 5, ENER_ACTIVITY = 6, ENER_EMISSION_DATA = 7, ENER_EMISSION_SOURCE = 8, ENER_REMARKS = 9;
-const TRANS_TYPE = 0, TRANS_QUANT = 1, TRANS_UNIT = 2, TRANS_ACTIVITY = 3, TRANS_REMARKS = 4;
-const EMISSION_TYPE = 0, EMISSION_QUANT = 1, EMISSION_UNIT = 2, EMISSION_ACTIVITY = 3, EMISSION_REMARKS = 4;
 
 @Component({
     selector: 'app-dialog',
@@ -84,6 +78,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private transferedRect: SVG.Rect = null;
     private currentlySelectedNode;
     currentlySelectedNodeName;
+    private currentlySelectedText: SVG.Text = null;
     private processContainerWidth;
     private arrayOfSeparators: Line[] = [];
     // [the current width that changed, index of the lifecycle stage]
@@ -128,7 +123,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     constructor(private dataService: DataService,
         private router: Router,
         private cd: ChangeDetectorRef,
-        private cookies: CookieService, public dialog: MatDialog) { }
+        private cookies: CookieService, public dialog: MatDialog,
+        private fb: FormBuilder) { }
     /**
      * Check if this.project.processNodes is empty, 
      * for the purpose of disallowing users from proceeding
@@ -140,11 +136,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         return !hasProcess;
     }
-    constructor(private dataService: DataService,
-                private router: Router,
-                private cd: ChangeDetectorRef,
-                private cookies: CookieService,
-                private fb: FormBuilder) { }
 
     ngOnInit() {
         this.project = this.dataService.getProject();
@@ -399,31 +390,32 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             return;
         }
         this.prepareForUndoableAction();
-        let connectorObj = this.project.processNodes[this.currentlySelectedConnector[0]].getCategories()[this.currentlySelectedConnector[1]];
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
                 this.materialList.removeAt(this.materialList.length - 1);
-                //connectorObj.materialInput = this.inputs;
+                rectObj.materialInput = this.materialList.value;
                 break;
+            
             case this.inputMenuBar[1]:   //Energy Input
                 this.energyList.removeAt(this.energyList.length - 1);
-                //connectorObj.energyInputs = this.energy;
+                rectObj.energyInputs = this.energyList.value;
                 break;
             case this.inputMenuBar[2]:   //Transportation Input
                 this.transportList.removeAt(this.transportList.length - 1);
-                //connectorObj.transportations = this.transportations;
+                rectObj.transportations = this.transportList.value;
                 break;
             case this.outputMenuBar[0]:   //Output
                 this.outputList.removeAt(this.outputList.length - 1);
-                //connectorObj.outputs = this.outputs;
+                rectObj.outputs = this.outputList.value;
                 break;
             case this.outputMenuBar[1]:   //Byproduct
                 this.byproductList.removeAt(this.byproductList.length - 1);
-                //connectorObj.byproducts = this.byproducts;
+                rectObj.byproducts = this.byproductList.value;
                 break;
             case this.outputMenuBar[2]:   //Direct Emission
                 this.emissionList.removeAt(this.emissionList.length - 1);
-                //connectorObj.directEmissions = this.emissions;
+                rectObj.directEmissions = this.emissionList.value;
                 break;
         }
         this.getDetails();
@@ -439,6 +431,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.headerHeight = this.containerHeader.nativeElement.offsetHeight;
         this.processContainerHeight = this.processcontainer.nativeElement.offsetHeight;
         this.processContainerWidth = this.processcontainer.nativeElement.offsetWidth;
+        this.draw.size(this.processContainerWidth, this.processContainerHeight);
         //getting previous dimension 
         this.previousDimensionArray = Object.assign([], this.project.dimensionArray);
         this.project.processDimension = this.processContainerWidth;
@@ -779,6 +772,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     createAbandonedNodes(r: Rect, index, indexAtProcess) {
         var rect = this.abandonedDraw.rect(100, 50);
+        let text = this.abandonedDraw.text(r.processName)
+
         rect.attr({
             x: 55,
             y: 20 * ( index + 1),
@@ -790,7 +785,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rect.data('key', indexAtProcess);
         rect.draggy();
         //At the end of the dragging, check which category is the box in
-        
+        text.attr({
+            id: rect.node.id + "text"
+        });
+
+        text.move(rect.x() + 25, rect.y() + 12.5);
+
         rect.on('dragmove', (event) => {
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
@@ -849,7 +849,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
         //removing the processNode
         rect.on("contextmenu", (event) => {
-            this.removeRect(rect);
+            this.removeRect(rect, text);
         });
     }
 
@@ -862,6 +862,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     createProcessNodes(index, width, isDoubleClick: Boolean) {
         let r = this.project.processNodes[index];
         let rect = this.draw.rect(100, 50);
+        let text = this.draw.text(r.processName);
+
         if (isDoubleClick) {
             rect.attr({
                 x: r.getX() + width,
@@ -888,12 +890,22 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         rect.data('key', index);    //saving the index of the data for this node pointing to project.processNodes
         rect.draggy();
+
+        text.attr({
+            id: rect.node.id + "text"
+        });
+
+        text.move(rect.x() + 25, rect.y() + 12.5);
+
         //if onclick set the border color
         if (!rect.data('key').isClicked) {
             rect.stroke({ color: '#000000' });
         } else {
             rect.stroke({ color: '#4e14e0' });
         }
+        rect.on('dragmove', (event) => {
+            text.move(rect.x() + 25, rect.y() + 12.5)
+        });
 
         //At the end of the dragging, check which category is the box in
         rect.on('dragend', (event) => {
@@ -981,7 +993,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
                 }
                 this.updateRect(rect.data('key'), rectObj);
-                this.onSelectedNodeChange(rect);
+                this.onSelectedNodeChange(rect, text);
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -994,7 +1006,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.head = this.currentlySelectedNode;
                 this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-                this.selectedTab = this.menuBar[0];
+                this.selectedTab = this.inputMenuBar[0];
                 document.getElementById('processBoxDetailsContainer').style.display = 'block';
                 this.getDetails();
                 
@@ -1003,7 +1015,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
         //removing the processNode
         rect.on("contextmenu", (event) => {
-            this.removeRect(rect);
+            this.removeRect(rect, text);
         });
 
         return rect;
@@ -1077,27 +1089,22 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * 
      * @param rect the node that was clicked on
      */
-    onSelectedNodeChange(rect: SVG.Rect) {
-        
+    onSelectedNodeChange(rect: SVG.Rect, text: SVG.Text) {
         if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
             document.getElementById('processBoxDetailsContainer').style.display = 'none';
             this.saveAndClearDetails();
             this.currentlySelectedNode = null;
-        } else if (this.currentlySelectedNode != null && rect != this.currentlySelectedNode) {
-            this.saveAndClearDetails();
+            this.currentlySelectedText = null;
+        }  else {
             this.currentlySelectedNode = rect;
-            this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-            this.getDetails();
-        } else {
-            this.currentlySelectedNode = rect;
+            this.currentlySelectedText = text;
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
             this.selectedTab = this.inputMenuBar[0];
-            this.getDetails();
             document.getElementById('processBoxDetailsContainer').style.display = 'block';
+            this.getDetails();
         }
 
     }
-
     /**
      * Adds a node to process component
      *
@@ -1125,7 +1132,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * 
      * @param rect A rect object
      */
-    removeRect(rect: SVG.Rect) {
+    removeRect(rect: SVG.Rect, text: SVG.Text) {
         if (this.isEdit) {
 
             const dialogConfig = new MatDialogConfig();
@@ -1180,6 +1187,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         if (i == this.project.processNodes.length - 1) {
                             this.project.processNodes.splice(removedIndex, 1);
                             rect.remove();
+                            text.remove();
                         }
 
                     }
@@ -1262,7 +1270,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * onclick delete button to delete a process node
      * */
     deleteProcessNodeEvent() {
-        this.removeRect(this.currentlySelectedNode);
+        this.removeRect(this.currentlySelectedNode, this.currentlySelectedText);
         this.currentlySelectedNode = null;
     }
 
@@ -1512,6 +1520,5 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.project = this.dataService.getProject();
         this.getDetails();
         this.cd.detectChanges();
-        
     }
 }

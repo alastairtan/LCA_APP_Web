@@ -74,7 +74,7 @@
                 <hr />
                 <div *ngIf="currentlySelectedNode != null" class="processNameDiv" id="processNameDiv">
                     <p>Process name</p>
-                    <input autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                    <input autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails()" />
                 </div>
                 <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" style="display:none">
                     <div class="detailBoxHeader">
@@ -119,7 +119,7 @@
                                         <div [formGroupName]="i">
                                             <div class="odd-color">
                                                 <strong>Material Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="container even-color">
                                                 <div class="row">
@@ -127,7 +127,7 @@
                                                         Quantity
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -137,7 +137,7 @@
                                                         Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="number">number</option>
                                                             <option value="kg">kg</option>
                                                             <option value="m3">m3</option>
@@ -156,7 +156,7 @@
                                                         Carbon Storage
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -166,7 +166,7 @@
                                                         Activity Data Origin
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -176,7 +176,7 @@
                                                         Emission Factor Value
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -186,14 +186,14 @@
                                                         Emission Factor Source
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="even-color">
                                                 <div>
                                                     Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
                                                 </div>
                                             </div>
                                             <div class="add-container">
@@ -220,11 +220,11 @@
                                         <div [formGroupName]="i">
                                             <div class="odd-color">
                                                 <strong>Equipment Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="equipmentName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="equipmentName" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="even-color">
                                                 Energy Type
-                                                <input autocomplete="off" type="text" formControlName="energyType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="energyType" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="container odd-color">
                                                 <div class="row">
@@ -232,7 +232,7 @@
                                                         Process Time
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="processTime" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="processTime" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -242,7 +242,7 @@
                                                         Rating
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="rating" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="rating" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -252,7 +252,7 @@
                                                         Quantity
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -262,7 +262,7 @@
                                                         Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="number">number</option>
                                                             <option value="kg">kg</option>
                                                             <option value="m3">m3</option>
@@ -281,7 +281,7 @@
                                                         Activity Data Origin
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -291,7 +291,7 @@
                                                         Emission Factor Value
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -301,14 +301,14 @@
                                                         Emission Factor Source
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="even-color">
                                                 <div>
                                                     Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
                                                 </div>
                                             </div>
                                             <div class="add-container">
@@ -335,7 +335,7 @@
                                         <div [formGroupName]="i">
                                             <div class="odd-color">
                                                 <strong>Transportation Type</strong>
-                                                <input autocomplete="off" type="text" formControlName="transportationType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="transportationType" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="container even-color">
                                                 <div class="row">
@@ -343,7 +343,7 @@
                                                         Quantity
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -353,7 +353,7 @@
                                                         Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="number">number</option>
                                                             <option value="kg">kg</option>
                                                             <option value="m3">m3</option>
@@ -372,14 +372,14 @@
                                                         Activity Data Origin
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="even-color">
                                                 <div>
                                                     Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
                                                 </div>
                                             </div>
                                             <div class="add-container">
@@ -406,7 +406,7 @@
                                         <div [formGroupName]="i">
                                             <div class="odd-color">
                                                 <strong>Output Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="container even-color">
                                                 <div class="row">
@@ -414,7 +414,7 @@
                                                         Functional Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="functionalUnit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="functionalUnit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="true">true</option>
                                                             <option value="false">false</option>
                                                         </select>
@@ -427,7 +427,7 @@
                                                         Quantity
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -438,7 +438,7 @@
                                                         Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="number">number</option>
                                                             <option value="kg">kg</option>
                                                             <option value="m3">m3</option>
@@ -457,14 +457,14 @@
                                                         Activity Data Origin
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="even-color">
                                                 <div>
                                                     Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
                                                 </div>
                                             </div>
                                             <div class="add-container">
@@ -491,7 +491,7 @@
                                         <div [formGroupName]="i">
                                             <div class="odd-color">
                                                 <strong>Byproduct Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="byproductName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="byproductName" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="container even-color">
                                                 <div class="row">
@@ -499,7 +499,7 @@
                                                         Co-product
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="coproduct" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="coproduct" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="true">true</option>
                                                             <option value="false">false</option>
                                                         </select>
@@ -512,7 +512,7 @@
                                                         Waste
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="waste" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="waste" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="true">true</option>
                                                             <option value="false">false</option>
                                                         </select>
@@ -525,7 +525,7 @@
                                                         Quantity
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -536,7 +536,7 @@
                                                         Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="number">number</option>
                                                             <option value="kg">kg</option>
                                                             <option value="m3">m3</option>
@@ -555,7 +555,7 @@
                                                         Activity Data Origin
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -565,14 +565,14 @@
                                                         Downstream Option
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="downstreamOption" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="downstreamOption" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="even-color">
                                                 <div>
                                                     Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
                                                 </div>
                                             </div>
                                             <div class="add-container">
@@ -599,7 +599,7 @@
                                         <div [formGroupName]="i">
                                             <div class="odd-color">
                                                 <strong>Emission Type</strong>
-                                                <input autocomplete="off" type="text" formControlName="emissionType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                <input autocomplete="off" type="text" formControlName="emissionType" class="material-input" (change)="saveAndClearDetails()" />
                                             </div>
                                             <div class="container even-color">
                                                 <div class="row">
@@ -607,7 +607,7 @@
                                                         Quantity
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -618,7 +618,7 @@
                                                         Unit
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
                                                             <option value="number">number</option>
                                                             <option value="kg">kg</option>
                                                             <option value="m3">m3</option>
@@ -637,14 +637,14 @@
                                                         Activity Data Origin
                                                     </div>
                                                     <div class="col-md-8 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="odd-color">
                                                 <div>
                                                     Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
                                                 </div>
                                             </div>
                                             <div class="add-container">

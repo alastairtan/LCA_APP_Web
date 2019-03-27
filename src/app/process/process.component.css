@@ -41,7 +41,7 @@
     box-sizing: border-box;
     border: solid 1px;
     color: black;
-    width: auto;
+    width: 100%;
     height: auto;
     font-size: medium;
     font-family: 'Raleway', sans-serif;
@@ -365,8 +365,6 @@ input {
     margin-right:0;
     margin-left:0;
 }
-
-
 
 .btn {
     background-color: #ffa384;
