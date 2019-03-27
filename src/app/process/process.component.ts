@@ -431,6 +431,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.headerHeight = this.containerHeader.nativeElement.offsetHeight;
         this.processContainerHeight = this.processcontainer.nativeElement.offsetHeight;
         this.processContainerWidth = this.processcontainer.nativeElement.offsetWidth;
+        this.draw.size(this.processContainerWidth, this.processContainerHeight);
         //getting previous dimension 
         this.previousDimensionArray = Object.assign([], this.project.dimensionArray);
         this.project.processDimension = this.processContainerWidth;
