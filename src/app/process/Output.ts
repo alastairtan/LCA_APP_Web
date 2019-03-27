@@ -10,9 +10,18 @@ export class Output {
         this.functionalUnit = false;
         this.outputName = '';
         this.quantity = '0';
-        this.unit = '';
+        this.unit = 'number';
         this.activityDataOrigin = '';
         this.remarks = 'N/A';
+    }
+
+    parseData(jsonObj) {
+        this.functionalUnit = jsonObj.functionalUnit;
+        this.outputName = jsonObj.outputName;
+        this.quantity = jsonObj.quantity;
+        this.unit = jsonObj.unit;
+        this.activityDataOrigin = jsonObj.activityDataOrigin;
+        this.remarks = jsonObj.remarks;
     }
 
     equals(other: Output) {

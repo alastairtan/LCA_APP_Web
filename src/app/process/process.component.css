@@ -1,12 +1,16 @@
+.nav-float-right {
+    color: white;
+    position: absolute;
+    right: 0%;
+    height: 100%;
+}
 
 .processcontainer {
     display: block;
-    height: 55vh;
+    height: 85vh;
     border: solid 1px;
-    margin-left: 2vw;
-    margin-right: 2vw;
-    margin-top: 1vh;
-    width:100%;
+    margin: 2vh 2vw;
+    width: 100%;
     background: white;
 }
 
@@ -17,14 +21,19 @@
 
 .processBoxDetailsContainer {
     display: block;
-    height: 28vh;
+    height: 75vh;
+    max-height: 75vh;
+    width: 95%;
     border: solid 1px;
-    margin-left: 2vw;
-    margin-right: 2vw;
-    margin-top: 1.5vh;
-    width: 100%;
+    margin: 0 2.5%;
+    overflow: scroll;   
 }
 
+.buttonContainer {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
 .box-header {
     display: flex;
     flex-direction: column;
@@ -32,7 +41,7 @@
     box-sizing: border-box;
     border: solid 1px;
     color: black;
-    width: 100%;
+    width: auto;
     height: auto;
     font-size: medium;
     font-family: 'Raleway', sans-serif;
@@ -45,18 +54,66 @@
     padding: 0;
 }
 
-.material-input {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-sizing: border-box;
-    border: solid 1px;
-    color: black;
-    width: 100%;
-    height: 2em;
+.add-container {
+    margin: 0 auto;
+    padding: 5px;
+    text-align: center;
+    background-color: #f2f3f2;
+}
+
+.empty-text {
+    font-style: italic;
+    text-align: center;
+}
+
+.input-output {
+    background: #f2f3f2;
+    width: 95%;
+    margin: 5px 2.5%;
+    border: solid grey 1px;
+    border-radius: 3px;
     font-size: medium;
+    padding: 3px;
+}
+
+.material-input {
+    display: block;
+    border: solid 1px;
+    border-radius: 3px;
+    width: 95%;
+    height: 25px;
+    padding: 0;
+    margin: 1px 2.5%;
+    font-size: medium;
+    line-height: 1.5;
+    border-radius: 3px;
+    color: black;
     font-family: 'Raleway', sans-serif;
     text-align: center;
+}
+
+.vcenter {
+    margin-left: 0;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+}
+
+.smaller-input {
+    width: 92%;
+    margin: 1px 4%;
+}
+
+.odd-color {
+    background: #f2f3f2;
+}
+
+.even-color {
+    background: #e5e7e5;
+}
+
+.input-field {
+    padding: 0;
 }
 /*
     Add-delete buttons for MaterialInput
@@ -119,8 +176,8 @@ input {
 
 
 .abandoned {
-    overflow: visible;
-    height: 100%;
+    overflow: hidden;
+    height: 80%;
     width: 100%;
     z-index: 3;
 }
@@ -129,6 +186,10 @@ input {
     transition: opacity .35s ease;
     width: inherit;
     font-size: 1em;
+}
+
+.selectedMenuButton {
+    background: #fe7c51;
 }
 
 /*
@@ -266,13 +327,21 @@ input {
     padding-top: 2vh;
 }
 
+.processNameDiv {
+    font-family: sans-serif;
+    font-size: 1vw;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.5vh;
+}
+
 .row .container{
     height: 100%;
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: 20% 80%;
+    grid-template-columns: 10% 70% 20%;
     height: 100%;
     width: 100%;
 }

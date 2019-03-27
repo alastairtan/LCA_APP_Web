@@ -8,9 +8,17 @@ export class TransportationInput {
     constructor() {
         this.transportationType = '';
         this.quantity = '0';
-        this.unit = '';
+        this.unit = 'number';
         this.activityDataOrigin = '';
         this.remarks = 'N/A';
+    }
+
+    parseData(jsonObj) {
+        this.transportationType = jsonObj.transportationType;
+        this.quantity = jsonObj.quantity;
+        this.unit = jsonObj.unit;
+        this.activityDataOrigin = jsonObj.activityDataOrigin;
+        this.remarks = jsonObj.remarks;
     }
 
     equals(other: TransportationInput) {

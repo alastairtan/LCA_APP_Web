@@ -8,9 +8,17 @@ export class DirectEmission {
     constructor() {
         this.emissionType = '';
         this.quantity = '0';
-        this.unit = '';
+        this.unit = 'number';
         this.activityDataOrigin = '';
         this.remarks = 'N/A';
+    }
+
+    parseData(jsonObj) {
+        this.emissionType = jsonObj.emissionType;
+        this.quantity = jsonObj.quantity;
+        this.unit = jsonObj.unit;
+        this.activityDataOrigin = jsonObj.activityDataOrigin;
+        this.remarks = jsonObj.remarks;
     }
 
     equals(other: DirectEmission) {
