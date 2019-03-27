@@ -32,11 +32,12 @@
                     <table>
                         <tr>
                             <th>Entity</th>
-                            <th *ngFor="let name of this.metadata.arrowNames">{{name}}</th>
+                            <th *ngFor="let name of processName">{{name}}</th>
                         </tr>
-                        <tr *ngFor="let row of this.results; let i = index" [attr.data-index]="i">
-                            <td>{{this.metadata.entities[i]}}</td>
-                            <td *ngFor="let cell of row; let j = index" [attr.data-index]="j">{{cell}}</td>
+                        <tr *ngFor="let row of result">
+                            <td *ngFor="let col of row">
+                                {{col}}
+                            </td>
                         </tr>
                     </table>
                 </div>

@@ -179,6 +179,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     getDetails() {
         //get corresponding arrows 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
+        console.log('getDetails', this.currentlySelectedNode.data('key'))
         this.inputs = rectObj.materialInput;
         this.outputs = rectObj.outputs;
         this.byproducts = rectObj.byproducts;
@@ -329,6 +330,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     saveAndClearDetails() {
         //get corresponding arrows 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
+        console.log(this.currentlySelectedNode.data('key'));
         this.prepareForUndoableAction();
         //Update all material inputs
         switch (this.selectedTab) {
@@ -729,7 +731,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var focusedElement = <HTMLInputElement>document.activeElement;
                     focusedElement.blur();
                 }
-                console.log(this.project.processNodes, this.project.separatorArray);
+                console.log(this.project.processNodes, this.project.separatorArray, this.currentlySelectedNode);
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -860,8 +862,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     onDblClick() {
         if (this.isEdit) {
             let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
-            console.log(result[1]);
-            console.log(this.mouseX - this.svgOffsetLeft);
             let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
                 [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
@@ -907,6 +907,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     createAbandonedNodes(r: Rect, index, indexAtProcess) {
         var rect = this.abandonedDraw.rect(100, 50);
+        let text = this.abandonedDraw.text(r.processName)
         rect.attr({
             x: 55,
             y: 20 * ( index + 1),
@@ -918,7 +919,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rect.data('key', indexAtProcess);
         rect.draggy();
         //At the end of the dragging, check which category is the box in
-        
+        text.attr({
+            id: rect.node.id + "text"
+        });
+
+        text.move(rect.x() + 25, rect.y() + 12.5);
+
         rect.on('dragmove', (event) => {
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
@@ -977,7 +983,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
         //removing the processNode
         rect.on("contextmenu", (event) => {
-            this.removeRect(rect);
+            this.removeRect(rect, text);
         });
     }
 
@@ -1022,8 +1028,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         
         rect.data('key', index);    //saving the index of the data for this node pointing to project.processNodes
         rect.draggy();
-
-        console.log(rect.y(), text.y());
 
         text.attr({
             id: rect.node.id + "text"
@@ -1149,7 +1153,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
         //removing the processNode
         rect.on("contextmenu", (event) => {
-            this.removeRect(rect);
+            this.removeRect(rect, text);
         });
 
         return rect;
@@ -1225,22 +1229,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     onSelectedNodeChange(rect: SVG.Rect, text: SVG.Text) {
         if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
-            document.getElementById('processBoxDetailsContainer').style.display = 'none';
             this.saveAndClearDetails();
+            document.getElementById('processBoxDetailsContainer').style.display = 'none';
             this.currentlySelectedNode = null;
             this.currentlySelectedText = null;
-        } else if (rect != this.currentlySelectedNode && this.currentlySelectedNode != null) {
-            this.saveAndClearDetails();
-            this.currentlySelectedNode = rect;
-            this.currentlySelectedText = text;
-            this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-            this.getDetails();
         } else {
             this.currentlySelectedNode = rect;
             this.currentlySelectedText = text;
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
             this.selectedTab = this.menuBar[0];
             document.getElementById('processBoxDetailsContainer').style.display = 'block';
+            this.getDetails();
         }
 
     }
@@ -1272,7 +1271,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * 
      * @param rect A rect object
      */
-    removeRect(rect: SVG.Rect) {
+    removeRect(rect: SVG.Rect, text:SVG.Text) {
         if (this.isEdit) {
 
             const dialogConfig = new MatDialogConfig();
@@ -1335,6 +1334,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     } else if (this.tail = rect) {
                         this.tail = null;
                     }
+
+                    text.remove();
                 }
             });
 
@@ -1356,6 +1357,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let dataNode = this.project.processNodes[i];
                 if (dataNode.id == rectObj.id) {
                     this.project.processNodes[i] = rectObj;
+                    console.log(rectObj);
                 }
             }
         }
@@ -1409,7 +1411,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * onclick delete button to delete a process node
      * */
     deleteProcessNodeEvent() {
-        this.removeRect(this.currentlySelectedNode);
+        this.removeRect(this.currentlySelectedNode, this.currentlySelectedText);
         this.currentlySelectedNode = null;
     }
 
