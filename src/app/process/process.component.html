@@ -12,7 +12,7 @@
     </div>
     
     <div class="container-fluid">
-        <div class= "grid-container">
+        <div class="grid-container">
             <div class="sidenav">
                 <div class="subtitle">
                     <p>
@@ -61,389 +61,614 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" style="display:none">
-                            <div class="detailBoxHeader">
-                                {{processName}}
+                    
+                </div>
+
+            </div>
+            <div class="sidenav">
+                <div class="subtitle">
+                    <p>
+                        Details
+                    </p>
+                </div>
+                <hr />
+                <div *ngIf="currentlySelectedNode != null" class="processNameDiv" id="processNameDiv">
+                    <p>Process name</p>
+                    <input autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails()" />
+                </div>
+                <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" style="display:none">
+                    <div class="detailBoxHeader">
+                        {{processName}}
+                    </div>
+                    <div class="detailBoxHeader">
+                        {{allocationRule}}
+                    </div>
+                    
+                    <div class="tab-content">
+                        <div class="buttonContainer">
+                            <div class="containerHeader" role="tablist">
+                                <div class="menuTabs" *ngFor="let tab of inputMenuBar; let first = first;" [ngClass]="{firstItem: first}" role="presentation" [class.active]="selectedwallet===wallet">
+                                    <button *ngIf="tab == selectedTab" class="menuButtons selectedMenuButton" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
+                                    <button *ngIf="tab != selectedTab" class="menuButtons" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
+                                </div>
                             </div>
-                            <div class="detailBoxHeader">
-                                {{allocationRule}}
+                            <div class="containerHeader" role="tablist">
+                                <div class="menuTabs" *ngFor="let tab of outputMenuBar; let first = first;" [ngClass]="{firstItem: first}" role="presentation" [class.active]="selectedwallet===wallet">
+                                    <button *ngIf="tab == selectedTab" class="menuButtons selectedMenuButton" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
+                                    <button *ngIf="tab != selectedTab" class="menuButtons" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
+                                </div>
                             </div>
-                            <ul class="containerHeader" role="tablist">
-                                <div class="menuTabs" *ngFor="let tab of menuBar; let first = first;" [ngClass]="{firstItem: first}" role="presentation" [class.active]="selectedwallet===wallet">
-                                    <button class="menuButtons" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
-                                </div>
-                            </ul>
-
-                            <div class="tab-content">
-
-                                <div *ngIf="selectedTab === menuBar[0]" role="tabpanel" class="tab-pane active" id="materialInputContainer">
-                                    <div class="containerHeader">
-                                        <div class="box-header">
-                                            Material Name
-                                        </div>
-                                        <div class="box-header">
-                                            Quantity
-                                        </div>
-                                        <div class="box-header">
-                                            Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Carbon Storage
-                                        </div>
-                                        <div class="box-header">
-                                            Activity Data Origin
-                                        </div>
-                                        <div class="box-header">
-                                            Emission Factor Value
-                                        </div>
-                                        <div class="box-header">
-                                            Emission Factor Source
-                                        </div>
-                                        <div class="box-header">
-                                            Remarks
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                                <i class="fa fa-plus fa-1x"></i><br />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div #item class=""
-                                         *ngFor="let input of this.inputs; let i = index" [attr.data-index]="i">
-                                        <div class="containerHeader" id="{{'materialInputForm' + i}}">
-                                            <input type="text" name="materialName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
-                                                <option value="number">number</option>
-                                                <option value="kg">kg</option>
-                                                <option value="m3">m3</option>
-                                                <option value="litre">litre</option>
-                                                <option value="tkm">tkm</option>
-                                                <option value="kWh">kWh</option>
-                                                <option value="MJ">MJ</option>
-                                                <option value="hours">hours</option>
-                                            </select>
-                                            <input type="text" name="carbonStorage" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="emissionFactorData" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="emissionFactorSource" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <div>
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="selectedTab === menuBar[1]" role="tabpanel" class="tab-pane active" id="outputContainer">
-                                    <div class="containerHeader">
-                                        <div class="box-header" style="width: 50%">
-                                            Functional Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Output Name
-                                        </div>
-                                        <div class="box-header">
-                                            Quantity
-                                        </div>
-                                        <div class="box-header">
-                                            Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Activity Data Origin
-                                        </div>
-                                        <div class="box-header">
-                                            Remarks
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                                <i class="fa fa-plus fa-1x"></i><br />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div #item class=""
-                                         *ngFor="let output of this.outputs; let i = index" [attr.data-index]="i">
-                                        <div class="containerHeader" id="{{'outputForm' + i}}">
-                                            <select name="functionalUnit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" style="width: 50%">
-                                                <option value="true">true</option>
-                                                <option value="false">false</option>
-                                            </select>
-                                            <input type="text" name="outputName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
-                                                <option value="number">number</option>
-                                                <option value="kg">kg</option>
-                                                <option value="m3">m3</option>
-                                                <option value="litre">litre</option>
-                                                <option value="tkm">tkm</option>
-                                                <option value="kWh">kWh</option>
-                                                <option value="MJ">MJ</option>
-                                                <option value="hours">hours</option>
-                                            </select>
-                                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <div>
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="selectedTab === menuBar[2]" role="tabpanel" class="tab-pane active" id="byproductContainer">
-                                    <div class="containerHeader">
-                                        <div class="box-header" style="width: 50%">
-                                            Co-product
-                                        </div>
-                                        <div class="box-header" style="width: 50%">
-                                            Waste
-                                        </div>
-                                        <div class="box-header">
-                                            By-product Name
-                                        </div>
-                                        <div class="box-header">
-                                            Quantity
-                                        </div>
-                                        <div class="box-header">
-                                            Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Activity Data Origin
-                                        </div>
-                                        <div class="box-header boolean-field">
-                                            Downstream Option
-                                        </div>
-                                        <div class="box-header">
-                                            Remarks
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                                <i class="fa fa-plus fa-1x"></i><br />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div #item class=""
-                                         *ngFor="let byproduct of this.byproducts; let i = index" [attr.data-index]="i">
-                                        <div class="containerHeader" id="{{'byproductForm' + i}}">
-                                            <select name="coproduct" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" style="width: 50%">
-                                                <option value="true">true</option>
-                                                <option value="false">false</option>
-                                            </select>
-                                            <select name="waste" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" style="width: 50%">
-                                                <option value="true">true</option>
-                                                <option value="false">false</option>
-                                            </select>
-                                            <input type="text" name="byproductName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
-                                                <option value="number">number</option>
-                                                <option value="kg">kg</option>
-                                                <option value="m3">m3</option>
-                                                <option value="litre">litre</option>
-                                                <option value="tkm">tkm</option>
-                                                <option value="kWh">kWh</option>
-                                                <option value="MJ">MJ</option>
-                                                <option value="hours">hours</option>
-                                            </select>
-                                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="downstreamOption" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <div>
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="selectedTab === menuBar[3]" role="tabpanel" class="tab-pane active" id="energyInputContainer">
-                                    <div class="containerHeader">
-                                        <div class="box-header">
-                                            Equipment Name
-                                        </div>
-                                        <div class="box-header">
-                                            Energy Type
-                                        </div>
-                                        <div class="box-header">
-                                            Process Time
-                                        </div>
-                                        <div class="box-header">
-                                            Rating
-                                        </div>
-                                        <div class="box-header">
-                                            Quantity
-                                        </div>
-                                        <div class="box-header">
-                                            Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Activity Data Origin
-                                        </div>
-                                        <div class="box-header">
-                                            Emission Factor Value
-                                        </div>
-                                        <div class="box-header">
-                                            Emission Factor Source
-                                        </div>
-                                        <div class="box-header">
-                                            Remarks
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                                <i class="fa fa-plus fa-1x"></i><br />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div #item class=""
-                                         *ngFor="let input of this.energy; let i = index" [attr.data-index]="i">
-                                        <div class="containerHeader" id="{{'energyInputForm' + i}}">
-                                            <input type="text" name="equipmentName" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="energyType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="processTime" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="rating" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
-                                                <option value="number">number</option>
-                                                <option value="kg">kg</option>
-                                                <option value="m3">m3</option>
-                                                <option value="litre">litre</option>
-                                                <option value="tkm">tkm</option>
-                                                <option value="kWh">kWh</option>
-                                                <option value="MJ">MJ</option>
-                                                <option value="hours">hours</option>
-                                            </select>
-                                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="emissionFactorData" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="emissionFactorSource" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <div>
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="selectedTab === menuBar[4]" role="tabpanel" class="tab-pane active" id="transportationInputContainer">
-                                    <div class="containerHeader">
-                                        <div class="box-header">
-                                            Transportation Type
-                                        </div>
-                                        <div class="box-header">
-                                            Quantity
-                                        </div>
-                                        <div class="box-header">
-                                            Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Activity Data Origin
-                                        </div>
-                                        <div class="box-header">
-                                            Remarks
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                                <i class="fa fa-plus fa-1x"></i><br />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div #item class=""
-                                         *ngFor="let input of this.transportations; let i = index" [attr.data-index]="i">
-                                        <div class="containerHeader" id="{{'transportationInputForm' + i}}">
-                                            <input type="text" name="transportationType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
-                                                <option value="number">number</option>
-                                                <option value="kg">kg</option>
-                                                <option value="m3">m3</option>
-                                                <option value="litre">litre</option>
-                                                <option value="tkm">tkm</option>
-                                                <option value="kWh">kWh</option>
-                                                <option value="MJ">MJ</option>
-                                                <option value="hours">hours</option>
-                                            </select>
-                                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <div>
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="selectedTab === menuBar[5]" role="tabpanel" class="tab-pane active" id="otherEmissionsContainer">
-                                    <div class="containerHeader">
-                                        <div class="box-header">
-                                            Type of Emission
-                                        </div>
-                                        <div class="box-header">
-                                            Quantity
-                                        </div>
-                                        <div class="box-header">
-                                            Unit
-                                        </div>
-                                        <div class="box-header">
-                                            Activity Data Origin
-                                        </div>
-                                        <div class="box-header">
-                                            Remarks
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                                <i class="fa fa-plus fa-1x"></i><br />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div #item class=""
-                                         *ngFor="let emission of this.emissions; let i = index" [attr.data-index]="i">
-                                        <div class="containerHeader" id="{{'directEmissionForm' + i}}">
-                                            <input type="text" name="emissionType" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="quantity" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <select name="unit" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)">
-                                                <option value="number">number</option>
-                                                <option value="kg">kg</option>
-                                                <option value="m3">m3</option>
-                                                <option value="litre">litre</option>
-                                                <option value="tkm">tkm</option>
-                                                <option value="kWh">kWh</option>
-                                                <option value="MJ">MJ</option>
-                                                <option value="hours">hours</option>
-                                            </select>
-                                            <input type="text" name="activityDataOrigin" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <input type="text" name="remarks" class="material-input" (change)="saveAndClearDetails(this.currentlySelectedConnector, true)" />
-                                            <div>
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div *ngIf="selectedTab === menuBar[6]" role="tabpanel" class="tab-pane active" id="otherEmissionsContainer">
-
-
-                                    <input id="name" value="{{currentlySelectedNodeName}}" />
+                            <div>
+                                <div class="add-container">
+                                    <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                        <i class="fa fa-plus fa-1x"></i><br />
+                                    </button>
                                 </div>
                             </div>
                         </div>
+                        <div *ngIf="selectedTab === inputMenuBar[0]" role="tabpanel" class="tab-pane active" id="materialInputContainer">
+                            <div *ngIf="materialList.length == 0" class="empty-text">
+                                There are currently no material inputs. <br /> Click the button
+                                <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                    <i class="fa fa-plus fa-1x"></i><br />
+                                </button> above to add one.
+                            </div>
+                            <form [formGroup]="materialForm" id="materialInputForm">
+                                <div formArrayName="inputs">
+                                    <div class="input-output" *ngFor="let input of materialList.controls; let i = index;">
+                                        <div [formGroupName]="i">
+                                            <div class="odd-color">
+                                                <strong>Material Name</strong>
+                                                <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Quantity
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="number">number</option>
+                                                            <option value="kg">kg</option>
+                                                            <option value="m3">m3</option>
+                                                            <option value="litre">litre</option>
+                                                            <option value="tkm">tkm</option>
+                                                            <option value="kWh">kWh</option>
+                                                            <option value="MJ">MJ</option>
+                                                            <option value="hours">hours</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Carbon Storage
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Activity Data Origin
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Emission Factor Value
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Emission Factor Source
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="even-color">
+                                                <div>
+                                                    Remarks
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                            </div>
+                                            <div class="add-container">
+                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                    <i class="fa fa-trash fa-1x"></i><br />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
 
+                        <div *ngIf="selectedTab === inputMenuBar[1]" role="tabpanel" class="tab-pane active" id="energyInputContainer">
+                            <div *ngIf="energyList.length == 0" class="empty-text">
+                                There are currently no energy inputs. <br /> Click the button
+                                <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                    <i class="fa fa-plus fa-1x"></i><br />
+                                </button> above to add one.
+                            </div>
+                            <form [formGroup]="energyForm" id="energyInputForm">
+                                <div formArrayName="inputs">
+                                    <div class="input-output" *ngFor="let input of energyList.controls; let i = index;">
+                                        <div [formGroupName]="i">
+                                            <div class="odd-color">
+                                                <strong>Equipment Name</strong>
+                                                <input autocomplete="off" type="text" formControlName="equipmentName" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="even-color">
+                                                Energy Type
+                                                <input autocomplete="off" type="text" formControlName="energyType" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Process Time
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="processTime" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Rating
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="rating" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Quantity
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="number">number</option>
+                                                            <option value="kg">kg</option>
+                                                            <option value="m3">m3</option>
+                                                            <option value="litre">litre</option>
+                                                            <option value="tkm">tkm</option>
+                                                            <option value="kWh">kWh</option>
+                                                            <option value="MJ">MJ</option>
+                                                            <option value="hours">hours</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Activity Data Origin
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Emission Factor Value
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Emission Factor Source
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="even-color">
+                                                <div>
+                                                    Remarks
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                            </div>
+                                            <div class="add-container">
+                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                    <i class="fa fa-trash fa-1x"></i><br />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div *ngIf="selectedTab === inputMenuBar[2]" role="tabpanel" class="tab-pane active" id="transportationInputContainer">
+                            <div *ngIf="transportList.length == 0" class="empty-text">
+                                There are currently no transportation inputs. <br /> Click the button
+                                <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                    <i class="fa fa-plus fa-1x"></i><br />
+                                </button> above to add one.
+                            </div>
+                            <form [formGroup]="transportForm" id="transportationInputForm">
+                                <div formArrayName="inputs">
+                                    <div class="input-output" *ngFor="let input of transportList.controls; let i = index;">
+                                        <div [formGroupName]="i">
+                                            <div class="odd-color">
+                                                <strong>Transportation Type</strong>
+                                                <input autocomplete="off" type="text" formControlName="transportationType" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Quantity
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="number">number</option>
+                                                            <option value="kg">kg</option>
+                                                            <option value="m3">m3</option>
+                                                            <option value="litre">litre</option>
+                                                            <option value="tkm">tkm</option>
+                                                            <option value="kWh">kWh</option>
+                                                            <option value="MJ">MJ</option>
+                                                            <option value="hours">hours</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Activity Data Origin
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="even-color">
+                                                <div>
+                                                    Remarks
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                            </div>
+                                            <div class="add-container">
+                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                    <i class="fa fa-trash fa-1x"></i><br />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div *ngIf="selectedTab === outputMenuBar[0]" role="tabpanel" class="tab-pane active" id="outputContainer">
+                            <div *ngIf="outputList.length == 0" class="empty-text">
+                                There are currently no outputs. <br /> Click the button
+                                <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                    <i class="fa fa-plus fa-1x"></i><br />
+                                </button> above to add one.
+                            </div>
+                            <form [formGroup]="outputForm" id="outputForm">
+                                <div formArrayName="inputs">
+                                    <div class="input-output" *ngFor="let input of outputList.controls; let i = index;">
+                                        <div [formGroupName]="i">
+                                            <div class="odd-color">
+                                                <strong>Output Name</strong>
+                                                <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Functional Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="functionalUnit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="true">true</option>
+                                                            <option value="false">false</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Quantity
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="number">number</option>
+                                                            <option value="kg">kg</option>
+                                                            <option value="m3">m3</option>
+                                                            <option value="litre">litre</option>
+                                                            <option value="tkm">tkm</option>
+                                                            <option value="kWh">kWh</option>
+                                                            <option value="MJ">MJ</option>
+                                                            <option value="hours">hours</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Activity Data Origin
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="even-color">
+                                                <div>
+                                                    Remarks
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                            </div>
+                                            <div class="add-container">
+                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                    <i class="fa fa-trash fa-1x"></i><br />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div *ngIf="selectedTab === outputMenuBar[1]" role="tabpanel" class="tab-pane active" id="byproductContainer">
+                            <div *ngIf="byproductList.length == 0" class="empty-text">
+                                There are currently no byproducts. <br /> Click the button
+                                <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                    <i class="fa fa-plus fa-1x"></i><br />
+                                </button> above to add one.
+                            </div>
+                            <form [formGroup]="byproductForm" id="byproductForm">
+                                <div formArrayName="inputs">
+                                    <div class="input-output" *ngFor="let input of byproductList.controls; let i = index;">
+                                        <div [formGroupName]="i">
+                                            <div class="odd-color">
+                                                <strong>Byproduct Name</strong>
+                                                <input autocomplete="off" type="text" formControlName="byproductName" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Co-product
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="coproduct" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="true">true</option>
+                                                            <option value="false">false</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Waste
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="waste" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="true">true</option>
+                                                            <option value="false">false</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Quantity
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="number">number</option>
+                                                            <option value="kg">kg</option>
+                                                            <option value="m3">m3</option>
+                                                            <option value="litre">litre</option>
+                                                            <option value="tkm">tkm</option>
+                                                            <option value="kWh">kWh</option>
+                                                            <option value="MJ">MJ</option>
+                                                            <option value="hours">hours</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Activity Data Origin
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Downstream Option
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="downstreamOption" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="even-color">
+                                                <div>
+                                                    Remarks
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                            </div>
+                                            <div class="add-container">
+                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                    <i class="fa fa-trash fa-1x"></i><br />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div *ngIf="selectedTab === outputMenuBar[2]" role="tabpanel" class="tab-pane active" id="otherEmissionsContainer">
+                            <div *ngIf="emissionList.length == 0" class="empty-text">
+                                There are currently no other direct emissions. <br /> Click the button
+                                <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                    <i class="fa fa-plus fa-1x"></i><br />
+                                </button> above to add one.
+                            </div>
+                            <form [formGroup]="emissionForm" id="emissionList">
+                                <div formArrayName="inputs">
+                                    <div class="input-output" *ngFor="let input of emissionList.controls; let i = index;">
+                                        <div [formGroupName]="i">
+                                            <div class="odd-color">
+                                                <strong>Emission Type</strong>
+                                                <input autocomplete="off" type="text" formControlName="emissionType" class="material-input" (change)="saveAndClearDetails()" />
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Quantity
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="container odd-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Unit
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                            <option value="number">number</option>
+                                                            <option value="kg">kg</option>
+                                                            <option value="m3">m3</option>
+                                                            <option value="litre">litre</option>
+                                                            <option value="tkm">tkm</option>
+                                                            <option value="kWh">kWh</option>
+                                                            <option value="MJ">MJ</option>
+                                                            <option value="hours">hours</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container even-color">
+                                                <div class="row">
+                                                    <div class="col-md-4 input-field">
+                                                        Activity Data Origin
+                                                    </div>
+                                                    <div class="col-md-8 vcenter">
+                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="odd-color">
+                                                <div>
+                                                    Remarks
+                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                            </div>
+                                            <div class="add-container">
+                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                    <i class="fa fa-trash fa-1x"></i><br />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div *ngIf="selectedTab === inputMenuBar[6]" role="tabpanel" class="tab-pane active" id="otherEmissionsContainer">
+                            <input autocomplete="off" id="name" value="{{currentlySelectedNodeName}}" />
+                        </div>
+                        <div id="processNameContainer">
+                            <p>
+                                Process Name
+                            </p>
+                            <input autocomplete="off" id="name" value="{{currentlySelectedNodeName}}" />
+                        </div>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>

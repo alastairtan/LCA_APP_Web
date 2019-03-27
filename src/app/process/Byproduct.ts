@@ -13,10 +13,21 @@ export class Byproduct {
         this.waste = false;
         this.byproductName = '';
         this.quantity = '0';
-        this.unit = '';
+        this.unit = 'number';
         this.activityDataOrigin = '';
         this.downstreamOption = '';
         this.remarks = 'N/A';
+    }
+
+    parseData(jsonObj) {
+        this.coproduct = jsonObj.coproduct;
+        this.waste = jsonObj.waste;
+        this.byproductName = jsonObj.byproductName;
+        this.quantity = jsonObj.quantity;
+        this.unit = jsonObj.unit;
+        this.activityDataOrigin = jsonObj.activityDataOrigin;
+        this.downstreamOption = jsonObj.downstreamOption;
+        this.remarks = jsonObj.remarks;
     }
 
     equals(other: Byproduct) {

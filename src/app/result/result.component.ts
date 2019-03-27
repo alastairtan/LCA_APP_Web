@@ -38,9 +38,9 @@ export class ResultComponent implements OnInit {
             let processUnit: Number[] = [];
             for (let j = 0; j < materialInputArr.length; j++) {
                 let materialInput = materialInputArr[j];
-                let index = this.economicVarExist(materialInput.materialName)
+                let index = this.economicVarExist(materialInput.materialName.toLowerCase())
                 if (index == null) {
-                    this.economicflow.push(materialInput.materialName);
+                    this.economicflow.push(materialInput.materialName.toLowerCase());
                     processUnit.push(-materialInput.quantity);
                 } else {
                     this.insertUnit(index, -materialInput.quantity, processUnit);
@@ -109,4 +109,3 @@ export class ResultComponent implements OnInit {
         this.router.navigate(['/process']);
     }
 }
-

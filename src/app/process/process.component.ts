@@ -7,7 +7,7 @@ import '../../../svg.connectable.js/src/svg.connectable.js';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 
 import { MaterialInput } from './MaterialInput';
 import { Line } from './Line';
@@ -19,12 +19,6 @@ import { DirectEmission } from './DirectEmission';
 import { CookieService } from 'ngx-cookie-service';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
 
-const MAT_NAME = 0, MAT_QUANT = 1, MAT_UNIT = 2, MAT_CARBON_STORAGE = 3, MAT_ACTIVITY = 4, MAT_EMISSION_DATA = 5, MAT_EMISSION_SOURCE = 6, MAT_REMARKS = 7;
-const OUT_FUNCTIONAL_UNIT = 0, OUT_NAME = 1, OUT_QUANT = 2, OUT_UNIT = 3, OUT_ACTIVITY = 4, OUT_REMARKS = 5;
-const BY_COPRODUCT = 0, BY_WASTE = 1, BY_NAME = 2, BY_QUANT = 3, BY_UNIT = 4, BY_ACTIVITY = 5, BY_DOWNSTREAM = 6, BY_REMARKS = 7;
-const ENER_EQUIP_NAME = 0, ENER_TYPE = 1, ENER_PROCESS_TIME = 2, ENER_RATING = 3, ENER_QUANT = 4, ENER_UNIT = 5, ENER_ACTIVITY = 6, ENER_EMISSION_DATA = 7, ENER_EMISSION_SOURCE = 8, ENER_REMARKS = 9;
-const TRANS_TYPE = 0, TRANS_QUANT = 1, TRANS_UNIT = 2, TRANS_ACTIVITY = 3, TRANS_REMARKS = 4;
-const EMISSION_TYPE = 0, EMISSION_QUANT = 1, EMISSION_UNIT = 2, EMISSION_ACTIVITY = 3, EMISSION_REMARKS = 4;
 
 @Component({
     selector: 'app-dialog',
@@ -91,6 +85,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     // [the current width - 1 that changed, index of the lifecycle stage]
     private currentOnResizeWidthArray: number[][] = [[]];
     private previousDimensionArray: number[] = [];
+    private currentlySelectedConnector;
     private isEdit: Boolean = false;
 
     //current container Width
@@ -98,8 +93,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private size = 100;
 
     private waitId;
-    menuBar = ['Material Input', 'Output', 'Byproduct', 'Energy Input', 'Transportation Input', 'Other Direct Emissions', 'Process Name'];
-    selectedTab = this.menuBar[0];
+
+    materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
+    materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
+    inputMenuBar = ['Material', 'Energy', 'Transport'];
+    outputMenuBar = ['Output', 'Byproduct', 'Others'];
+    selectedTab = this.inputMenuBar[0];
     isOpen = false;
 
     //currently selected Node
@@ -120,17 +119,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     project: Project = this.dataService.getProject();            //Object to contain all data of the current project
     lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
-    inputs: MaterialInput[] = [];
-    outputs: Output[] = [];
-    byproducts: Byproduct[] = [];
-    energy: EnergyInput[] = [];
-    transportations: TransportationInput[] = [];
-    emissions: DirectEmission[] = [];
 
     constructor(private dataService: DataService,
         private router: Router,
         private cd: ChangeDetectorRef,
-        private cookies: CookieService, public dialog: MatDialog) { }
+        private cookies: CookieService, public dialog: MatDialog,
+        private fb: FormBuilder) { }
     /**
      * Check if this.project.processNodes is empty, 
      * for the purpose of disallowing users from proceeding
@@ -142,9 +136,24 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         return !hasProcess;
     }
-    
+
     ngOnInit() {
         this.project = this.dataService.getProject();
+
+        this.materialForm   = this.fb.group({ inputs: this.fb.array([]) });
+        this.energyForm     = this.fb.group({ inputs: this.fb.array([]) });
+        this.transportForm  = this.fb.group({ inputs: this.fb.array([]) });
+        this.outputForm     = this.fb.group({ inputs: this.fb.array([]) });
+        this.byproductForm  = this.fb.group({ inputs: this.fb.array([]) });
+        this.emissionForm   = this.fb.group({ inputs: this.fb.array([]) });
+
+        this.materialList   = this.materialForm.get('inputs') as FormArray;
+        this.energyList = this.energyForm.get('inputs') as FormArray;
+        this.transportList = this.transportForm.get('inputs') as FormArray;
+        this.outputList = this.outputForm.get('inputs') as FormArray;
+        this.byproductList = this.byproductForm.get('inputs') as FormArray;
+        this.emissionList = this.emissionForm.get('inputs') as FormArray;
+      
         let pc = document.getElementById('processcontainer');
         pc.oncontextmenu = function () {
             return false;
@@ -177,303 +186,156 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param array keydata of a connector [index of rect, index of connector]
      */
     getDetails() {
-        //get corresponding arrows 
-        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
-        console.log('getDetails', this.currentlySelectedNode.data('key'))
-        this.inputs = rectObj.materialInput;
-        this.outputs = rectObj.outputs;
-        this.byproducts = rectObj.byproducts;
-        this.energy = rectObj.energyInputs;
-        this.transportations = rectObj.transportations;
-        this.emissions = rectObj.directEmissions;
-        this.cd.detectChanges();                    //Detect change and update the DOM
+        //get corresponding rect 
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        
         switch (this.selectedTab) {
-            case this.menuBar[0]:           //Material Input
-                //Get details for all material inputs
+            case this.inputMenuBar[0]:           //Material Input
+                //Clear old data
+                this.clearFormArray(this.materialList);
+                //Add data to the list
                 for (let j = 0; j < rectObj.materialInput.length; j++) {
-                    var inputArray = document.getElementById('materialInputForm' + j).childNodes;
-                    //Get all HTML input elements
-                    var materialNameInput   = <HTMLInputElement>inputArray[MAT_NAME];
-                    var quantityInput       = <HTMLInputElement>inputArray[MAT_QUANT];
-                    var unitInput           = <HTMLInputElement>inputArray[MAT_UNIT];
-                    var carbonStorageInput  = <HTMLInputElement>inputArray[MAT_CARBON_STORAGE];
-                    var activityDataInput   = <HTMLInputElement>inputArray[MAT_ACTIVITY];
-                    var emissionDataInput   = <HTMLInputElement>inputArray[MAT_EMISSION_DATA];
-                    var emissionSourceInput = <HTMLInputElement>inputArray[MAT_EMISSION_SOURCE];
-                    var remarksInput        = <HTMLInputElement>inputArray[MAT_REMARKS];
-                    //Update all the inputs' value to be the same as the actual value in the processNode
-                    materialNameInput.value = rectObj.materialInput[j].materialName;
-                    quantityInput.value = rectObj.materialInput[j].quantity;
-                    unitInput.value = rectObj.materialInput[j].unit;
-                    carbonStorageInput.value = rectObj.materialInput[j].carbonStorage;
-                    activityDataInput.value = rectObj.materialInput[j].activityDataOrigin;
-                    emissionDataInput.value = rectObj.materialInput[j].emissionFactorData;
-                    emissionSourceInput.value = rectObj.materialInput[j].emissionFactorSource;
-                    remarksInput.value = rectObj.materialInput[j].remarks;
+                    this.materialList.push(this.fb.group(rectObj.materialInput[j]));
                 }
                 break;
-            case this.menuBar[1]:       //Output
-                for (let j = 0; j < rectObj.outputs.length; j++) {
-                    var inputArray = document.getElementById("outputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var functionalUnitInput = <HTMLInputElement>inputArray[OUT_FUNCTIONAL_UNIT];
-                    var outputNameInput     = <HTMLInputElement>inputArray[OUT_NAME];
-                    var quantityInput       = <HTMLInputElement>inputArray[OUT_QUANT];
-                    var unitInput           = <HTMLInputElement>inputArray[OUT_UNIT];
-                    var activityDataInput   = <HTMLInputElement>inputArray[OUT_ACTIVITY];
-                    var remarksInput        = <HTMLInputElement>inputArray[OUT_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    functionalUnitInput.value = rectObj.outputs[j].functionalUnit.toString();
-                    outputNameInput.value = rectObj.outputs[j].outputName;
-                    quantityInput.value = rectObj.outputs[j].quantity;
-                    unitInput.value = rectObj.outputs[j].unit;
-                    activityDataInput.value = rectObj.outputs[j].activityDataOrigin;
-                    remarksInput.value = rectObj.outputs[j].remarks;
-                }
-                break;
-            case this.menuBar[2]:       //Byproduct
-                for (let j = 0; j < rectObj.byproducts.length; j++) {
-                    var inputArray = document.getElementById("byproductForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var coproductInput      = <HTMLInputElement>inputArray[BY_COPRODUCT];
-                    var wasteInput          = <HTMLInputElement>inputArray[BY_WASTE];
-                    var byproductNameInput  = <HTMLInputElement>inputArray[BY_NAME];
-                    var quantityInput       = <HTMLInputElement>inputArray[BY_QUANT];
-                    var unitInput           = <HTMLInputElement>inputArray[BY_UNIT];
-                    var activityDataInput   = <HTMLInputElement>inputArray[BY_ACTIVITY];
-                    var downstreamInput     = <HTMLInputElement>inputArray[BY_DOWNSTREAM];
-                    var remarksInput        = <HTMLInputElement>inputArray[BY_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    coproductInput.value = rectObj.byproducts[j].coproduct.toString();
-                    wasteInput.value = rectObj.byproducts[j].waste.toString();
-                    byproductNameInput.value = rectObj.byproducts[j].byproductName;
-                    quantityInput.value = rectObj.byproducts[j].quantity;
-                    unitInput.value = rectObj.byproducts[j].unit;
-                    downstreamInput.value = rectObj.byproducts[j].downstreamOption;
-                    activityDataInput.value = rectObj.byproducts[j].activityDataOrigin;
-                    remarksInput.value = rectObj.byproducts[j].remarks;
-                }
-                break;
-            case this.menuBar[3]:       //Energy Input
+            case this.inputMenuBar[1]:       //Energy Input
+                //Clear old data
+                this.clearFormArray(this.energyList);
+                //Add data to the list
                 for (let j = 0; j < rectObj.energyInputs.length; j++) {
-                    var inputArray = document.getElementById("energyInputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var equipmentNameInput  = <HTMLInputElement>inputArray[ENER_EQUIP_NAME];
-                    var energyTypeInput     = <HTMLInputElement>inputArray[ENER_TYPE];
-                    var processTimeInput    = <HTMLInputElement>inputArray[ENER_PROCESS_TIME];
-                    var ratingInput         = <HTMLInputElement>inputArray[ENER_RATING];
-                    var quantityInput       = <HTMLInputElement>inputArray[ENER_QUANT];
-                    var unitInput           = <HTMLInputElement>inputArray[ENER_UNIT];
-                    var activityDataInput   = <HTMLInputElement>inputArray[ENER_ACTIVITY];
-                    var wasteInput          = <HTMLInputElement>inputArray[ENER_EMISSION_DATA];
-                    var byproductNameInput  = <HTMLInputElement>inputArray[ENER_EMISSION_SOURCE];
-                    var remarksInput        = <HTMLInputElement>inputArray[ENER_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    equipmentNameInput.value = rectObj.energyInputs[j].equipmentName;
-                    energyTypeInput.value = rectObj.energyInputs[j].energyType;
-                    processTimeInput.value = rectObj.energyInputs[j].processTime;
-                    ratingInput.value = rectObj.energyInputs[j].rating;
-                    quantityInput.value = rectObj.energyInputs[j].quantity;
-                    unitInput.value = rectObj.energyInputs[j].unit;
-                    activityDataInput.value = rectObj.energyInputs[j].activityDataOrigin;
-                    wasteInput.value = rectObj.energyInputs[j].emissionFactorData;
-                    byproductNameInput.value = rectObj.energyInputs[j].emissionFactorSource;
-                    remarksInput.value = rectObj.energyInputs[j].remarks;
+                    this.energyList.push(this.fb.group(rectObj.energyInputs[j]));
                 }
                 break;
-            case this.menuBar[4]:       //Transportation Input
+            case this.inputMenuBar[2]:       //Transportation Input
+                //Clear old data
+                this.clearFormArray(this.transportList);
+                //Add data to the list
                 for (let j = 0; j < rectObj.transportations.length; j++) {
-                    var inputArray = document.getElementById("transportationInputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var transportTypeInput  = <HTMLInputElement>inputArray[TRANS_TYPE];
-                    var quantityInput       = <HTMLInputElement>inputArray[TRANS_QUANT];
-                    var unitInput           = <HTMLInputElement>inputArray[TRANS_UNIT];
-                    var activityDataInput   = <HTMLInputElement>inputArray[TRANS_ACTIVITY];
-                    var remarksInput        = <HTMLInputElement>inputArray[TRANS_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    transportTypeInput.value = rectObj.transportations[j].transportationType;
-                    quantityInput.value = rectObj.transportations[j].quantity;
-                    unitInput.value = rectObj.transportations[j].unit;
-                    activityDataInput.value = rectObj.transportations[j].activityDataOrigin;
-                    remarksInput.value = rectObj.transportations[j].remarks;
+                    this.transportList.push(this.fb.group(rectObj.transportations[j]));
                 }
                 break;
-            case this.menuBar[5]:       //Direct Emission
+            case this.outputMenuBar[0]:       //Output
+                //Clear old data
+                this.clearFormArray(this.outputList);
+                //Add data to the list
+                for (let j = 0; j < rectObj.outputs.length; j++) {
+                    this.outputList.push(this.fb.group(rectObj.outputs[j]));
+                }
+                break;
+            case this.outputMenuBar[1]:       //Byproduct
+                //Clear old data
+                this.clearFormArray(this.byproductList);
+                //Add data to the list
+                for (let j = 0; j < rectObj.byproducts.length; j++) {
+                    this.byproductList.push(this.fb.group(rectObj.byproducts[j]));
+                }
+                break;
+            case this.outputMenuBar[2]:       //Direct Emission
+                //Clear old data
+                this.clearFormArray(this.emissionList);
+                //Add data to the list
                 for (let j = 0; j < rectObj.directEmissions.length; j++) {
-                    var inputArray = document.getElementById("directEmissionForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var emissionTypeInput   = <HTMLInputElement>inputArray[EMISSION_TYPE];
-                    var quantityInput       = <HTMLInputElement>inputArray[EMISSION_QUANT];
-                    var unitInput           = <HTMLInputElement>inputArray[EMISSION_UNIT];
-                    var activityDataInput   = <HTMLInputElement>inputArray[EMISSION_ACTIVITY];
-                    var remarksInput        = <HTMLInputElement>inputArray[EMISSION_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    emissionTypeInput.value = rectObj.directEmissions[j].emissionType;
-                    quantityInput.value = rectObj.directEmissions[j].quantity;
-                    unitInput.value = rectObj.directEmissions[j].unit;
-                    activityDataInput.value = rectObj.directEmissions[j].activityDataOrigin;
-                    remarksInput.value = rectObj.directEmissions[j].remarks;
+                    this.emissionList.push(this.fb.group(rectObj.directEmissions[j]));
                 }
                 break;
-            case this.menuBar[6]:
+            case this.inputMenuBar[6]:
                 let inputDiv = document.getElementById('name');
                 let HTMLInput = <HTMLInputElement>inputDiv;
                 this.currentlySelectedNodeName = rectObj.processName;
+                break;
         }
+        this.cd.detectChanges();                    //Detect change and update the DOM
     }
 
     /**
      * Save the data from the currently selected node into the project, then clear the input form
-     * @param rect the currently selected node
-     * @param divId the HTML id of the input form
      */
     saveAndClearDetails() {
-        //get corresponding arrows 
+        if (this.currentlySelectedNode == undefined || this.currentlySelectedNode == null) {
+            return;
+        }
+        //get corresponding node 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
-        console.log(this.currentlySelectedNode.data('key'));
         this.prepareForUndoableAction();
         //Update all material inputs
         switch (this.selectedTab) {
-            case this.menuBar[0]:       //Material Input
-                for (let j = 0; j < this.inputs.length; j++) {
-                    var inputArray = document.getElementById("materialInputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var materialNameInput = <HTMLInputElement>inputArray[MAT_NAME];
-                    var quantityInput = <HTMLInputElement>inputArray[MAT_QUANT];
-                    var unitInput = <HTMLInputElement>inputArray[MAT_UNIT];
-                    var carbonStorageInput = <HTMLInputElement>inputArray[MAT_CARBON_STORAGE];
-                    var activityDataInput = <HTMLInputElement>inputArray[MAT_ACTIVITY];
-                    var emissionDataInput = <HTMLInputElement>inputArray[MAT_EMISSION_DATA];
-                    var emissionSourceInput = <HTMLInputElement>inputArray[MAT_EMISSION_SOURCE];
-                    var remarksInput = <HTMLInputElement>inputArray[MAT_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    this.inputs[j].materialName = materialNameInput.value;
-                    this.inputs[j].quantity = quantityInput.value;
-                    this.inputs[j].unit = unitInput.value;
-                    this.inputs[j].carbonStorage = carbonStorageInput.value;
-                    this.inputs[j].activityDataOrigin = activityDataInput.value;
-                    this.inputs[j].emissionFactorData = emissionDataInput.value;
-                    this.inputs[j].emissionFactorSource = emissionSourceInput.value;
-                    this.inputs[j].remarks = remarksInput.value;
+            case this.inputMenuBar[0]:       //Material Input
+                //Create new data array
+                var materialInputs: MaterialInput[] = [];
+                for (let j = 0; j < this.materialList.length; j++) {
+                    //Push data to the array
+                    var materialInput = new MaterialInput();
+                    materialInput.parseData(this.materialList.at(j).value);
+                    materialInputs.push(materialInput);
                 }
-                rectObj.materialInput = this.inputs;
+                //Update the array for the rect
+                rectObj.materialInput = materialInputs;
                 break;
-            case this.menuBar[1]:       //Output
-                for (let j = 0; j < this.outputs.length; j++) {
-                    var inputArray = document.getElementById("outputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var functionalUnitInput = <HTMLInputElement>inputArray[OUT_FUNCTIONAL_UNIT];
-                    var outputNameInput = <HTMLInputElement>inputArray[OUT_NAME];
-                    var quantityInput = <HTMLInputElement>inputArray[OUT_QUANT];
-                    var unitInput = <HTMLInputElement>inputArray[OUT_UNIT];
-                    var activityDataInput = <HTMLInputElement>inputArray[OUT_ACTIVITY];
-                    var remarksInput = <HTMLInputElement>inputArray[OUT_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    this.outputs[j].functionalUnit = functionalUnitInput.value == 'true';
-                    this.outputs[j].outputName = outputNameInput.value;
-                    this.outputs[j].quantity = quantityInput.value;
-                    this.outputs[j].unit = unitInput.value;
-                    this.outputs[j].activityDataOrigin = activityDataInput.value;
-                    this.outputs[j].remarks = remarksInput.value;
+            case this.inputMenuBar[1]:       //Energy Input
+                //Create new data array
+                var energyInputs: EnergyInput[] = [];
+                for (let j = 0; j < this.energyList.length; j++) {
+                    //Push data to the array
+                    var energyInput = new EnergyInput();
+                    energyInput.parseData(this.energyList.at(j).value);
+                    energyInputs.push(energyInput);
                 }
-                rectObj.outputs = this.outputs;
+                //Update the array for the rect
+                rectObj.energyInputs = energyInputs;
                 break;
-            case this.menuBar[2]:       //Byproduct
-                for (let j = 0; j < this.byproducts.length; j++) {
-                    var inputArray = document.getElementById("byproductForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var coproductInput = <HTMLInputElement>inputArray[BY_COPRODUCT];
-                    var wasteInput = <HTMLInputElement>inputArray[BY_WASTE];
-                    var byproductNameInput = <HTMLInputElement>inputArray[BY_NAME];
-                    var quantityInput = <HTMLInputElement>inputArray[BY_QUANT];
-                    var unitInput = <HTMLInputElement>inputArray[BY_UNIT];
-                    var activityDataInput = <HTMLInputElement>inputArray[BY_ACTIVITY];
-                    var downstreamInput = <HTMLInputElement>inputArray[BY_DOWNSTREAM];
-                    var remarksInput = <HTMLInputElement>inputArray[BY_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    this.byproducts[j].coproduct = coproductInput.value == 'true';
-                    this.byproducts[j].waste = wasteInput.value == 'true';
-                    this.byproducts[j].byproductName = byproductNameInput.value;
-                    this.byproducts[j].quantity = quantityInput.value;
-                    this.byproducts[j].unit = unitInput.value;
-                    this.byproducts[j].downstreamOption = downstreamInput.value;
-                    this.byproducts[j].activityDataOrigin = activityDataInput.value;
-                    this.byproducts[j].remarks = remarksInput.value;
+            case this.inputMenuBar[2]:       //Transportation Input
+                //Create new data array
+                var transportationInputs: TransportationInput[] = [];
+                for (let j = 0; j < this.transportList.length; j++) {
+                    //Push data to the array
+                    var transport = new TransportationInput();
+                    transport.parseData(this.transportList.at(j).value);
+                    transportationInputs.push(transport);
                 }
-                rectObj.byproducts = this.byproducts;
+                //Update the array for the rect
+                rectObj.transportations = transportationInputs;
                 break;
-            case this.menuBar[3]:       //Energy Input
-                for (let j = 0; j < this.energy.length; j++) {
-                    var inputArray = document.getElementById("energyInputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var equipmentNameInput = <HTMLInputElement>inputArray[ENER_EQUIP_NAME];
-                    var energyTypeInput = <HTMLInputElement>inputArray[ENER_TYPE];
-                    var processTimeInput = <HTMLInputElement>inputArray[ENER_PROCESS_TIME];
-                    var ratingInput = <HTMLInputElement>inputArray[ENER_RATING];
-                    var quantityInput = <HTMLInputElement>inputArray[ENER_QUANT];
-                    var unitInput = <HTMLInputElement>inputArray[ENER_UNIT];
-                    var activityDataInput = <HTMLInputElement>inputArray[ENER_ACTIVITY];
-                    var wasteInput = <HTMLInputElement>inputArray[ENER_EMISSION_DATA];
-                    var byproductNameInput = <HTMLInputElement>inputArray[ENER_EMISSION_SOURCE];
-                    var remarksInput = <HTMLInputElement>inputArray[ENER_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    this.energy[j].equipmentName = equipmentNameInput.value;
-                    this.energy[j].energyType = energyTypeInput.value;
-                    this.energy[j].processTime = processTimeInput.value;
-                    this.energy[j].rating = ratingInput.value;
-                    this.energy[j].quantity = quantityInput.value;
-                    this.energy[j].unit = unitInput.value;
-                    this.energy[j].activityDataOrigin = activityDataInput.value;
-                    this.energy[j].emissionFactorData = wasteInput.value;
-                    this.energy[j].emissionFactorSource = byproductNameInput.value;
-                    this.energy[j].remarks = remarksInput.value;
+            case this.outputMenuBar[0]:       //Output
+                //Create new data array
+                var outputs: Output[] = [];
+                for (let j = 0; j < this.outputList.length; j++) {
+                    //Push data to the array
+                    var output = new Output();
+                    output.parseData(this.outputList.at(j).value);
+                    outputs.push(output);
                 }
-                rectObj.energyInputs = this.energy;
+                //Update the array for the rect
+                rectObj.outputs = outputs;
                 break;
-            case this.menuBar[4]:       //Transportation Input
-                for (let j = 0; j < this.transportations.length; j++) {
-                    var inputArray = document.getElementById("transportationInputForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var transportTypeInput = <HTMLInputElement>inputArray[TRANS_TYPE];
-                    var quantityInput = <HTMLInputElement>inputArray[TRANS_QUANT];
-                    var unitInput = <HTMLInputElement>inputArray[TRANS_UNIT];
-                    var activityDataInput = <HTMLInputElement>inputArray[TRANS_ACTIVITY];
-                    var remarksInput = <HTMLInputElement>inputArray[TRANS_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    this.transportations[j].transportationType = transportTypeInput.value;
-                    this.transportations[j].quantity = quantityInput.value;
-                    this.transportations[j].unit = unitInput.value;
-                    this.transportations[j].activityDataOrigin = activityDataInput.value;
-                    this.transportations[j].remarks = remarksInput.value;
+            case this.outputMenuBar[1]:       //Byproduct
+                //Create new data array
+                var byproducts: Byproduct[] = [];
+                for (let j = 0; j < this.byproductList.length; j++) {
+                    //Push data to the array
+                    var byproduct = new Byproduct();
+                    byproduct.parseData(this.byproductList.at(j).value);
+                    byproducts.push(byproduct);
                 }
-                rectObj.transportations = this.transportations;
+                //Update the array for the rect
+                rectObj.byproducts = byproducts;
                 break;
-            case this.menuBar[5]:       //Direct Emission
-                for (let j = 0; j < this.emissions.length; j++) {
-                    var inputArray = document.getElementById("directEmissionForm" + j).childNodes;
-                    //Get all HTML input elements
-                    var emissionTypeInput = <HTMLInputElement>inputArray[EMISSION_TYPE];
-                    var quantityInput = <HTMLInputElement>inputArray[EMISSION_QUANT];
-                    var unitInput = <HTMLInputElement>inputArray[EMISSION_UNIT];
-                    var activityDataInput = <HTMLInputElement>inputArray[EMISSION_ACTIVITY];
-                    var remarksInput = <HTMLInputElement>inputArray[EMISSION_REMARKS];
-                    //Update all the actual value in the processNode to be the same as the inputs' value
-                    this.emissions[j].emissionType = emissionTypeInput.value;
-                    this.emissions[j].quantity = quantityInput.value;
-                    this.emissions[j].unit = unitInput.value;
-                    this.emissions[j].activityDataOrigin = activityDataInput.value;
-                    this.emissions[j].remarks = remarksInput.value;
+            case this.outputMenuBar[2]:       //Direct Emission
+                //Create new data array
+                var emissions: DirectEmission[] = [];
+                for (let j = 0; j < this.emissionList.length; j++) {
+                    //Push data to the array
+                    var emission = new DirectEmission();
+                    emission.parseData(this.emissionList.at(j).value);
+                    emissions.push(emission);
                 }
-                rectObj.directEmissions = this.emissions;
+                //Update the array for the rect
+                rectObj.directEmissions = emissions;
                 break;
-            case this.menuBar[6]:
+            case this.inputMenuBar[6]:
                 let inputDiv = document.getElementById('name');
                 let HTMLInput = <HTMLInputElement>inputDiv;
                 rectObj.processName = HTMLInput.value;
                 HTMLInput.value = "";
-                this.currentlySelectedText.text(rectObj.processName);
-               
-
         }
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
@@ -487,30 +349,29 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.saveAndClearDetails();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         switch (tab) {
-            case this.menuBar[0]:   //Material Input
-                this.inputs.push(new MaterialInput());
-                rectObj.materialInput = this.inputs;
-                console.log(this.project.processNodes);
+            case this.inputMenuBar[0]:   //Material Input
+                this.addInput(this.materialList);
+                rectObj.materialInput = this.materialList.value;
                 break;
-            case this.menuBar[1]:   //Output
-                this.outputs.push(new Output());
-                rectObj.outputs = this.outputs;
+            case this.inputMenuBar[1]:   //Energy Input
+                this.addInput(this.energyList);
+                rectObj.energyInputs = this.energyList.value;
                 break;
-            case this.menuBar[2]:   //Byproduct
-                this.byproducts.push(new Byproduct());
-                rectObj.byproducts = this.byproducts;
+            case this.inputMenuBar[2]:   //Transportation Input
+                this.addInput(this.transportList);
+                rectObj.transportations = this.transportList.value;
                 break;
-            case this.menuBar[3]:   //Energy Input
-                this.energy.push(new EnergyInput());
-                rectObj.energyInputs = this.energy;
+            case this.outputMenuBar[0]:   //Output
+                this.addInput(this.outputList);
+                rectObj.outputs = this.outputList.value;
                 break;
-            case this.menuBar[4]:   //Transportation Input
-                this.transportations.push(new TransportationInput());
-                rectObj.transportations = this.transportations;
+            case this.outputMenuBar[1]:   //Byproduct
+                this.addInput(this.byproductList);
+                rectObj.byproducts = this.byproductList.value;
                 break;
-            case this.menuBar[5]:   //Direct Emission
-                this.emissions.push(new DirectEmission());
-                rectObj.directEmissions = this.emissions;
+            case this.outputMenuBar[2]:   //Direct Emission
+                this.addInput(this.emissionList);
+                rectObj.directEmissions = this.emissionList.value;
                 break;
         }
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
@@ -531,29 +392,30 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.prepareForUndoableAction();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         switch (tab) {
-            case this.menuBar[0]:   //Material Input
-                this.inputs.splice(index, 1);
-                rectObj.materialInput = this.inputs;
+            case this.inputMenuBar[0]:   //Material Input
+                this.materialList.removeAt(this.materialList.length - 1);
+                rectObj.materialInput = this.materialList.value;
                 break;
-            case this.menuBar[1]:   //Output
-                this.outputs.splice(index, 1);
-                rectObj.outputs = this.outputs;
+            
+            case this.inputMenuBar[1]:   //Energy Input
+                this.energyList.removeAt(this.energyList.length - 1);
+                rectObj.energyInputs = this.energyList.value;
                 break;
-            case this.menuBar[2]:   //Byproduct
-                this.byproducts.splice(index, 1);
-                rectObj.byproducts = this.byproducts;
+            case this.inputMenuBar[2]:   //Transportation Input
+                this.transportList.removeAt(this.transportList.length - 1);
+                rectObj.transportations = this.transportList.value;
                 break;
-            case this.menuBar[3]:   //Energy Input
-                this.energy.splice(index, 1);
-                rectObj.energyInputs = this.energy;
+            case this.outputMenuBar[0]:   //Output
+                this.outputList.removeAt(this.outputList.length - 1);
+                rectObj.outputs = this.outputList.value;
                 break;
-            case this.menuBar[4]:   //Transportation Input
-                this.transportations.splice(index, 1);
-                rectObj.transportations = this.transportations;
+            case this.outputMenuBar[1]:   //Byproduct
+                this.byproductList.removeAt(this.byproductList.length - 1);
+                rectObj.byproducts = this.byproductList.value;
                 break;
-            case this.menuBar[5]:   //Direct Emission
-                this.emissions.splice(index, 1);
-                rectObj.directEmissions = this.emissions;
+            case this.outputMenuBar[2]:   //Direct Emission
+                this.emissionList.removeAt(this.emissionList.length - 1);
+                rectObj.directEmissions = this.emissionList.value;
                 break;
         }
         this.getDetails();
@@ -731,7 +593,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     var focusedElement = <HTMLInputElement>document.activeElement;
                     focusedElement.blur();
                 }
-                console.log(this.project.processNodes, this.project.separatorArray, this.currentlySelectedNode);
+                console.log(this.project.processNodes, this.project.separatorArray);
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -862,6 +724,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     onDblClick() {
         if (this.isEdit) {
             let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
+            console.log(result[1]);
+            console.log(this.mouseX - this.svgOffsetLeft);
             let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
                 [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
@@ -908,6 +772,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     createAbandonedNodes(r: Rect, index, indexAtProcess) {
         var rect = this.abandonedDraw.rect(100, 50);
         let text = this.abandonedDraw.text(r.processName)
+
         rect.attr({
             x: 55,
             y: 20 * ( index + 1),
@@ -996,7 +861,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     createProcessNodes(index, width, isDoubleClick: Boolean) {
         let r = this.project.processNodes[index];
         let rect = this.draw.rect(100, 50);
-        let text = this.draw.text(r.processName)
+        let text = this.draw.text(r.processName);
+
         if (isDoubleClick) {
             rect.attr({
                 x: r.getX() + width,
@@ -1006,8 +872,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 'stroke-width': 1,
             });
             r.setId(rect.node.id);
-
-            
         } else {
             //scaling 
             let index = this.project.lifeCycleStages.indexOf(r.getCategories());
@@ -1020,19 +884,16 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 class: Rect,
                 fill: '#FFF',
                 'stroke-width': 1,
-                text: "test"
             });
             r.setX(x);
         }
-
-        
         rect.data('key', index);    //saving the index of the data for this node pointing to project.processNodes
         rect.draggy();
 
         text.attr({
             id: rect.node.id + "text"
         });
-        
+
         text.move(rect.x() + 25, rect.y() + 12.5);
 
         //if onclick set the border color
@@ -1041,10 +902,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         } else {
             rect.stroke({ color: '#4e14e0' });
         }
-        //while dragging move the text as well 
         rect.on('dragmove', (event) => {
             text.move(rect.x() + 25, rect.y() + 12.5)
         });
+
         //At the end of the dragging, check which category is the box in
         rect.on('dragend', (event) => {
             this.prepareForUndoableAction();
@@ -1144,7 +1005,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.head = this.currentlySelectedNode;
                 this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-                this.selectedTab = this.menuBar[0];
+                this.selectedTab = this.inputMenuBar[0];
                 document.getElementById('processBoxDetailsContainer').style.display = 'block';
                 this.getDetails();
                 
@@ -1229,21 +1090,20 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     onSelectedNodeChange(rect: SVG.Rect, text: SVG.Text) {
         if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
-            this.saveAndClearDetails();
             document.getElementById('processBoxDetailsContainer').style.display = 'none';
+            this.saveAndClearDetails();
             this.currentlySelectedNode = null;
             this.currentlySelectedText = null;
-        } else {
+        }  else {
             this.currentlySelectedNode = rect;
             this.currentlySelectedText = text;
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-            this.selectedTab = this.menuBar[0];
+            this.selectedTab = this.inputMenuBar[0];
             document.getElementById('processBoxDetailsContainer').style.display = 'block';
             this.getDetails();
         }
 
     }
-
     /**
      * Adds a node to process component
      *
@@ -1271,7 +1131,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * 
      * @param rect A rect object
      */
-    removeRect(rect: SVG.Rect, text:SVG.Text) {
+    removeRect(rect: SVG.Rect, text: SVG.Text) {
         if (this.isEdit) {
 
             const dialogConfig = new MatDialogConfig();
@@ -1326,6 +1186,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         if (i == this.project.processNodes.length - 1) {
                             this.project.processNodes.splice(removedIndex, 1);
                             rect.remove();
+                            text.remove();
                         }
 
                     }
@@ -1334,8 +1195,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     } else if (this.tail = rect) {
                         this.tail = null;
                     }
-
-                    text.remove();
                 }
             });
 
@@ -1357,7 +1216,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let dataNode = this.project.processNodes[i];
                 if (dataNode.id == rectObj.id) {
                     this.project.processNodes[i] = rectObj;
-                    console.log(rectObj);
                 }
             }
         }
@@ -1428,6 +1286,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             })
         }
     }
+
     /**
      * onclick zoom out button to decrease the size of every node
      * */
@@ -1441,6 +1300,51 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             })
         }
     }
+
+    /**================================================================
+     *                    FORM CONTROL FUNCTIONS
+     * ================================================================*/
+    // add a input form group
+    addInput(list: FormArray) {
+        switch (list) {
+            case this.materialList:
+                this.materialList.push(this.fb.group(new MaterialInput()));
+                break;
+            case this.energyList:
+                this.energyList.push(this.fb.group(new EnergyInput()));
+                break;
+            case this.transportList:
+                this.transportList.push(this.fb.group(new TransportationInput()));
+                break;
+            case this.outputList:
+                this.outputList.push(this.fb.group(new Output()));
+                break;
+            case this.byproductList:
+                this.byproductList.push(this.fb.group(new Byproduct()));
+                break;
+            case this.emissionList:
+                this.emissionList.push(this.fb.group(new DirectEmission()));
+                break;
+        }
+    }
+
+    // remove input from group
+    removeInput(list: FormArray, index: number) {
+        list.removeAt(index);
+    }
+
+    // get the formgroup under inputs form array
+    getInputsFormGroup(list: FormArray, index: number): FormGroup {
+        const formGroup = list.controls[index] as FormGroup;
+        return formGroup;
+    }
+
+    clearFormArray (formArray: FormArray) {
+        while (formArray.length !== 0) {
+            formArray.removeAt(0);
+        }
+    }
+
     /**Read project data from dataService and update the form */
     readJSON(data) {
         var projectData = JSON.parse(data);
@@ -1615,6 +1519,5 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.project = this.dataService.getProject();
         this.getDetails();
         this.cd.detectChanges();
-        
     }
 }

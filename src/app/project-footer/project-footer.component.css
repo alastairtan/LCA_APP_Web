@@ -48,3 +48,378 @@
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.nav-float-right {
+    color: white;
+    position: absolute;
+    right: 0%;
+    height: 100%;
+}
+
+.processcontainer {
+    display: block;
+    height: 85vh;
+    border: solid 1px;
+    margin: 2vh 2vw;
+    width: 100%;
+    background: white;
+}
+
+.processBoxContainer {
+    display: block;
+    height: 55vh;
+}
+
+.processBoxDetailsContainer {
+    display: block;
+    height: 75vh;
+    max-height: 75vh;
+    width: 95%;
+    border: solid 1px;
+    margin: 0 2.5%;
+    overflow: scroll;
+}
+
+.buttonContainer {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.box-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    border: solid 1px;
+    color: black;
+    width: auto;
+    height: auto;
+    font-size: medium;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+}
+
+.containerHeader {
+    display: flex;
+    justify-content: space-around;
+    padding: 0;
+}
+
+.add-container {
+    margin: 0 auto;
+    padding: 5px;
+    text-align: center;
+    background-color: #f2f3f2;
+}
+
+.empty-text {
+    font-style: italic;
+    text-align: center;
+}
+
+.input-output {
+    background: #f2f3f2;
+    width: 95%;
+    margin: 5px 2.5%;
+    border: solid grey 1px;
+    border-radius: 3px;
+    font-size: medium;
+    padding: 3px;
+}
+
+.material-input {
+    display: block;
+    border: solid 1px;
+    border-radius: 3px;
+    width: 95%;
+    height: 25px;
+    padding: 0;
+    margin: 1px 2.5%;
+    font-size: medium;
+    line-height: 1.5;
+    border-radius: 3px;
+    color: black;
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+}
+
+.vcenter {
+    margin-left: 0;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+}
+
+.smaller-input {
+    width: 92%;
+    margin: 1px 4%;
+}
+
+.odd-color {
+    background: #f2f3f2;
+}
+
+.even-color {
+    background: #e5e7e5;
+}
+
+.input-field {
+    padding: 0;
+}
+/*
+    Add-delete buttons for MaterialInput
+*/
+.btn-sq-xs {
+    margin: 1px;
+    padding: 4px 9px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.btn-add {
+    color: #fff;
+    background-color: #7cc8a9;
+    border-color: #7cc883;
+}
+
+.btn-delete {
+    color: #fff;
+    background-color: #c87c9b;
+    border-color: #c87cc1;
+}
+
+.menuTabs {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    display: block;
+    list-style-type: none;
+}
+
+    .menuTabs a {
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+    }
+
+    /* Add a color to the active/current link */
+    .menuTabs .active {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+input {
+    height: 7vh;
+    width: 100%;
+}
+
+.example-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+
+.abandoned {
+    overflow: hidden;
+    height: 80%;
+    width: 100%;
+    z-index: 3;
+}
+
+.menuButtons {
+    transition: opacity .35s ease;
+    width: inherit;
+    font-size: 1em;
+}
+
+.selectedMenuButton {
+    background: #fe7c51;
+}
+
+/*
+    A container for animation purposes
+*/
+.save-container {
+    position: absolute;
+    right: 40px;
+    bottom: 60px;
+    width: 100px;
+    align-items: center;
+}
+
+.menuicon {
+    /*/border-radius: 50%;
+    background-image: linear-gradient(to left, #7c9bc9 0%, #99b8e8 51%, #b4cef7 100%);
+    border: none;*/
+    width: auto;
+    height: auto;
+    margin-left: 25px;
+}
+
+.btn-save {
+    color: #fff;
+    background-color: #7c9bc8;
+    border-color: #7c9bc8;
+}
+
+    .btn-save:hover {
+        transform: scale(1.05);
+    }
+
+.disabled-btn-save {
+    color: black;
+    background-color: #ada7bc;
+    border-color: #ada7bc;
+    cursor: not-allowed;
+}
+
+/*
+    CSS for the text to show after saving
+*/
+.showtime {
+    color: black;
+    font-style: italic;
+    position: absolute;
+    right: 40px;
+    bottom: 20px;
+    font-family: 'Raleway', sans-serif;
+}
+
+.stage {
+    width: 100%;
+    left: 10em
+}
+
+.button-container {
+    margin-left: 3vw;
+}
+
+.processButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: transparent;
+}
+
+
+#processNameContainer {
+    display: none;
+    height: 28vh;
+    border: solid 1px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+    margin-top: 1vh;
+    width: 100%;
+}
+
+    #processNameContainer p {
+        display: block;
+        background-color: #ffa384;
+        font-family: sans-serif;
+        text-align: center;
+        font-size: 1.25vw;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+    }
+
+
+.buttonsContainer {
+    display: flex;
+    margin-top: 15px;
+    background-color: #ffa384;
+    border: solid;
+}
+
+    .buttonsContainer button {
+        margin-left: 1vw;
+        margin-right: 1vw;
+        height: auto;
+    }
+
+        .buttonsContainer button:hover {
+            background-color: #fc7244;
+        }
+
+.container-fluid {
+    background-color: #f9fafc;
+    height: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.sidenav {
+    width: 100%;
+    height: 100%;
+    background-color: #e6e8e6;
+    margin-bottom: 10px;
+}
+
+
+.title {
+    font-size: 1.5vw;
+    font-family: sans-serif;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.subtitle {
+    font-family: sans-serif;
+    font-size: 1.25vw;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 2vh;
+}
+
+.processNameDiv {
+    font-family: sans-serif;
+    font-size: 1vw;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.5vh;
+}
+
+.row .container {
+    height: 100%;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 10% 70% 20%;
+    height: 100%;
+    width: 100%;
+}
+
+.mat-toolbar-row, .mat-toolbar-single-row {
+    height: 5vh;
+    padding-left: 0;
+    padding-right: 0;
+    width: inherit;
+}
+
+.mat-toolbar-multiple-rows {
+    min-height: 5vh;
+    background-color: #cfd0d1;
+}
+
+.container {
+    width: 100%;
+    padding-left: 15px;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+
+
+.btn {
+    background-color: #ffa384;
+}

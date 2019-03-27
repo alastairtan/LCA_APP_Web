@@ -4,7 +4,6 @@ export class MaterialInput {
     unit: string;
     carbonStorage: string;
     activityDataOrigin: string;
-    emissionDataOrigin: string;
     emissionFactorData: string;
     emissionFactorSource: string;
     remarks: string; 
@@ -12,13 +11,23 @@ export class MaterialInput {
     constructor() {
         this.materialName = '';
         this.quantity = '0';
-        this.unit = '';
+        this.unit = 'number';
         this.carbonStorage = '';
         this.activityDataOrigin = '';
-        this.emissionDataOrigin = '';
         this.emissionFactorData = '';
         this.emissionFactorSource = '';
         this.remarks = 'N/A';
+    }
+
+    parseData(jsonObj) {
+        this.materialName = jsonObj.materialName;
+        this.quantity = jsonObj.quantity;
+        this.unit = jsonObj.unit;
+        this.carbonStorage = jsonObj.carbonStorage;
+        this.activityDataOrigin = jsonObj.activityDataOrigin;
+        this.emissionFactorData = jsonObj.emissionFactorData;
+        this.emissionFactorSource = jsonObj.emissionFactorSource;
+        this.remarks = jsonObj.remarks;
     }
 
     equals(other: MaterialInput) {
@@ -28,7 +37,6 @@ export class MaterialInput {
         isEqual = isEqual && (this.unit == other.unit);
         isEqual = isEqual && (this.carbonStorage == other.carbonStorage);
         isEqual = isEqual && (this.activityDataOrigin == other.activityDataOrigin);
-        isEqual = isEqual && (this.emissionDataOrigin == other.emissionDataOrigin);
         isEqual = isEqual && (this.emissionFactorData == other.emissionFactorData);
         isEqual = isEqual && (this.emissionFactorSource == other.emissionFactorSource);
         isEqual = isEqual && (this.remarks == other.remarks);
@@ -42,7 +50,6 @@ export class MaterialInput {
         isEqual = isEqual && (thisInput.unit == thatInput.unit);
         isEqual = isEqual && (thisInput.carbonStorage == thatInput.carbonStorage);
         isEqual = isEqual && (thisInput.activityDataOrigin == thatInput.activityDataOrigin);
-        isEqual = isEqual && (thisInput.emissionDataOrigin == thatInput.emissionDataOrigin);
         isEqual = isEqual && (thisInput.emissionFactorData == thatInput.emissionFactorData);
         isEqual = isEqual && (thisInput.emissionFactorSource == thatInput.emissionFactorSource);
         isEqual = isEqual && (thisInput.remarks == thatInput.remarks);

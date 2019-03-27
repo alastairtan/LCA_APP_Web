@@ -16,11 +16,24 @@ export class EnergyInput {
         this.processTime = '0';
         this.rating = '0.0001';
         this.quantity = '0';
-        this.unit = '';
+        this.unit = 'number';
         this.activityDataOrigin = '';
         this.emissionFactorData = '';
         this.emissionFactorSource = '';
         this.remarks = 'N/A';
+    }
+
+    parseData(jsonObj) {
+        this.equipmentName = jsonObj.equipmentName;
+        this.energyType = jsonObj.energyType;
+        this.processTime = jsonObj.processTime;
+        this.rating = jsonObj.rating;
+        this.quantity = jsonObj.quantity;
+        this.unit = jsonObj.unit;
+        this.activityDataOrigin = jsonObj.activityDataOrigin;
+        this.emissionFactorData = jsonObj.emissionFactorData;
+        this.emissionFactorSource = jsonObj.emissionFactorSource;
+        this.remarks = jsonObj.remarks;
     }
 
     equals(other: EnergyInput) {

@@ -70,7 +70,7 @@
         </form>
         <div class="row">
             <div class="buttonsContainer">
-                <button>
+                <button (click)="saveElsewhere()">
                     Save
                 </button>
                 <button *ngIf="this.currentProject.projectName != ''" (click)="navNext()"><span>Next</span></button>
