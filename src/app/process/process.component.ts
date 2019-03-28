@@ -94,6 +94,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     private waitId;
 
+    currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
     inputMenuBar = ['Material', 'Energy', 'Transport'];
@@ -188,7 +189,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     getDetails() {
         //get corresponding rect 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
-        
+        this.currentlySelectedNode.processName = rectObj.processName;
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:           //Material Input
                 //Clear old data
@@ -257,6 +258,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //get corresponding node 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         this.prepareForUndoableAction();
+        
         //Update all material inputs
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:       //Material Input
@@ -331,12 +333,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Update the array for the rect
                 rectObj.directEmissions = emissions;
                 break;
-            case this.inputMenuBar[6]:
-                let inputDiv = document.getElementById('name');
-                let HTMLInput = <HTMLInputElement>inputDiv;
-                rectObj.processName = HTMLInput.value;
-                HTMLInput.value = "";
         }
+        //Save the process name and data to the app
+        rectObj.processName = this.currentlySelectedNode.processName;
+        this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
 
@@ -588,6 +588,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     handleKeyboardEvent(event: KeyboardEvent) {
         switch (event.key) {
             //Arrow key events for ease of navigation
+            case 'Home':
+                console.log(this.currentProcessName);
+                break;
             case 'Enter': case 'Escape':
                 if (document.activeElement.nodeName != 'BODY') {
                     this.saveAndClearDetails();
@@ -997,11 +1000,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
+                    this.currentlySelectedText = text;
                     this.currentlySelectedNode.stroke({ color: '#ffa384' })
                 } else {
                     this.currentlySelectedNode.stroke({ color: '#000000' })
                     this.saveAndClearDetails();
                     this.currentlySelectedNode = rect;
+                    this.currentlySelectedText = text;
                     this.currentlySelectedNode.stroke({ color: '#ffa384' })
                 }
                 this.head = this.currentlySelectedNode;
@@ -1098,6 +1103,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }  else {
             this.currentlySelectedNode = rect;
             this.currentlySelectedText = text;
+            console.log(this.currentlySelectedText)
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
             this.selectedTab = this.inputMenuBar[0];
             document.getElementById('processBoxDetailsContainer').style.display = 'block';
@@ -1458,7 +1464,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     pushToCookie() {
         let recentProject: Project[] = JSON.parse(this.cookies.get('recent'));
         for (let i = 0; i < recentProject.length; i++) {
-            if (recentProject[i].scopeName == this.project.scopeName) {
+            if (recentProject[i].projectName == this.project.projectName) {
                 recentProject[i] = this.project;
                 this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
                 return;
