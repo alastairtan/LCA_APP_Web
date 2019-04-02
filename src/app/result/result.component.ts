@@ -22,6 +22,10 @@ export class ResultComponent implements OnInit {
     demandVectorForm: FormGroup;
     demandVector: FormArray;
 
+    //Variable for highlighting the table
+    hoveredRow = null;
+    hoveredCol = null;
+
     constructor(private dataService: DataService,
                 private router: Router,
                 private cd: ChangeDetectorRef,
@@ -46,6 +50,8 @@ export class ResultComponent implements OnInit {
                 }
                 console.log(vector);
                 break;
+            case 'End':
+                console.log(this.economicflow);
             default:
                 //Other keyboard events
                 break;
@@ -115,7 +121,6 @@ export class ResultComponent implements OnInit {
     transformingDataIntoMatrix() {
         for (let i = 0; i < this.economicflow.length; i++) {
             let row: any[] = [];
-            row.push(this.economicflow[i]);
             for (let j = 0; j < this.processName.length; j++) {
                 if (this.process[j][i] == undefined) {
                     row.push(0);
@@ -131,6 +136,14 @@ export class ResultComponent implements OnInit {
             this.demandVector.push(valueFormGroup);
         }
         console.log(this.result);
+    }
+
+    /**
+     * Record down the row and column that is hovered over, in order to highlight
+     */
+    onMouseOver(row, col) {
+        this.hoveredRow = row;
+        this.hoveredCol = col;
     }
     
     /**Save the current project to session storage, and navigate to the previous page */
