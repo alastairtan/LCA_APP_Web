@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 import { Project } from '../project';
 
@@ -18,15 +19,37 @@ export class ResultComponent implements OnInit {
     processName: String[] = [];
     economicflow: String[] = [];
     result: any[] = [];
+    demandVectorForm: FormGroup;
+    demandVector: FormArray;
 
     constructor(private dataService: DataService,
                 private router: Router,
-                private cd: ChangeDetectorRef) { }
+                private cd: ChangeDetectorRef,
+                private fb: FormBuilder) { }
 
     ngOnInit() {
+        this.demandVectorForm = this.fb.group({ inputs: this.fb.array([]) });
+        this.demandVector = this.demandVectorForm.get('inputs') as FormArray;
+
         this.sign();
         this.transformingDataIntoMatrix();
+    }
 
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        switch (event.key) {
+            //Arrow key events for ease of navigation
+            case 'Home':
+                let vector = [];
+                for (let val of this.demandVector.value) {
+                    vector.push(val.value);
+                }
+                console.log(vector);
+                break;
+            default:
+                //Other keyboard events
+                break;
+        }
     }
 
     sign() {
@@ -102,6 +125,10 @@ export class ResultComponent implements OnInit {
             }
             console.log(row);
             this.result.push(row);
+            var valueFormGroup = new FormGroup({
+                value: new FormControl(0)
+            });
+            this.demandVector.push(valueFormGroup);
         }
         console.log(this.result);
     }

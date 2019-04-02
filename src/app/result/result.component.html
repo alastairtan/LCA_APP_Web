@@ -29,17 +29,23 @@
                     <p class="title">
                         Generated results
                     </p>
-                    <table>
-                        <tr>
-                            <th>Entity</th>
-                            <th *ngFor="let name of processName">{{name}}</th>
-                        </tr>
-                        <tr *ngFor="let row of result">
-                            <td *ngFor="let col of row">
-                                {{col}}
-                            </td>
-                        </tr>
-                    </table>
+                    <form [formGroup]="demandVectorForm" id="demandVectorForm">
+                        <table formArrayName="inputs">
+                            <tr>
+                                <th>Entity</th>
+                                <th *ngFor="let name of processName">{{name}}</th>
+                                <th>Demand vector</th>
+                            </tr>
+                            <tr *ngFor="let row of result; let value of demandVector.controls; let i = index;">
+                                <td *ngFor="let col of row">
+                                    {{col}}
+                                </td>
+                                <td [formGroupName]="i" style="width:5vw">
+                                    <input type="number" autocomplete="off" formControlName="value"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
                 </div>
 
             </div>
