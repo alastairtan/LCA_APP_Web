@@ -29,12 +29,37 @@
                     <p class="title">
                         Generated results
                     </p>
+                    <p class="subtitle">
+                        Technical Matrix
+                    </p>
                     <table>
                         <tr>
                             <th>Entity</th>
                             <th *ngFor="let name of processName">{{name}}</th>
                         </tr>
                         <tr *ngFor="let row of result">
+                            <td *ngFor="let col of row">
+                                {{col}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+            <!-- Show last saved timing at the bottom right hand corner-->
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="placeholder defaultCursor">
+                    <p class="subtitle">
+                        Environmental Matrix
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Entity</th>
+                            <th *ngFor="let name of processName">{{name}}</th>
+                        </tr>
+                        <tr *ngFor="let row of resultEnvironmental">
                             <td *ngFor="let col of row">
                                 {{col}}
                             </td>
