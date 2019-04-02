@@ -19,8 +19,12 @@ body {
 */
 #pic {
     display: none;
-    width: 25vw;
-    max-height: 60vh;
+    width: 100%;
+    max-width: 26vw;
+    height: 100%;
+    max-height: 30vh;
+    margin: 0;
+    object-fit: contain;
 }
 
     #pic:hover {
@@ -35,18 +39,22 @@ body {
 }
 
 .picture {
-    max-width: 293px;
-    max-height: 359px;
-    width: 293px;
-    height: 359px;
-    background: url("/../assets/img/insert-image.png") no-repeat;
+    width: 26vw;
+    height: 30vh;
+    background: url("/../assets/img/insert-image.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
     transition: 0.3s;
     margin-left: auto;
     margin-right: auto;
 }
 
     .picture:hover {
-        background: url("/../assets/img/insert-image-hover.png") no-repeat;
+        background: url("/../assets/img/insert-image-hover.png");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
         transition-timing-function: ease-in;
     }
 
@@ -64,7 +72,7 @@ body {
 }
 
     .content .content-overlay {
-        margin-top: 1vh;
+        margin-top: 0;
         background: rgba(124,155,200,0.7);
         position: absolute;
         height: 100%;
