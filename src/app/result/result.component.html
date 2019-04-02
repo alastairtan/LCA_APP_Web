@@ -69,7 +69,7 @@
                             <th>Entity</th>
                             <th *ngFor="let name of processName">{{name}}</th>
                         </tr>
-                        <tr *ngFor="let row of resultEnvironmental">
+                        <tr *ngFor="let row of resultEnvironmental; let i = index">
                             <th style="font-weight:300">{{environmentalflow[i]}}</th>
                             <td *ngFor="let col of row">
                                 {{col}}
