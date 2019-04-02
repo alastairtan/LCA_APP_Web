@@ -192,6 +192,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
         sourceCheck.checked = rectObj.isSource;
+        console.log(rectObj.isSource);
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:           //Material Input
                 //Clear old data
@@ -340,6 +341,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rectObj.processName = this.currentlySelectedNode.processName;
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         rectObj.isSource = sourceCheck.checked;
+        console.log(rectObj.isSource);
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
