@@ -26,7 +26,7 @@ export class ResultComponent implements OnInit {
     ngOnInit() {
         this.sign();
         this.transformingDataIntoMatrix();
-
+        this.checkIsProcessNodeSource();
     }
 
     sign() {
@@ -105,7 +105,36 @@ export class ResultComponent implements OnInit {
         }
         console.log(this.result);
     }
-    
+
+    checkIsProcessNodeSource() {
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            let node = this.project.processNodes[i];
+            if (node.isSource) {
+                //add a column of zeros with process name = source name
+                let output = this.project.processNodes[i].outputs;
+                for (let j = 0; j < output.length; j++) {
+                    this.processName.push(output[i].outputName);
+                    this.pushSourceColumn(output[i].outputName);
+                }
+            }
+        }
+    }
+
+    pushSourceColumn(name: String) {
+        let index = this.economicVarExist(name);
+        let column = [];
+        for (let i = 0; i < this.result.length; i++) {
+            if (i == index) {
+                column.push(1);
+            } else {
+                column.push(0);
+            }
+        }
+
+        this.result.push(column);
+        console.log(this.result)
+        
+    }
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
         this.router.navigate(['/process']);
