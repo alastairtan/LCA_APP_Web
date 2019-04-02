@@ -158,6 +158,9 @@ export class ResultComponent implements OnInit {
                     vector[index] = emission.quantity;
                 } else {
                     this.environmentalflow.push(emission.emissionType);
+                    while (vector.length != this.environmentalflow.length - 1) {
+                        vector.push(0);
+                    }
                     vector.push(emission.quantity);
                 }
             }
