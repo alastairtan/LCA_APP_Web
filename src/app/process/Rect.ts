@@ -13,6 +13,7 @@ export class Rect {
     nextId: string[] = [];
     connectors: Connector[] = [];
     isClicked;
+    isSource: boolean;
     categories;
     processName: string;
     materialInput: MaterialInput[] = [];
@@ -24,12 +25,13 @@ export class Rect {
     isSource: Boolean;
     isTarget: Boolean;
 
-    constructor(x, y, id, nextId, connectors, isClicked, categories, processName, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
+    constructor(x, y, id, nextId, connectors, isClicked, isSource, categories, processName, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
         this.x = x;
         this.y = y
         this.id = id;
         this.nextId = nextId;
         this.isClicked = isClicked;
+        this.isSource = isSource;
         this.categories = categories;
         this.connectors = connectors;
         this.processName = processName;

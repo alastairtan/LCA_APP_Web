@@ -98,7 +98,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
     inputMenuBar = ['Material', 'Energy', 'Transport'];
-    outputMenuBar = ['Output', 'Byproduct', 'Others'];
+    outputMenuBar = [' Material ', 'Byproduct', 'Emission'];
     selectedTab = this.inputMenuBar[0];
     isOpen = false;
 
@@ -189,7 +189,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     getDetails() {
         //get corresponding rect 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
+        sourceCheck.checked = rectObj.isSource;
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:           //Material Input
                 //Clear old data
@@ -336,8 +338,31 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         //Save the process name and data to the app
         rectObj.processName = this.currentlySelectedNode.processName;
+        let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
+        rectObj.isSource = sourceCheck.checked;
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
+    }
+
+    isCurrentProcessSource() {
+        if (this.currentlySelectedNode == null || this.currentlySelectedNode == undefined) {
+            return false;
+        } else {
+            return this.project.processNodes[this.currentlySelectedNode.data('key')].isSource;
+        }
+    }
+
+    /**
+     * Set the currently selected process as a source
+     */
+    setSourceProcess() {
+        let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
+        if (sourceCheck.checked) {
+            if (this.inputMenuBar.includes(this.selectedTab)) {
+                this.selectedTab = this.outputMenuBar[0];
+            }
+        }
+        this.saveAndClearDetails();
     }
 
     /**
@@ -589,7 +614,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':
-                console.log(this.currentProcessName);
+                console.log(this.currentlySelectedNode.data('isSource'));
                 break;
             case 'Enter': case 'Escape':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -731,7 +756,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             console.log(result[1]);
             console.log(this.mouseX - this.svgOffsetLeft);
             let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
-                [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
+                [], [], false, false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
             this.createProcessNodes(indexInProcessNodes, result[1], true);
         } else {
@@ -798,7 +823,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
                 let r = new Rect(this.mouseX - this.svgOffsetLeft - this.svgabandoned.nativeElement.offsetWidth, this.mouseY - this.svgOffsetTop,
-                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isClicked, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
+                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isClicked, rectObj.isSource, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 this.project.processNodes[rect.data('key')] = r;
                 this.transferedRect = this.createProcessNodes(rect.data('key'), 0, false);
             } else {
@@ -821,7 +846,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let result = this.allocatingLifeStages(rect.x());
                 let rectObj = this.project.processNodes[rect.data('key')];
                 this.project.processNodes[rect.data('key')] = new Rect(rect.x() - this.svgabandoned.nativeElement.offsetWidth - result[1], rect.y(), rectObj.id, rectObj.nextId,
-                    rectObj.connectors, rectObj.isClicked, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
+                    rectObj.connectors, rectObj.isClicked, rectObj.isSource, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 
                 rect.remove();
                 //TODO:
@@ -915,7 +940,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.prepareForUndoableAction();
             let result = this.allocatingLifeStages(rect.x());
             let oldObj = this.project.processNodes[rect.data('key')];
-            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isClicked, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
+            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isClicked, oldObj.isSource, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
             this.updateRect(rect.data('key'), rectObj);
         });
 
@@ -1011,7 +1036,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.head = this.currentlySelectedNode;
                 this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-                this.selectedTab = this.inputMenuBar[0];
+                if (this.project.processNodes[this.currentlySelectedNode.data('key')].isSource) {
+                    this.selectedTab = this.outputMenuBar[0];
+                } else {
+                    this.selectedTab = this.inputMenuBar[0];
+                }
                 document.getElementById('processBoxDetailsContainer').style.display = 'block';
                 this.getDetails();
                 
@@ -1105,7 +1134,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.currentlySelectedText = text;
             console.log(this.currentlySelectedText)
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-            this.selectedTab = this.inputMenuBar[0];
+            console.log(this.project.processNodes[this.currentlySelectedNode.data('key')].isSource)
+            if (this.project.processNodes[this.currentlySelectedNode.data('key')].isSource) {
+                this.selectedTab = this.outputMenuBar[0];
+            } else {
+                this.selectedTab = this.inputMenuBar[0];
+            }
             document.getElementById('processBoxDetailsContainer').style.display = 'block';
             this.getDetails();
         }
@@ -1266,8 +1300,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * onclick add button which manually add a node in process component
      * */
     addProcessNodeEvent() {
+        this.isEdit = false;
+        this.editMode();
         let stageIndex = 0;
-        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
+        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
         let index = this.addRect(rectObj);
         this.createProcessNodes(index,0, true);
     }
@@ -1276,6 +1312,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * onclick delete button to delete a process node
      * */
     deleteProcessNodeEvent() {
+        this.isEdit = false;
+        this.editMode();
         this.removeRect(this.currentlySelectedNode, this.currentlySelectedText);
         this.currentlySelectedNode = null;
     }
@@ -1426,9 +1464,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     editMode() {
         if (this.isEdit) {
             this.isEdit = false;
-            document.getElementById('editButton').style.backgroundColor = 'transparent'
         } else {
-            document.getElementById('editButton').style.backgroundColor = '#ffa384'
             this.isEdit = true;
         }
     }

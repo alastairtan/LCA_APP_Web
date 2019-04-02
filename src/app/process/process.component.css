@@ -54,6 +54,14 @@
     padding: 0;
 }
 
+.source-container {
+    font-size: 0.8vw;
+    margin: 0 auto;
+    padding: 2px;
+    text-align: center;
+    background-color: #d8dbd8;
+}
+
 .add-container {
     margin: 0 auto;
     padding: 5px;
@@ -139,6 +147,20 @@
     border-color: #c87cc1;
 }
 
+.menuHeader {
+    background: #fe6938;
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8vw;
+    font-weight: bold;
+}
+
+.disabledMenuHeader {
+    background: #a2aba2;
+    cursor: not-allowed;
+}
+
 .menuTabs {
     display: flex;
     flex-direction: column;
@@ -166,6 +188,11 @@ input {
     height: 7vh;
     width: 100%;
 }
+input[type=checkbox] {
+    margin: 2px auto;
+    height: 1vw;
+}
+
 .example-container {
     position: absolute;
     top: 0;
@@ -173,7 +200,6 @@ input {
     left: 0;
     right: 0;
 }
-
 
 .abandoned {
     overflow: hidden;
@@ -190,6 +216,11 @@ input {
 
 .selectedMenuButton {
     background: #fe7c51;
+}
+
+.disabledMenuButtons {
+    background: #bdc3bd;
+    cursor: not-allowed;
 }
 
 /*
@@ -256,7 +287,32 @@ input {
     justify-content: space-between;
     background-color: transparent;
     font-size: 1.2vw;
+    border: 2px solid #a7a9ab;
+    border-radius: 5px;
+    margin: auto 1.9vw;
 }
+
+    .processButtons:hover {
+        background: #e8e9e9;
+    }
+
+.viewButton {
+    border: 2px solid #ff6a38;
+    background: #ffa384;
+}
+
+    .viewButton:hover {
+        background: #ffc9b7;
+    }
+
+.doneButton {
+    border: 2px solid #eb3b00;
+    background-color: #ff6a38;
+}
+
+    .doneButton:hover {
+        background: #ffa384;
+    }
 
 
 #processNameContainer {
