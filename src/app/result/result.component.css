@@ -41,3 +41,9 @@ input[type=number] {
 .highlighted {
     background-color: #ffc9b7;
 }
+
+.subtitle {
+    font-family: sans-serif;
+    font-size: 1.25vw;
+    font-weight: bold;
+}

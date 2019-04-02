@@ -22,6 +22,7 @@ export class Rect {
     energyInputs: EnergyInput[] = [];
     transportations: TransportationInput[] = [];
     directEmissions: DirectEmission[] = [];
+    isTarget: Boolean;
 
     constructor(x, y, id, nextId, connectors, isClicked, isSource, categories, processName, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
         this.x = x;
