@@ -345,7 +345,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         if (sourceCheck.checked) {
             if (this.inputMenuBar.includes(this.selectedTab)) {
-                this.selectedTab = this.outputMenuBar[0];
+                this.changeTab(this.outputMenuBar[0]);
             }
         }
         this.saveAndClearDetails();
