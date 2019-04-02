@@ -70,6 +70,7 @@
                             <th *ngFor="let name of processName">{{name}}</th>
                         </tr>
                         <tr *ngFor="let row of resultEnvironmental">
+                            <th style="font-weight:300">{{environmentalflow[i]}}</th>
                             <td *ngFor="let col of row">
                                 {{col}}
                             </td>
