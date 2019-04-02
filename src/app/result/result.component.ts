@@ -61,12 +61,10 @@ export class ResultComponent implements OnInit {
             }
             this.process.push(processUnit);
         }
-        console.log(this.process)
     }
 
     economicVarExist(name: String) {
         for (let i = 0; i < this.economicflow.length; i++) {
-            console.log(name, this.economicflow[i])
             if (this.economicflow[i].toLowerCase() == name.toLowerCase()) {
                 return i;
             }
@@ -77,7 +75,6 @@ export class ResultComponent implements OnInit {
     insertUnit(index, unit: Number, processUnit: Number[]) {
         if (processUnit.length < index) {
             let diff: any = index - processUnit.length + 1;
-            console.log(unit, diff)
             for (let i = 0; i < diff; i++) {
                 processUnit.push(0);
             }
@@ -85,8 +82,6 @@ export class ResultComponent implements OnInit {
         } else {
 
             processUnit[index] = unit;
-
-            console.log(unit, processUnit)
         }
     }
 
@@ -101,10 +96,8 @@ export class ResultComponent implements OnInit {
                     row.push(this.process[j][i]);
                 }
             }
-            console.log(row);
             this.result.push(row);
         }
-        console.log(this.result);
     }
 
     checkIsProcessNodeSource() {
@@ -114,8 +107,8 @@ export class ResultComponent implements OnInit {
                 //add a column of zeros with process name = source name
                 let output = this.project.processNodes[i].outputs;
                 for (let j = 0; j < output.length; j++) {
-                    this.processName.push(output[i].outputName);
-                    this.pushSourceColumn(output[i].outputName);
+                    this.processName.push(output[j].outputName);
+                    this.pushSourceColumn(output[j].outputName);
                 }
             }
         }
@@ -123,8 +116,6 @@ export class ResultComponent implements OnInit {
 
     pushSourceColumn(name: String) {
         let index = this.economicVarExist(name);
-        console.log(index);
-        let column = [];
         for (let i = 0; i < this.result.length; i++) {
             if (i == index) {
                 this.result[i].push(1);
@@ -132,9 +123,7 @@ export class ResultComponent implements OnInit {
                 this.result[i].push(0);
             }
         }
-
-        this.result.push(column);
-        console.log(this.result)
+        
         
     }
     /**Save the current project to session storage, and navigate to the previous page */
