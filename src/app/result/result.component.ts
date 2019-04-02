@@ -25,6 +25,7 @@ export class ResultComponent implements OnInit {
     //Variable for highlighting the table
     hoveredRow = null;
     hoveredCol = null;
+    rowCount = 0;
 
     constructor(private dataService: DataService,
                 private router: Router,
@@ -136,6 +137,7 @@ export class ResultComponent implements OnInit {
             this.demandVector.push(valueFormGroup);
         }
         console.log(this.result);
+        this.rowCount = this.economicflow.length;
     }
 
     /**

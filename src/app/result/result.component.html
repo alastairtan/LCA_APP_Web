@@ -34,7 +34,7 @@
                                 <tr>
                                     <th>Entity</th>
                                     <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(null, j)" [ngClass]="{highlighted: hoveredCol == j}">{{name}}</th>
-                                    <th>Demand vector</th>
+                                    <th (mouseenter)="onMouseOver(null, rowCount + 2)" [ngClass]="{highlighted: hoveredCol == rowCount + 2}">Demand vector</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -43,7 +43,7 @@
                                     <td *ngFor="let col of row; let j = index" on-mouseover="onMouseOver(i, j)" [ngClass]="{highlighted: (hoveredCol == j || hoveredRow == i)}">
                                         {{col}}
                                     </td>
-                                    <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(i, null)" [ngClass]="{highlighted: hoveredRow == i}">
+                                    <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(i, rowCount + 2)" [ngClass]="{highlighted: (hoveredRow == i || hoveredCol == rowCount + 2)}">
                                         <input type="number" autocomplete="off" formControlName="value" />
                                     </td>
                                 </tr>
