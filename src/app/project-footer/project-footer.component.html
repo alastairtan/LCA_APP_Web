@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html>
 <body>
-    <input type="text" [(ngModel)]="processName"/>
-    <br/>
+    <input type="text" [(ngModel)]="processName" />
+    <br />
     {{processName}}
+    <table>
+        <tr *ngFor="let row of array; let i = index">
+            <td *ngFor="let cell of row; let j = index" on-mouseover="mouseOverCell(i, j)" [ngClass]="{highlighted: (hoveredCol == j || hoveredRow == i)}">{{cell}}</td>
+        </tr>
+    </table>
 </body>
 </html>
