@@ -221,9 +221,7 @@ export class ResultComponent implements OnInit {
         }
         //check if length of columns is equal to process name
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
-        console.log(this.environmentalflow);
-        console.log(matrix);
-        console.log(this.resultEnvironmental);
+        
     }
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
