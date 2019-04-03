@@ -1,6 +1,8 @@
+
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 import { Project } from '../project';
 
@@ -22,16 +24,46 @@ export class ResultComponent implements OnInit {
     //display matrix 
     result: any[] = [];
     resultEnvironmental: any[] = [];
+    demandVectorForm: FormGroup;
+    demandVector: FormArray;
+
+    //Variable for highlighting the table
+    hoveredRow = null;
+    hoveredCol = null;
+    rowCount = 0;
 
     constructor(private dataService: DataService,
                 private router: Router,
-                private cd: ChangeDetectorRef) { }
+                private cd: ChangeDetectorRef,
+                private fb: FormBuilder) { }
 
     ngOnInit() {
+        this.demandVectorForm = this.fb.group({ inputs: this.fb.array([]) });
+        this.demandVector = this.demandVectorForm.get('inputs') as FormArray;
+
         this.sign();
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
         this.checkIsProcessNodeSource();
         this.geratingEnvironmentalMatrix();
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        switch (event.key) {
+            //Arrow key events for ease of navigation
+            case 'Home':
+                let vector = [];
+                for (let val of this.demandVector.value) {
+                    vector.push(val.value);
+                }
+                console.log(vector);
+                break;
+            case 'End':
+                console.log(this.economicflow);
+            default:
+                //Other keyboard events
+                break;
+        }
     }
 
     sign() {
@@ -102,7 +134,6 @@ export class ResultComponent implements OnInit {
     transformingDataIntoMatrix(label, data, result) {
         for (let i = 0; i < label.length; i++) {
             let row: any[] = [];
-            row.push(label[i]);
             for (let j = 0; j < data.length; j++) {
                 if (data[j][i] == undefined) {
                     row.push(0);
@@ -111,7 +142,21 @@ export class ResultComponent implements OnInit {
                 }
             }
             result.push(row);
+            var valueFormGroup = new FormGroup({
+                value: new FormControl(0)
+            });
+            this.demandVector.push(valueFormGroup);
         }
+        console.log(this.result);
+        this.rowCount = this.economicflow.length;
+    }
+
+    /**
+     * Record down the row and column that is hovered over, in order to highlight
+     */
+    onMouseOver(row, col) {
+        this.hoveredRow = row;
+        this.hoveredCol = col;
     }
 
     checkIsProcessNodeSource() {
@@ -164,7 +209,7 @@ export class ResultComponent implements OnInit {
                     vector.push(emission.quantity);
                 }
             }
-                matrix.push(vector);
+            matrix.push(vector);
         }
         while (matrix.length < this.processName.length) {
             let length = matrix[0].length;
@@ -176,7 +221,9 @@ export class ResultComponent implements OnInit {
         }
         //check if length of columns is equal to process name
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
-        
+        console.log(this.environmentalflow);
+        console.log(matrix);
+        console.log(this.resultEnvironmental);
     }
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {

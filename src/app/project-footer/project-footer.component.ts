@@ -10,4 +10,12 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./project-footer.component.css']
 })
 export class ProjectFooterComponent {
+    array = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]];
+    hoveredRow = null;
+    hoveredCol = null;
+
+    mouseOverCell(row, col) {
+        this.hoveredRow = row;
+        this.hoveredCol = col;
+    }
 }

@@ -2,7 +2,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-
     <div class="nav">
         <button (click)="navPrev()">
             <p class="navButtonFont">
@@ -32,17 +31,28 @@
                     <p class="subtitle">
                         Technical Matrix
                     </p>
-                    <table>
-                        <tr>
-                            <th>Entity</th>
-                            <th *ngFor="let name of processName">{{name}}</th>
-                        </tr>
-                        <tr *ngFor="let row of result">
-                            <td *ngFor="let col of row">
-                                {{col}}
-                            </td>
-                        </tr>
-                    </table>
+                    <form [formGroup]="demandVectorForm" id="demandVectorForm">
+                        <table formArrayName="inputs">
+                            <thead>
+                                <tr>
+                                    <th>Entity</th>
+                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(null, j)" [ngClass]="{highlighted: hoveredCol == j}">{{name}}</th>
+                                    <th (mouseenter)="onMouseOver(null, rowCount + 2)" [ngClass]="{highlighted: hoveredCol == rowCount + 2}">Demand vector</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of result; let value of demandVector.controls; let i = index;">
+                                    <th style="font-weight:300" (mouseenter)="onMouseOver(i, null)" [ngClass]="{highlighted: hoveredRow == i}">{{economicflow[i]}}</th>
+                                    <td *ngFor="let col of row; let j = index" on-mouseover="onMouseOver(i, j)" [ngClass]="{highlighted: (hoveredCol == j || hoveredRow == i)}">
+                                        {{col}}
+                                    </td>
+                                    <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(i, rowCount + 2)" [ngClass]="{highlighted: (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input type="number" autocomplete="off" formControlName="value" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
                 </div>
 
             </div>
@@ -60,6 +70,7 @@
                             <th *ngFor="let name of processName">{{name}}</th>
                         </tr>
                         <tr *ngFor="let row of resultEnvironmental">
+                            <th style="font-weight:300">{{environmentalflow[i]}}</th>
                             <td *ngFor="let col of row">
                                 {{col}}
                             </td>
@@ -71,5 +82,4 @@
             <!-- Show last saved timing at the bottom right hand corner-->
         </div>
     </div>
-
 </body>

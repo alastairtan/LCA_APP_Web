@@ -7,7 +7,7 @@ import '../../../svg.connectable.js/src/svg.connectable.js';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
-import { FormArray, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup} from '@angular/forms';
 
 import { MaterialInput } from './MaterialInput';
 import { Line } from './Line';
@@ -103,20 +103,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     isOpen = false;
 
     //currently selected Node
-    //insert attributes here
-
-    projectForm = new FormGroup({
-        MaterialInput: new FormGroup({
-            materialName: new FormControl(''),
-            quantity: new FormControl(''),
-            unit: new FormControl(''),
-            carbonStorage: new FormControl(''),
-            activityDataOrigin: new FormControl(''),
-            emissionFactorData: new FormControl(''),
-            emissionFactorSource: new FormControl(''),
-            remarks: new FormControl('')
-        }),
-    })
 
     project: Project = this.dataService.getProject();            //Object to contain all data of the current project
     lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
@@ -359,7 +345,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         if (sourceCheck.checked) {
             if (this.inputMenuBar.includes(this.selectedTab)) {
-                this.selectedTab = this.outputMenuBar[0];
+                this.changeTab(this.outputMenuBar[0]);
             }
         }
         this.saveAndClearDetails();
