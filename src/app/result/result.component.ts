@@ -164,9 +164,7 @@ export class ResultComponent implements OnInit {
                     vector.push(emission.quantity);
                 }
             }
-            if (emissionArray.length != 0) {
                 matrix.push(vector);
-            }
         }
         while (matrix.length < this.processName.length) {
             let length = matrix[0].length;
@@ -178,9 +176,7 @@ export class ResultComponent implements OnInit {
         }
         //check if length of columns is equal to process name
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
-        console.log(this.environmentalflow);
-        console.log(matrix);
-        console.log(this.resultEnvironmental);
+        
     }
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
