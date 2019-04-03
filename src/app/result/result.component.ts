@@ -1,3 +1,4 @@
+
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
@@ -42,7 +43,6 @@ export class ResultComponent implements OnInit {
 
         this.sign();
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
-        this.checkIsProcessNodeSource();
         this.geratingEnvironmentalMatrix();
     }
 
@@ -68,34 +68,51 @@ export class ResultComponent implements OnInit {
     sign() {
         for (let i = 0; i < this.project.processNodes.length; i++) {
             let processNode = this.project.processNodes[i];
-            this.processName.push(processNode.processName);
-            let materialInputArr = processNode.materialInput;
-            let materialOutputArr = processNode.outputs;
             let processUnit: Number[] = [];
-            for (let j = 0; j < materialInputArr.length; j++) {
-                let materialInput = materialInputArr[j];
-                let materialName = materialInput.materialName;
-                let index = this.economicVarExist(materialName.toLowerCase())
-                if (index == null) {
-                    this.economicflow.push(materialName);
-                    processUnit.push(-materialInput.quantity);
-                } else {
-                    this.insertUnit(index, -materialInput.quantity, processUnit);
+            if (!processNode.isSource) {
+                this.processName.push(processNode.processName); let materialInputArr = processNode.materialInput;
+                let materialOutputArr = processNode.outputs;
+                for (let j = 0; j < materialInputArr.length; j++) {
+                    let materialInput = materialInputArr[j];
+                    let materialName = materialInput.materialName;
+                    let index = this.economicVarExist(materialName.toLowerCase())
+                    if (index == null) {
+                        this.economicflow.push(materialName);
+                        processUnit.push(-materialInput.quantity);
+                    } else {
+                        this.insertUnit(index, -materialInput.quantity, processUnit);
+                    }
                 }
-            }
 
-            for (let k = 0; k < materialOutputArr.length; k++) {
-                let output = materialOutputArr[k];
-                let outputName = output.outputName;
-                let index = this.economicVarExist(outputName)
-                if (index == null) {
-                    this.economicflow.push(outputName.toLowerCase());
-                    processUnit.push(+output.quantity);
-                } else {
+                for (let k = 0; k < materialOutputArr.length; k++) {
+                    let output = materialOutputArr[k];
+                    let outputName = output.outputName;
+                    let index = this.economicVarExist(outputName)
+                    if (index == null) {
+                        this.economicflow.push(outputName.toLowerCase());
+                        processUnit.push(+output.quantity);
+                    } else {
+                        this.insertUnit(index, +output.quantity, processUnit);
+                    }
+                }
+                this.process.push(processUnit);
+            } else {
+                let materialOutputArr = processNode.outputs;
+                for (let k = 0; k < materialOutputArr.length; k++) {
+                    processUnit = [];
+                    let output = materialOutputArr[k];
+                    let outputName = output.outputName;
+                    let index = this.economicVarExist(outputName)
+                    this.processName.push(outputName)
+                    if (index == null) {
+                        this.economicflow.push(outputName.toLowerCase());
+                        index = this.economicflow.length - 1;
+                    } 
+
                     this.insertUnit(index, +output.quantity, processUnit);
+                    this.process.push(processUnit);
                 }
             }
-            this.process.push(processUnit);
         }
     }
 
@@ -158,33 +175,6 @@ export class ResultComponent implements OnInit {
         this.hoveredCol = col;
     }
 
-    checkIsProcessNodeSource() {
-        for (let i = 0; i < this.project.processNodes.length; i++) {
-            let node = this.project.processNodes[i];
-            if (node.isSource) {
-                //add a column of zeros with process name = source name
-                let output = this.project.processNodes[i].outputs;
-                for (let j = 0; j < output.length; j++) {
-                    this.processName.push(output[j].outputName);
-                    this.pushSourceColumn(output[j].outputName);
-                }
-            }
-        }
-    }
-
-    pushSourceColumn(name: String) {
-        let index = this.economicVarExist(name);
-        for (let i = 0; i < this.result.length; i++) {
-            if (i == index) {
-                this.result[i].push(1);
-            } else {
-                this.result[i].push(0);
-            }
-        }
-        
-        
-    }
-
     geratingEnvironmentalMatrix() {
         let matrix: any[] = [];
         for (let i = 0; i < this.project.processNodes.length; i++) {
@@ -208,9 +198,7 @@ export class ResultComponent implements OnInit {
                     vector.push(emission.quantity);
                 }
             }
-            if (emissionArray.length != 0) {
-                matrix.push(vector);
-            }
+            matrix.push(vector);
         }
         while (matrix.length < this.processName.length) {
             let length = matrix[0].length;
@@ -222,9 +210,7 @@ export class ResultComponent implements OnInit {
         }
         //check if length of columns is equal to process name
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
-        console.log(this.environmentalflow);
-        console.log(matrix);
-        console.log(this.resultEnvironmental);
+        
     }
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {

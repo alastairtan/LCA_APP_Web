@@ -178,7 +178,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
         sourceCheck.checked = rectObj.isSource;
-        console.log(rectObj.isSource);
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:           //Material Input
                 //Clear old data
@@ -327,7 +326,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rectObj.processName = this.currentlySelectedNode.processName;
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         rectObj.isSource = sourceCheck.checked;
-        console.log(rectObj.isSource);
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
@@ -494,7 +492,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.arrayOfSeparators = this.project.separatorArray;
                 let lineObj = this.project.separatorArray[i - 1];
                 accumWidth += this.project.dimensionArray[i - 1]
-                console.log(this.project.dimensionArray);
                 line = this.draw.line(accumWidth, 5, accumWidth, lineObj.endY);
                 //update id of the object
                 this.project.separatorArray[i - 1].id = line.node.id;
@@ -602,7 +599,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':
-                console.log(this.currentlySelectedNode.data('isSource'));
                 break;
             case 'Enter': case 'Escape':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -741,8 +737,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     onDblClick() {
         if (this.isEdit) {
             let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
-            console.log(result[1]);
-            console.log(this.mouseX - this.svgOffsetLeft);
+
             let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
                 [], [], false, false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
@@ -758,7 +753,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             const dialogRef = this.dialog.open(Dialog, dialogConfig);
             dialogRef.afterClosed().subscribe(result => {
                 console.log(' Dialog was closed')
-                console.log(result)
             });
         }
     }
@@ -1120,9 +1114,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }  else {
             this.currentlySelectedNode = rect;
             this.currentlySelectedText = text;
-            console.log(this.currentlySelectedText)
             this.currentlySelectedNodeName = this.project.processNodes[this.currentlySelectedNode.data('key')].processName;
-            console.log(this.project.processNodes[this.currentlySelectedNode.data('key')].isSource)
             if (this.project.processNodes[this.currentlySelectedNode.data('key')].isSource) {
                 this.selectedTab = this.outputMenuBar[0];
             } else {
@@ -1152,7 +1144,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     removeConnector(connectorToBeRemoved) {
         this.project.processNodes[connectorToBeRemoved[0]].getConnectors().splice(connectorToBeRemoved[1], 1);
         this.project.processNodes[connectorToBeRemoved[0]].getNext().splice(connectorToBeRemoved[1], 1);
-        console.log(this.project.processNodes, connectorToBeRemoved);
     }
 
     /**
@@ -1174,7 +1165,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             const dialogRef = this.dialog.open(confirmationDialog, dialogConfig);
             dialogRef.afterClosed().subscribe(result => {
                 console.log(' Dialog was closed')
-                console.log(result)
                 if (result) {
                     var choseYes = this.dataService.showDeleteConfirmation();
                     if (!choseYes) {
@@ -1429,24 +1419,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         const dialogRef = this.dialog.open(Dialog, dialogConfig);
         dialogRef.afterClosed().subscribe(result => {
             console.log(' Dialog was closed')
-            console.log(result)
         });
-        /*const { dialog } = require("electron").remote;
-        //Call to the current window to make the dialog a modal
-        const { BrowserWindow } = require('electron').remote;
-        var WIN = BrowserWindow.getFocusedWindow();
-        const options = {
-            type: 'warning',
-            buttons: ['Ok'],
-            defaultId: 0,
-            cancelId: 0,
-            title: 'No process',
-            message: 'There are no allocated process!',
-            detail: 'You cannot proceed or save without any allocated process.\n\
-                    \nDouble click on a column to create a process in that stage,\
-                    \nor re-allocate a process from the "Unallocated processes" sidebar.',
-        };
-        var ok = dialog.showMessageBox(WIN, options);*/
     }
 
     editMode() {
