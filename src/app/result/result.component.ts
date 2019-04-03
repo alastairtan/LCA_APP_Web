@@ -28,6 +28,7 @@ export class ResultComponent implements OnInit {
     demandVector: FormArray;
 
     //Variable for highlighting the table
+    hoveredTable = null;
     hoveredRow = null;
     hoveredCol = null;
     rowCount = 0;
@@ -170,7 +171,9 @@ export class ResultComponent implements OnInit {
     /**
      * Record down the row and column that is hovered over, in order to highlight
      */
-    onMouseOver(row, col) {
+    onMouseOver(table, row, col) {
+        console.log(table, row, col);
+        this.hoveredTable = table;
         this.hoveredRow = row;
         this.hoveredCol = col;
     }
