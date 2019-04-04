@@ -62,11 +62,12 @@ button:hover {
 label {
     background-color: #ffa384;
     border-radius: 4px;
-    margin-left: 1vw;
-    margin-right: 1vw;
+    margin: auto 1vw;
     border: hidden;
     height: 4vh;
     color: black;
+    padding: 5px;
+    cursor: pointer;
 }
 
     label:hover {

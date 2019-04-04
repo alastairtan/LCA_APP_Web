@@ -42,6 +42,10 @@ input[type=number] {
     background-color: #ffc9b7;
 }
 
+.highlightedDblClick {
+    background-color: #ffdcd1;
+}
+
 .subtitle {
     font-family: sans-serif;
     font-size: 1.25vw;

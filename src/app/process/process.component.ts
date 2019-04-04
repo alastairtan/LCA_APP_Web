@@ -7,7 +7,8 @@ import '../../../svg.connectable.js/src/svg.connectable.js';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
-import { FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from "@angular/router";
 
 import { MaterialInput } from './MaterialInput';
 import { Line } from './Line';
@@ -100,6 +101,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     inputMenuBar = ['Material', 'Energy', 'Transport'];
     outputMenuBar = [' Material ', 'Byproduct', 'Emission'];
     selectedTab = this.inputMenuBar[0];
+
+    navFromResult = {};
+
     isOpen = false;
 
     //currently selected Node
@@ -107,11 +111,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     project: Project = this.dataService.getProject();            //Object to contain all data of the current project
     lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
 
-    constructor(private dataService: DataService,
-        private router: Router,
-        private cd: ChangeDetectorRef,
-        private cookies: CookieService, public dialog: MatDialog,
-        private fb: FormBuilder) { }
+    constructor(private dataService: DataService, private router: Router,
+                private cd: ChangeDetectorRef, private cookies: CookieService,
+                public dialog: MatDialog, private fb: FormBuilder,
+                private route: ActivatedRoute) {
+        this.route.params.subscribe(params => {
+            this.navFromResult = params;
+        });
+    }
     /**
      * Check if this.project.processNodes is empty, 
      * for the purpose of disallowing users from proceeding
@@ -122,6 +129,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             hasProcess = hasProcess || this.project.lifeCycleStages.includes(this.project.processNodes[i].categories);
         }
         return !hasProcess;
+    }
+
+    /**
+     * */
+    isNavFromResult() {
+        if (this.navFromResult.hasOwnProperty('processId'))
+                return true;
+        return false;
     }
 
     ngOnInit() {
@@ -145,6 +160,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         pc.oncontextmenu = function () {
             return false;
         }
+        console.log(this.navFromResult, this.isNavFromResult());
     }
 
     ngAfterViewInit() {
@@ -1033,6 +1049,24 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rect.on("contextmenu", (event) => {
             this.removeRect(rect, text);
         });
+
+        //Highlight the selected node from result component
+        if (this.isNavFromResult()) {
+            if (rect.node.id == this.navFromResult['processId']) {
+                this.currentlySelectedNode = rect;
+                this.cd.detectChanges();                //To remedy *ngIf check in HTML file
+                this.currentlySelectedText = text;
+                console.log(rect);
+                this.currentlySelectedNode.stroke({ color: '#ffa384'})
+                this.getDetails();
+                switch (this.navFromResult['tab']) {
+                    case '4': this.changeTab(this.outputMenuBar[0]); break;
+                    case '6': this.changeTab(this.outputMenuBar[2]); break;
+                    default: break;
+                }
+                document.getElementById('processBoxDetailsContainer').style.display = 'block';
+            }
+        }
 
         return rect;
     }
