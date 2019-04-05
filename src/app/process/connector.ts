@@ -5,7 +5,7 @@ export class Connector {
     index: number;
     
 
-    constructor(id, headIndex, index, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions) {
+    constructor(id, headIndex, index) {
         this.id = id;
         this.headIndex = headIndex;
         this.index = index;

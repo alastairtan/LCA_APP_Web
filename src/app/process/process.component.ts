@@ -379,7 +379,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 conn2.connector.style('stroke-dasharray', "5");
 
                 let connectorArr = r.getConnectors();
-                connectorArr.push(conn2.connector.node.id);
+                connectorArr.push(new Connector(conn2.connector.node.id, null, connectorArr.length - 1));
                 r.connectors = connectorArr;
                 //click event to addd the process block in this area
                 rect.click((event) => {
@@ -397,7 +397,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     conn2.connector.style('stroke-width', "3px");
                     let oldR = promptRect[rect.data('key')];
                     for (let i = 0; i < oldR.connectors.length; i++) {
-                        SVG.get(oldR.connectors[i]).remove();
+                        SVG.get(oldR.connectors[i].id).remove();
                     }
                     promptRect.splice(rect.data('key'), 1);
                     rect.remove();
@@ -1093,7 +1093,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     let connectorsArray = headObj.connectors;
                     nextIdArray.push(rectObj.id);
                     //creating a new connector object
-                    connectorsArray.push(conn2.connector.node.id);
+                    connectorsArray.push(new Connector(conn2.connector.node.id, this.getCorrespondingRect(this.head).i, connectorsArray.length));
                     //[index of head in processNodes, index of connector in head]
                     conn2.connector.data('key', [this.getCorrespondingRect(this.head).i, connectorsArray.length - 1]);
 
@@ -1291,7 +1291,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
                             let next = this.project.processNodes[i].getNext()[j];
                             if (rect.node.id == next) {
-                                SVG.get(this.project.processNodes[i].getConnectors()[j]).remove();
+                                SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
                                 this.project.processNodes[i].getNext().splice(j, 1);
                                 this.project.processNodes[i].getConnectors().splice(j, 1);
                                 j--;
@@ -1305,8 +1305,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
 
                                 //logic to be resolved
-                                if (SVG.get(this.project.processNodes[i].getConnectors()[j]) != null) {
-                                    SVG.get(this.project.processNodes[i].getConnectors()[j]).remove();
+                                if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
+                                    SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
                                 }
                             }
                             removedIndex = i;
