@@ -905,7 +905,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             id: rect.node.id + "text"
         });
 
-        text.move(rect.x() + 25, rect.y() + 12.5);
+        text.move(rect.x(), rect.y() - 20);
 
         //if onclick set the border color
         if (!rect.data('key').isClicked) {
@@ -914,7 +914,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             rect.stroke({ color: '#4e14e0' });
         }
         rect.on('dragmove', (event) => {
-            text.move(rect.x() + 25, rect.y() + 12.5)
+            text.move(rect.x(), rect.y() - 20)
         });
 
         //At the end of the dragging, check which category is the box in
