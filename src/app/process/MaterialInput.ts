@@ -7,16 +7,18 @@ export class MaterialInput {
     emissionFactorData: string;
     emissionFactorSource: string;
     remarks: string; 
+    isCollapsed: boolean;
 
     constructor() {
         this.materialName = '';
         this.quantity = '0';
-        this.unit = 'number';
+        this.unit = 'm3';
         this.carbonStorage = '';
         this.activityDataOrigin = '';
         this.emissionFactorData = '';
         this.emissionFactorSource = '';
         this.remarks = 'N/A';
+        this.isCollapsed = false;
     }
 
     parseData(jsonObj) {
@@ -28,6 +30,7 @@ export class MaterialInput {
         this.emissionFactorData = jsonObj.emissionFactorData;
         this.emissionFactorSource = jsonObj.emissionFactorSource;
         this.remarks = jsonObj.remarks;
+        this.isCollapsed = jsonObj.isCollapsed;
     }
 
     equals(other: MaterialInput) {

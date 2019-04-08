@@ -5,14 +5,16 @@ export class Output {
     unit: string;
     activityDataOrigin: string;
     remarks: string; 
+    isCollapsed: boolean;
 
     constructor() {
         this.functionalUnit = false;
         this.outputName = '';
         this.quantity = '0';
-        this.unit = 'number';
+        this.unit = 'm3';
         this.activityDataOrigin = '';
         this.remarks = 'N/A';
+        this.isCollapsed = false;
     }
 
     parseData(jsonObj) {
@@ -22,6 +24,7 @@ export class Output {
         this.unit = jsonObj.unit;
         this.activityDataOrigin = jsonObj.activityDataOrigin;
         this.remarks = jsonObj.remarks;
+        this.isCollapsed = jsonObj.isCollapsed;
     }
 
     equals(other: Output) {
