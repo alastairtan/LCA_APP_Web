@@ -69,6 +69,27 @@
     background-color: #f2f3f2;
 }
 
+.collapse-container {
+    margin: 0 -3px -3px -3px;
+    padding: 0;
+    text-align: center;
+    background-color: #d7dbd7;
+    font-size: 10px;
+    cursor: pointer;
+    z-index: 5;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+    .collapse-container:hover {
+        background-color: #cacfca;
+    }
+
+.collapse-all-container {
+    text-align: right;
+    color: black;
+}
+
 .empty-text {
     font-style: italic;
     text-align: center;
@@ -126,6 +147,15 @@
 /*
     Add-delete buttons for MaterialInput
 */
+.btn {
+    color: #fff;
+    background-color: #ffa384;
+}
+
+    .btn:hover {
+        background-color: #ff7d51;
+    }
+
 .btn-sq-xs {
     margin: 1px;
     padding: 4px 9px;
@@ -134,18 +164,16 @@
     border-radius: 3px;
 }
 
-.btn-add {
-    color: #fff;
-    background-color: #7cc8a9;
-    border-color: #7cc883;
+.btn-collapse {
+    font-size: 14px;
+    padding: 3px 5px;
+    color: black;
+    background-color: #f1aa92;
 }
 
-.btn-delete {
-    
-    color: #fff;
-    background-color: #c87c9b;
-    border-color: #c87cc1;
-}
+    .btn-collapse:hover {
+        background-color: #eb8765;
+    }
 
 .menuHeader {
     background: #fe6938;
@@ -420,8 +448,4 @@ input[type=checkbox] {
     padding-right: 0;
     margin-right:0;
     margin-left:0;
-}
-
-.btn {
-    background-color: #ffa384;
 }

@@ -438,6 +438,51 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         return false;
     }
 
+    /**
+     * Check if all inputs in the current tab are collapsed
+     * @param tab
+     */
+    areAllCollapsed(tab) {
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                for (var i = 0; i < this.materialList.length; i++) {
+                    if (!this.materialList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.inputMenuBar[1]:   //Energy Input
+                for (var i = 0; i < this.energyList.length; i++) {
+                    if (!this.energyList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.inputMenuBar[2]:   //Transportation Input
+                for (var i = 0; i < this.transportList.length; i++) {
+                    if (!this.transportList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.outputMenuBar[0]:   //Output
+                for (var i = 0; i < this.outputList.length; i++) {
+                    if (!this.outputList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.outputMenuBar[1]:   //Byproduct
+                for (var i = 0; i < this.byproductList.length; i++) {
+                    if (!this.byproductList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.outputMenuBar[2]:   //Direct Emission
+                for (var i = 0; i < this.emissionList.length; i++) {
+                    if (!this.emissionList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+        }
+    }
+
     //================================================================
     //                  DETAILS-RELATED FUNCTIONS
     //================================================================
@@ -682,28 +727,194 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
-                this.materialList.removeAt(this.materialList.length - 1);
+                this.materialList.removeAt(index);
                 rectObj.materialInput = this.materialList.value;
                 break;
             
             case this.inputMenuBar[1]:   //Energy Input
-                this.energyList.removeAt(this.energyList.length - 1);
+                this.energyList.removeAt(index);
                 rectObj.energyInputs = this.energyList.value;
                 break;
             case this.inputMenuBar[2]:   //Transportation Input
-                this.transportList.removeAt(this.transportList.length - 1);
+                this.transportList.removeAt(index);
                 rectObj.transportations = this.transportList.value;
                 break;
             case this.outputMenuBar[0]:   //Output
-                this.outputList.removeAt(this.outputList.length - 1);
+                this.outputList.removeAt(index);
                 rectObj.outputs = this.outputList.value;
                 break;
             case this.outputMenuBar[1]:   //Byproduct
-                this.byproductList.removeAt(this.byproductList.length - 1);
+                this.byproductList.removeAt(index);
                 rectObj.byproducts = this.byproductList.value;
                 break;
             case this.outputMenuBar[2]:   //Direct Emission
-                this.emissionList.removeAt(this.emissionList.length - 1);
+                this.emissionList.removeAt(index);
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+        this.getDetails();
+    }
+
+    /**
+     * Collapse a corresponding detail to the appropriate data array at the specified index,
+     * based on the current selected tab
+     * @param tab name of the tab to collapse from
+     * @param index index of the input to collapse
+     */
+    collapseDetail(tab: string, index: number) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                this.materialList.at(index).value.isCollapsed = true;
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                this.energyList.at(index).value.isCollapsed = true;
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                this.transportList.at(index).value.isCollapsed = true;
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                this.outputList.at(index).value.isCollapsed = true;
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                this.byproductList.at(index).value.isCollapsed = true;
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                this.emissionList.at(index).value.isCollapsed = true;
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+    }
+
+    /**
+     * Collapse all details to the appropriate data array based on the current selected tab
+     * @param tab name of the tab to collapse from
+     */
+    collapseAll(tab: string) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                for (var i = 0; i < this.materialList.length; i++) {
+                    this.materialList.at(i).value.isCollapsed = true;
+                }
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                for (var i = 0; i < this.energyList.length; i++) {
+                    this.energyList.at(i).value.isCollapsed = true;
+                }
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                for (var i = 0; i < this.transportList.length; i++) {
+                    this.transportList.at(i).value.isCollapsed = true;
+                }
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                for (var i = 0; i < this.outputList.length; i++) {
+                    this.outputList.at(i).value.isCollapsed = true;
+                }
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                for (var i = 0; i < this.byproductList.length; i++) {
+                    this.byproductList.at(i).value.isCollapsed = true;
+                }
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                for (var i = 0; i < this.emissionList.length; i++) {
+                    this.emissionList.at(i).value.isCollapsed = true;
+                }
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+    }
+
+    /**
+     * Expand a corresponding detail to the appropriate data array at the specified index,
+     * based on the current selected tab
+     * @param tab name of the tab to expand from
+     * @param index index of the input to expand
+     */
+    expandDetail(tab: string, index: number) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                this.materialList.at(index).value.isCollapsed = false;
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                this.energyList.at(index).value.isCollapsed = false;
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                this.transportList.at(index).value.isCollapsed = false;
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                this.outputList.at(index).value.isCollapsed = false;
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                this.byproductList.at(index).value.isCollapsed = false;
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                this.emissionList.at(index).value.isCollapsed = false;
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+        this.getDetails();
+    }
+
+    /**
+     * Expand all details to the appropriate data array based on the current selected tab
+     * @param tab name of the tab to expand from
+     */
+    expandAll(tab: string) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                for (var i = 0; i < this.materialList.length; i++) {
+                    this.materialList.at(i).value.isCollapsed = false;
+                }
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                for (var i = 0; i < this.energyList.length; i++) {
+                    this.energyList.at(i).value.isCollapsed = false;
+                }
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                for (var i = 0; i < this.transportList.length; i++) {
+                    this.transportList.at(i).value.isCollapsed = false;
+                }
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                for (var i = 0; i < this.outputList.length; i++) {
+                    this.outputList.at(i).value.isCollapsed = false;
+                }
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                for (var i = 0; i < this.byproductList.length; i++) {
+                    this.byproductList.at(i).value.isCollapsed = false;
+                }
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                for (var i = 0; i < this.emissionList.length; i++) {
+                    this.emissionList.at(i).value.isCollapsed = false;
+                }
                 rectObj.directEmissions = this.emissionList.value;
                 break;
         }
