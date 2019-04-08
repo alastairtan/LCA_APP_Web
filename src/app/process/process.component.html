@@ -78,7 +78,7 @@
                     <p>Process name</p>
                     <input *ngIf="currentlySelectedNode != null" [(ngModel)]="currentlySelectedNode.processName" autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails()" />
                 </div>
-                <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" style="display:none">
+                <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" *ngIf="currentlySelectedNode != null">
                     <div class="detailBoxHeader">
                         {{processName}}
                     </div>
@@ -251,10 +251,10 @@
                                             <div *ngIf="input.value.isCollapsed">
                                                 <div class="container odd-color">
                                                     <div class="row">
-                                                        <div class="col-md-6 input-field">
+                                                        <div class="col-md-4 input-field">
                                                             <strong>Material Name</strong>
                                                         </div>
-                                                        <div class="col-md-6 vcenter">
+                                                        <div class="col-md-8 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.materialName}}"/>
                                                         </div>
                                                     </div>
@@ -386,10 +386,10 @@
                                             <div *ngIf="input.value.isCollapsed">
                                                 <div class="container odd-color">
                                                     <div class="row">
-                                                        <div class="col-md-6 input-field">
+                                                        <div class="col-md-4 input-field">
                                                             <strong>Energy Type</strong>
                                                         </div>
-                                                        <div class="col-md-6 vcenter">
+                                                        <div class="col-md-8 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.energyType}}" />
                                                         </div>
                                                     </div>
@@ -477,10 +477,10 @@
                                             <div *ngIf="input.value.isCollapsed">
                                                 <div class="container odd-color">
                                                     <div class="row">
-                                                        <div class="col-md-6 input-field">
+                                                        <div class="col-md-5 input-field">
                                                             <strong>Transportation Type</strong>
                                                         </div>
-                                                        <div class="col-md-6 vcenter">
+                                                        <div class="col-md-7 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.transportationType}}" />
                                                         </div>
                                                     </div>
@@ -582,10 +582,10 @@
                                             <div *ngIf="input.value.isCollapsed">
                                                 <div class="container odd-color">
                                                     <div class="row">
-                                                        <div class="col-md-6 input-field">
+                                                        <div class="col-md-4 input-field">
                                                             <strong>Output Name</strong>
                                                         </div>
-                                                        <div class="col-md-6 vcenter">
+                                                        <div class="col-md-8 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.outputName}}" />
                                                         </div>
                                                     </div>
@@ -710,10 +710,10 @@
                                             <div *ngIf="input.value.isCollapsed">
                                                 <div class="container odd-color">
                                                     <div class="row">
-                                                        <div class="col-md-6 input-field">
+                                                        <div class="col-md-5 input-field">
                                                             <strong>Byproduct Name</strong>
                                                         </div>
-                                                        <div class="col-md-6 vcenter">
+                                                        <div class="col-md-7 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.byproductName}}" />
                                                         </div>
                                                     </div>
@@ -802,10 +802,10 @@
                                             <div *ngIf="input.value.isCollapsed">
                                                 <div class="container odd-color">
                                                     <div class="row">
-                                                        <div class="col-md-6 input-field">
+                                                        <div class="col-md-4 input-field">
                                                             <strong>Emission Type</strong>
                                                         </div>
-                                                        <div class="col-md-6 vcenter">
+                                                        <div class="col-md-8 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.emissionType}}" />
                                                         </div>
                                                     </div>

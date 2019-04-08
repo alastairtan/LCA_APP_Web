@@ -508,7 +508,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
-        sourceCheck.checked = rectObj.isSource;
+        if (sourceCheck != null) {
+            sourceCheck.checked = rectObj.isSource;
+        }
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:           //Material Input
                 //Clear old data
@@ -584,10 +586,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var materialInputs: MaterialInput[] = [];
                 for (let j = 0; j < this.materialList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var materialInput = new MaterialInput();
                     materialInput.parseData(this.materialList.at(j).value);
-                    materialInputs.push(materialInput);
+                    if (!materialInput.equals(new MaterialInput()))
+                        materialInputs.push(materialInput);
                 }
                 //Update the array for the rect
                 rectObj.materialInput = materialInputs;
@@ -596,10 +599,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var energyInputs: EnergyInput[] = [];
                 for (let j = 0; j < this.energyList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var energyInput = new EnergyInput();
                     energyInput.parseData(this.energyList.at(j).value);
-                    energyInputs.push(energyInput);
+                    if (!energyInput.equals(new EnergyInput()))
+                        energyInputs.push(energyInput);
                 }
                 //Update the array for the rect
                 rectObj.energyInputs = energyInputs;
@@ -608,10 +612,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var transportationInputs: TransportationInput[] = [];
                 for (let j = 0; j < this.transportList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var transport = new TransportationInput();
                     transport.parseData(this.transportList.at(j).value);
-                    transportationInputs.push(transport);
+                    if (!transport.equals(new TransportationInput()))
+                        transportationInputs.push(transport);
                 }
                 //Update the array for the rect
                 rectObj.transportations = transportationInputs;
@@ -620,10 +625,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var outputs: Output[] = [];
                 for (let j = 0; j < this.outputList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var output = new Output();
                     output.parseData(this.outputList.at(j).value);
-                    outputs.push(output);
+                    if (!output.equals(new Output()))
+                        outputs.push(output);
                 }
                 //Update the array for the rect
                 rectObj.outputs = outputs;
@@ -632,10 +638,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var byproducts: Byproduct[] = [];
                 for (let j = 0; j < this.byproductList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var byproduct = new Byproduct();
                     byproduct.parseData(this.byproductList.at(j).value);
-                    byproducts.push(byproduct);
+                    if (!byproduct.equals(new Byproduct()))
+                        byproducts.push(byproduct);
                 }
                 //Update the array for the rect
                 rectObj.byproducts = byproducts;
@@ -644,10 +651,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var emissions: DirectEmission[] = [];
                 for (let j = 0; j < this.emissionList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var emission = new DirectEmission();
                     emission.parseData(this.emissionList.at(j).value);
-                    emissions.push(emission);
+                    if (!emission.equals(new DirectEmission()))
+                        emissions.push(emission);
                 }
                 //Update the array for the rect
                 rectObj.directEmissions = emissions;
@@ -1289,7 +1297,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else {
                     this.selectedTab = this.inputMenuBar[0];
                 }
-                document.getElementById('processBoxDetailsContainer').style.display = 'block';
                 this.getDetails();
                 
             }
@@ -1313,7 +1320,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     case '6': this.changeTab(this.outputMenuBar[2]); break;
                     default: break;
                 }
-                document.getElementById('processBoxDetailsContainer').style.display = 'block';
             }
         }
 
@@ -1374,7 +1380,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     onSelectedNodeChange(rect: SVG.Rect, text: SVG.Text) {
         if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
-            document.getElementById('processBoxDetailsContainer').style.display = 'none';
             this.saveAndClearDetails();
             this.currentlySelectedNode = null;
             this.currentlySelectedText = null;
@@ -1387,7 +1392,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             } else {
                 this.selectedTab = this.inputMenuBar[0];
             }
-            document.getElementById('processBoxDetailsContainer').style.display = 'block';
             this.getDetails();
         }
 
@@ -1481,6 +1485,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     } else if (this.tail = rect) {
                         this.tail = null;
                     }
+                    this.onSelectedNodeChange(null, null);
                 }
             });
 
@@ -1550,7 +1555,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.isEdit = false;
         this.editMode();
         this.removeRect(this.currentlySelectedNode, this.currentlySelectedText);
-        this.currentlySelectedNode = null;
     }
 
     /**
