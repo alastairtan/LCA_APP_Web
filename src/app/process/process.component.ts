@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
+import { Component, HostListener, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef, Inject, Input } from '@angular/core';
 import { Rect } from './Rect';
 import { Connector } from './Connector';
 import * as SVG from 'svg.js';
@@ -92,6 +92,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private size = 100;
 
     private waitId;
+
+    //list of promptRect generated
+    private idPrompt: any[] = [];
 
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
@@ -336,7 +339,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let materialInputArr = rectObj.materialInput;
         let outputArr = rectObj.outputs;
         let promptRect = rectObj.promptRectArr;
-        for (let i = promptRect.length; i < materialInputArr.length; i++) {
+        for (let i = 0; i < materialInputArr.length; i++) {
             let input = materialInputArr[i];
             let name = input.materialName;
             if (!this.isAttributeExistInNode(name, 'input', rectObj)) {
@@ -351,11 +354,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 outputObj.quantity = input.quantity;
                 promptRectOutput.push(outputObj)
                 promptRectNextid.push(rectObj.id);
-                let r = new Rect(x - 100, y - 100 + 80 * (promptRect.length), null, promptRectNextid,[], false, false, rectObj.categories, name, [], [], promptRectOutput, [], [], [], [])
-
+                let r = new Rect(x - 100, y - 100 + 80 * (promptRect.length), rectObj.id + i + 'input', promptRectNextid, [], false, false, rectObj.categories, name, [], [], promptRectOutput, [], [], [], [])
+                if (this.isPromptRectCreated(r.id)) {
+                    break;
+                }
                 promptRect.push(r);
                 let rect = this.draw.rect(100, 50);
-
+                rect.node.id = r.id;
                 rect.attr({
                     x: r.getX(),
                     y: r.getY(),
@@ -381,9 +386,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let connectorArr = r.getConnectors();
                 connectorArr.push(new Connector(conn2.connector.node.id, null, connectorArr.length - 1));
                 r.connectors = connectorArr;
-                //click event to addd the process block in this area
+
+                this.idPrompt.push([r.id, conn2.connector.node.id]);
+                //click event to add the process block in this area
                 rect.click((event) => {
-                    console.log(promptRect[rect.data('key')]);
                     let index = this.addRect(promptRect[rect.data('key')]);
                     let newRect = this.createProcessNodes(index, 0, true);
                     //creating arrow connectable
@@ -395,18 +401,103 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     }, this.currentlySelectedNode);
                     conn2.setConnectorColor("#ffa384");
                     conn2.connector.style('stroke-width', "3px");
+                    conn2.connector.node.id = this.project.processNodes[index].connectors[0].id;
+
+                    //removing all prompt rect and connectors
                     let oldR = promptRect[rect.data('key')];
                     for (let i = 0; i < oldR.connectors.length; i++) {
                         SVG.get(oldR.connectors[i].id).remove();
                     }
+                    this.idPrompt.splice(rect.data('index'), 1);
                     promptRect.splice(rect.data('key'), 1);
                     rect.remove();
+                    this.head.stroke({ color: '#000000' });
+                    this.head = null;
+                    this.tail = null;
 
+                    this.onSelectedNodeChange(null,null)
                 });
 
             }
         }
-        
+        for (let i = 0; i < outputArr.length; i++) {
+            let output = outputArr[i];
+            let name = output.outputName;
+            if (!this.isAttributeExistInNode(name, 'output', rectObj)) {
+                //create a prompt rect
+                let x = rectObj.x;
+                let y = rectObj.y;
+
+                let promptRectInput = [];
+                let inputObj = new MaterialInput();
+                inputObj.materialName = name;
+                inputObj.quantity = output.quantity;
+                promptRectInput.push(inputObj);
+                let r = new Rect(x + 100, y + 100 + 80 * (promptRect.length), rectObj.id + i + 'output', [], [], false, false, rectObj.categories, name, [], promptRectInput, [], [], [], [], [])
+                if (this.isPromptRectCreated(r.id)) {
+                    break;
+                }
+                promptRect.push(r);
+                let rect = this.draw.rect(100, 50);
+                rect.node.id = r.id;
+                console.log(rect.node.id);
+                rect.attr({
+                    x: r.getX(),
+                    y: r.getY(),
+                    class: Rect,
+                    fill: '#FFF',
+                    'stroke-width': 1,
+                    'stroke-dasharray': 5
+                });
+
+
+                //creating arrow connectable from prompt
+                let conn2 = this.currentlySelectedNode.connectable({
+                    type: 'angled',
+                    targetAttach: 'perifery',
+                    sourceAttach: 'perifery',
+                    marker: 'default',
+                }, rect);
+                conn2.setConnectorColor("#000");
+                conn2.connector.style('stroke-dasharray', "5");
+
+                rect.data({
+                    index: i,
+                    arrow: conn2.connector.node.id
+                });
+                rect.draggy();
+
+                this.idPrompt.push([r.id, conn2.connector.node.id]);
+                //click event to add the process block in this area
+                rect.click((event) => {
+                    let index = this.addRect(promptRect[rect.data('index')]);
+                    let newRect = this.createProcessNodes(index, 0, true);
+                    //creating arrow connectable
+                    let conn2 = this.currentlySelectedNode.connectable({
+                        type: 'angled',
+                        targetAttach: 'perifery',
+                        sourceAttach: 'perifery',
+                        marker: 'default',
+                    }, newRect);
+                    conn2.setConnectorColor("#ffa384");
+                    conn2.connector.style('stroke-width', "3px");
+                    let headObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+                    headObj.connectors.push(new Connector(conn2.connector.node.id, this.currentlySelectedNode.data('key'), headObj.connectors.length));
+                    headObj.nextId.push(this.project.processNodes[index].id);
+                    //removing all prompt rect and connectors
+                    this.idPrompt.splice(rect.data('index'), 1);
+                    promptRect.splice(rect.data('index'), 1);
+                    SVG.get(rect.data('arrow')).remove();
+                    rect.remove();
+                    this.head.stroke({ color: '#000000' });
+                    this.head = null;
+                    this.tail = null;
+
+                    this.onSelectedNodeChange(null, null)
+                });
+
+            }
+        }
     }
 
     isAttributeExistInNode(name: String, att: String, rectObj: Rect) {
@@ -431,9 +522,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     let node = this.project.processNodes[i];
                     for (let j = 0; j < rectObj.nextId.length; j++) {
                         if (node.id == rectObj.nextId[j]) {
-                            for (let k = 0; k < node.outputs.length; k++) {
-                                let outputs = node.outputs[k];
-                                if (outputs.outputName == name) {
+                            for (let k = 0; k < node.materialInput.length; k++) {
+                                let inputs = node.materialInput[k];
+                                if (inputs.materialName == name) {
                                     return true;
                                 }
                             }
@@ -546,6 +637,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.getDetails();
     }
 
+    isPromptRectCreated(id: string) {
+        for (let i = 0; i < this.idPrompt.length; i++) {
+            if (this.idPrompt[i][0] == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Generating lifecycle stages
      * */
@@ -1303,9 +1403,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         if (this.project.processNodes[i].getId() == rect.node.id) {
                             //remove processlinks
                             for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
-
+                                console.log(this.project.processNodes[i].getConnectors()[j].id);
                                 //logic to be resolved
                                 if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
+                                    console.log(this.project.processNodes[i].getConnectors()[j].id);
                                     SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
                                 }
                             }
@@ -1328,11 +1429,20 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     } else if (this.tail = rect) {
                         this.tail = null;
                     }
+                    this.removePromptRect();
                 }
             });
         }
     }
 
+
+    removePromptRect() {
+        for (let i = 0; i < this.idPrompt.length; i++) {
+            for (let j = 0; j < 2; j++) {
+                SVG.get(this.idPrompt[i][j]).remove();
+            }
+        }
+    }
     /**
      * update data of the node at project.processNodes
      * 
