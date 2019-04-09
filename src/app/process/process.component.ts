@@ -593,7 +593,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //get corresponding node 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         this.prepareForUndoableAction();
-        this.updateRelations();
         //Update all material inputs
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:       //Material Input
@@ -687,6 +686,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
     }
 
+    /**
+     * Update relations between inputs and outputs of all nodes
+     * WARNING: This is a quite expensive function. Don't call it too often
+     */
     updateRelations() {
         //Loop through all nodes to assign their inputs
         for (let fromNode of this.project.processNodes) {

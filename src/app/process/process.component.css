@@ -85,6 +85,11 @@
         background-color: #cacfca;
     }
 
+.update-relations-container {
+    text-align: left;
+    color: black;
+}
+
 .collapse-all-container {
     text-align: right;
     color: black;
@@ -173,6 +178,7 @@
     padding: 3px 5px;
     color: black;
     background-color: #f1aa92;
+    width: 90%;
 }
 
     .btn-collapse:hover {

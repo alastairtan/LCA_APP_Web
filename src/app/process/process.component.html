@@ -130,7 +130,11 @@
                                 </div>
                                 <div class="add-container">
                                     <div class="row">
-                                        <div class="col-md-5"></div>
+                                        <div class="col-md-5 update-relations-container">
+                                            <button type="button" class="btn btn-sq-xs btn-collapse" (click)="updateRelations(); saveAndClearDetails()">
+                                                Update links
+                                            </button>
+                                        </div>
                                         <div class="col-md-2">
                                             <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
                                                 <i class="fa fa-plus fa-1x"></i><br />
