@@ -1374,7 +1374,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                                 input.isCollapsed = true;
                             }
                         }
-                        this.changeTab(this.inputMenuBar[0]);
+                        this.getDetails();
                         break;
                     case '4': 
                         for (let output of this.project.processNodes[this.currentlySelectedNode.data('key')].outputs) {
