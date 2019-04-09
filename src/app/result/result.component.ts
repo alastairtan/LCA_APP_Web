@@ -221,7 +221,7 @@ export class ResultComponent implements OnInit {
      * @param table 1 for Technical Matrix, 2 for Environmental Matrix
      * @param cellValue text value of the cell clicked
      */
-    navToInput(processIndex, table, cellValue) {
+    navToInput(processIndex, table, cellValue, name) {
         if (parseFloat(cellValue) == 0) {
             return;
         }
@@ -232,7 +232,7 @@ export class ResultComponent implements OnInit {
         } else if (parseFloat(cellValue) > 0) {
             tab = 4;
         }
-        var route = 'process/' + processId + '/' + tab;
+        var route = 'process/' + processId + '/' + tab + '/' + name;
         this.router.navigate([route])
     }
 

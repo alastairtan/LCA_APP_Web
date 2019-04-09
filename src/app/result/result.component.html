@@ -51,7 +51,7 @@
                                     </th>
                                     <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)" 
                                         [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i), 
-                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col)">
+                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                         {{col}}
                                     </td>
                                     <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
@@ -84,7 +84,7 @@
                                 <th style="font-weight:300" (mouseenter)="onMouseOver(2, i, null)" [ngClass]="{highlighted: hoveredTable == 2 && hoveredRow == i}">{{environmentalflow[i]}}</th>
                                 <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(2, i, j)" 
                                     [ngClass]="{highlighted: hoveredTable == 2 && (hoveredCol == j || hoveredRow == i),
-                                                highlightedDblClick: hoveredTable == 2 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col)">
+                                                highlightedDblClick: hoveredTable == 2 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
                                     {{col}}
                                 </td>
                             </tr>

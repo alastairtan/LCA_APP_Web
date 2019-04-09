@@ -1363,11 +1363,39 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.currentlySelectedNode = rect;
                 this.cd.detectChanges();                //To remedy *ngIf check in HTML file
                 this.currentlySelectedText = text;
-                this.currentlySelectedNode.stroke({ color: '#ffa384'})
+                this.currentlySelectedNode.stroke({ color: '#ffa384' })
                 this.getDetails();
                 switch (this.navFromResult['tab']) {
-                    case '4': this.changeTab(this.outputMenuBar[0]); break;
-                    case '6': this.changeTab(this.outputMenuBar[2]); break;
+                    case '1':
+                        for (let input of this.project.processNodes[this.currentlySelectedNode.data('key')].materialInput) {
+                            if (input.materialName.toLowerCase() == this.navFromResult['name'].toLowerCase()) {
+                                input.isCollapsed = false;
+                            } else {
+                                input.isCollapsed = true;
+                            }
+                        }
+                        this.changeTab(this.inputMenuBar[0]);
+                        break;
+                    case '4': 
+                        for (let output of this.project.processNodes[this.currentlySelectedNode.data('key')].outputs) {
+                            if (output.outputName.toLowerCase() == this.navFromResult['name'].toLowerCase()) {
+                                output.isCollapsed = false;
+                            } else {
+                                output.isCollapsed = true;
+                            }
+                        }
+                        this.changeTab(this.outputMenuBar[0]);
+                        break;
+                    case '6':
+                        for (let emission of this.project.processNodes[this.currentlySelectedNode.data('key')].directEmissions) {
+                            if (emission.emissionType.toLowerCase() == this.navFromResult['name'].toLowerCase()) {
+                                emission.isCollapsed = false;
+                            } else {
+                                emission.isCollapsed = true;
+                            }
+                        }
+                        this.changeTab(this.outputMenuBar[2]);
+                        break;
                     default: break;
                 }
             }
