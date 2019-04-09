@@ -76,7 +76,7 @@
                 <hr />
                 <div *ngIf="currentlySelectedNode != null" class="processNameDiv" id="processNameDiv">
                     <p>Process name</p>
-                    <input *ngIf="currentlySelectedNode != null" [(ngModel)]="currentlySelectedNode.processName" autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails()" />
+                    <input *ngIf="currentlySelectedNode != null" [(ngModel)]="currentlySelectedNode.processName" autocomplete="off" type="text" name="processName" class="material-input" (change)="updateRelations(); saveAndClearDetails()" />
                 </div>
                 <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" *ngIf="currentlySelectedNode != null">
                     <div class="detailBoxHeader">
@@ -166,7 +166,7 @@
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
                                                     <strong>Material Name</strong>
-                                                    <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails()" />
+                                                    <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="updateRelations(); saveAndClearDetails()" />
                                                 </div>
                                                 <div class="container even-color">
                                                     <div class="row">
@@ -536,7 +536,7 @@
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
                                                     <strong>Output Name</strong>
-                                                    <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails()" />
+                                                    <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="updateRelations(); saveAndClearDetails()" />
                                                 </div>
                                                 <div class="container even-color">
                                                     <div class="row">

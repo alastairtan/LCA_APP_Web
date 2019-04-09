@@ -701,7 +701,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
                             input.from = fromNode.processName;
                             output.to = toNode.processName;
-                            //Update currently selected node
+                            //Update currently selected node, since it will be overwritten later if this is not done
                             var fromNodeIndex = this.project.processNodes.indexOf(fromNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == fromNodeIndex && this.selectedTab == this.outputMenuBar[0]) {
                                 var outputIndex = fromNode.outputs.indexOf(output);
@@ -768,6 +768,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 break;
         }
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
+        this.updateRelations();
         this.getDetails();
     }
 
@@ -811,6 +812,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 rectObj.directEmissions = this.emissionList.value;
                 break;
         }
+        this.updateRelations();
         this.getDetails();
     }
 
@@ -1325,6 +1327,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.updateRect(rect.data('key'), rectObj);
                 this.onSelectedNodeChange(rect, text);
+                this.updateRelations();
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -1462,6 +1465,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     removeConnector(connectorToBeRemoved) {
         this.project.processNodes[connectorToBeRemoved[0]].getConnectors().splice(connectorToBeRemoved[1], 1);
         this.project.processNodes[connectorToBeRemoved[0]].getNext().splice(connectorToBeRemoved[1], 1);
+        this.updateRelations();
     }
 
     /**
