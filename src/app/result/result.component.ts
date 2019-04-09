@@ -164,7 +164,6 @@ export class ResultComponent implements OnInit {
             });
             this.demandVector.push(valueFormGroup);
         }
-        console.log(this.result);
         this.rowCount = this.economicflow.length;
     }
 
