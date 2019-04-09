@@ -22,10 +22,9 @@ export class Rect {
     energyInputs: EnergyInput[] = [];
     transportations: TransportationInput[] = [];
     directEmissions: DirectEmission[] = [];
-    promptRectArr: Rect[] = [];
     isTarget: Boolean;
 
-    constructor(x, y, id, nextId, connectors, isClicked, isSource, categories, processName, promptRectArr, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
+    constructor(x, y, id, nextId, connectors, isClicked, isSource, categories, processName, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
         this.x = x;
         this.y = y
         this.id = id;
@@ -35,7 +34,6 @@ export class Rect {
         this.categories = categories;
         this.connectors = connectors;
         this.processName = processName;
-        this.promptRectArr = promptRectArr;
         this.materialInput = materialInput;
         this.outputs = outputs;
         this.byproducts = byproducts;

@@ -2,7 +2,7 @@
 export class Connector {
     id: string;
     headIndex: number;
-    index: number;
+    index: number; // index of the connector in an array
     
 
     constructor(id, headIndex, index) {

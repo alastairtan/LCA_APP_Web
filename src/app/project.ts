@@ -66,7 +66,7 @@ export class Project {
             for (let i = 0; i < projectData.processNodes.length; i++) {
                 let currentDataNode = projectData.processNodes[i];
                 let rectObj = new Rect(currentDataNode.x, currentDataNode.y, currentDataNode.id, currentDataNode.nextId, currentDataNode.connectors, currentDataNode.isClicked, currentDataNode.isSource, currentDataNode.categories, currentDataNode.processName,
-                    currentDataNode.promptRectArr, currentDataNode.materialInput, currentDataNode.outputs, currentDataNode.byproducts, currentDataNode.energyInputs, currentDataNode.transportations, currentDataNode.directEmissions);
+                     currentDataNode.materialInput, currentDataNode.outputs, currentDataNode.byproducts, currentDataNode.energyInputs, currentDataNode.transportations, currentDataNode.directEmissions);
                 this.processNodes.push(rectObj);
             }
         }
