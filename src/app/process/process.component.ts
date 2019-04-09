@@ -98,6 +98,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
+    processIdMap = {};
     inputMenuBar = ['Material', 'Energy', 'Transport'];
     outputMenuBar = [' Material ', 'Byproduct', 'Emission'];
     selectedTab = this.inputMenuBar[0];
@@ -144,7 +145,16 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         pc.oncontextmenu = function () {
             return false;
         }
-        console.log(this.navFromResult, this.isNavFromResult());
+
+        //Initialize the rectId-to-process-name map
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            var node = this.project.processNodes[i];
+            this.processIdMap[node.id] = {
+                name: node.processName,
+                index: i
+            };
+        }
+        this.updateRelations();
     }
 
     ngAfterViewInit() {
@@ -508,6 +518,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
+        this.processIdMap[rectObj.id] = {
+            name: rectObj.processName,
+            index: this.currentlySelectedNode.data('key')
+        };
         if (sourceCheck != null) {
             sourceCheck.checked = rectObj.isSource;
         }
@@ -579,7 +593,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //get corresponding node 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         this.prepareForUndoableAction();
-        
+        this.updateRelations();
         //Update all material inputs
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:       //Material Input
@@ -663,10 +677,33 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         //Save the process name and data to the app
         rectObj.processName = this.currentlySelectedNode.processName;
+        this.processIdMap[rectObj.id] = {
+            name: rectObj.processName,
+            index: this.currentlySelectedNode.data('key')
+        };
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         rectObj.isSource = sourceCheck.checked;
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
+    }
+
+    updateRelations() {
+        //Loop through all nodes to assign their inputs
+        for (let fromNode of this.project.processNodes) {
+            for (let output of fromNode.outputs) {
+                //Auto-assign to-process if it's empty
+                for (let next of fromNode.nextId) {
+                    var toNode = this.project.processNodes[this.processIdMap[next]['index']];
+                    for (let input of toNode.materialInput) {
+                        if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
+                            input.from = fromNode.processName;
+                            output.to = toNode.processName;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -947,14 +984,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
+                console.log(this.project.processNodes);
                 break;
-            case 'Enter': case 'Escape':
-                if (document.activeElement.nodeName != 'BODY') {
-                    this.saveAndClearDetails();
-                    var focusedElement = <HTMLInputElement>document.activeElement;
-                    focusedElement.blur();
-                }
-                console.log(this.project.processNodes, this.project.separatorArray);
+            case 'End':
+                console.log(this.processIdMap);
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {

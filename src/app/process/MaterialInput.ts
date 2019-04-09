@@ -1,5 +1,6 @@
 export class MaterialInput {
     materialName: string;
+    from: string;
     quantity: string;
     unit: string;
     carbonStorage: string;
@@ -11,6 +12,7 @@ export class MaterialInput {
 
     constructor() {
         this.materialName = '';
+        this.from = "";
         this.quantity = '0';
         this.unit = 'm3';
         this.carbonStorage = '';
@@ -23,6 +25,7 @@ export class MaterialInput {
 
     parseData(jsonObj) {
         this.materialName = jsonObj.materialName;
+        this.from = jsonObj.from;
         this.quantity = jsonObj.quantity;
         this.unit = jsonObj.unit;
         this.carbonStorage = jsonObj.carbonStorage;
@@ -36,6 +39,7 @@ export class MaterialInput {
     equals(other: MaterialInput) {
         var isEqual = true;
         isEqual = isEqual && (this.materialName == other.materialName);
+        isEqual = isEqual && (this.from == other.from);
         isEqual = isEqual && (this.quantity == other.quantity);
         isEqual = isEqual && (this.unit == other.unit);
         isEqual = isEqual && (this.carbonStorage == other.carbonStorage);
@@ -49,6 +53,7 @@ export class MaterialInput {
     static areEqual(thisInput: MaterialInput, thatInput: MaterialInput) {
         var isEqual = true;
         isEqual = isEqual && (thisInput.materialName == thatInput.materialName);
+        isEqual = isEqual && (thisInput.from == thatInput.from);
         isEqual = isEqual && (thisInput.quantity == thatInput.quantity);
         isEqual = isEqual && (thisInput.unit == thatInput.unit);
         isEqual = isEqual && (thisInput.carbonStorage == thatInput.carbonStorage);

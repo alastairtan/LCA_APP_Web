@@ -167,6 +167,19 @@
                                                 <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
+                                                            From process
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="from" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="" class="auto-select">auto</option>
+                                                                <option *ngFor="let node of project.processNodes" value="{{node.processName}}">{{node.processName}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
                                                             Quantity
                                                         </div>
                                                         <div class="col-md-6 vcenter">
@@ -174,7 +187,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container odd-color">
+                                                <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Unit
@@ -193,7 +206,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container even-color">
+                                                <div class="container odd-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Carbon Storage
@@ -203,7 +216,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container odd-color">
+                                                <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Activity Data Origin
@@ -213,7 +226,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container even-color">
+                                                <div class="container odd-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Emission Factor Value
@@ -223,7 +236,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container odd-color">
+                                                <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Emission Factor Source
@@ -233,7 +246,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="even-color">
+                                                <div class="odd-color">
                                                     <div>
                                                         Remarks
                                                         <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
@@ -255,7 +268,17 @@
                                                             <strong>Material Name</strong>
                                                         </div>
                                                         <div class="col-md-8 vcenter">
-                                                            <input disabled class="material-input smaller-input" value="{{input.value.materialName}}"/>
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.materialName}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            From process
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.from}}" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -514,6 +537,19 @@
                                                 <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
+                                                            To process
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="to" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="">auto</option>
+                                                                <option *ngFor="let node of project.processNodes" value="{{node.processName}}">{{node.processName}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
                                                             Functional Unit
                                                         </div>
                                                         <div class="col-md-6 vcenter">
@@ -524,7 +560,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container odd-color">
+                                                <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Quantity
@@ -534,8 +570,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <div class="container even-color">
+                                                <div class="container odd-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Unit
@@ -554,7 +589,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container odd-color">
+                                                <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Activity Data Origin
@@ -564,7 +599,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="even-color">
+                                                <div class="odd-color">
                                                     <div>
                                                         Remarks
                                                         <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
@@ -587,6 +622,16 @@
                                                         </div>
                                                         <div class="col-md-8 vcenter">
                                                             <input disabled class="material-input smaller-input" value="{{input.value.outputName}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            To Process
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.to}}" />
                                                         </div>
                                                     </div>
                                                 </div>

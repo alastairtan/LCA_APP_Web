@@ -144,6 +144,10 @@
 .input-field {
     padding: 0;
 }
+
+.auto-select {
+    color: #ffa384;
+}
 /*
     Add-delete buttons for MaterialInput
 */
