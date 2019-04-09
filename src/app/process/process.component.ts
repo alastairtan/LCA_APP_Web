@@ -701,6 +701,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
                             input.from = fromNode.processName;
                             output.to = toNode.processName;
+                            //Update currently selected node
+                            var fromNodeIndex = this.project.processNodes.indexOf(fromNode);
+                            if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == fromNodeIndex && this.selectedTab == this.outputMenuBar[0]) {
+                                var outputIndex = fromNode.outputs.indexOf(output);
+                                this.outputList.at(outputIndex).value.to = toNode.processName;
+                            }
+                            var toNodeIndex = this.project.processNodes.indexOf(toNode);
+                            if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
+                                var inputIndex = toNode.materialInput.indexOf(input);
+                                this.materialList.at(inputIndex).value.from = fromNode.processName;
+                            }
                             break;
                         }
                     }
