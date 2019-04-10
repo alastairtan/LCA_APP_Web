@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 import { Project } from '../project';
+import { Rect } from '../process/Rect';
 
 @Component({
     selector: 'app-result',
@@ -45,6 +46,7 @@ export class ResultComponent implements OnInit {
         this.sign();
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
         this.geratingEnvironmentalMatrix();
+        this.isAdditionalSourceNodeExist();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -216,6 +218,71 @@ export class ResultComponent implements OnInit {
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
         
     }
+
+    isAdditionalSourceNodeExist() {
+
+        //0 for not covered 1 for covered 
+        console.log(this.project.processNodes)
+        let coveredNodes: number[] = [];
+        //hash
+        let map = new Map<string, number>();
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            map.set(this.project.processNodes[i].id, i);
+            coveredNodes.push(0);
+        }
+
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            let node = this.project.processNodes[i];
+                for (let j = 0; j < node.nextId.length; j++) {
+                    let index = map.get(node.nextId[j]);
+                    console.log(index);
+                    coveredNodes[index] = 1;
+                }
+        }
+        console.log(coveredNodes);
+        for (let i = 0; i < coveredNodes.length; i++) {
+            if (coveredNodes[i] == 0) {
+                if (this.project.processNodes[i].materialInput.length != 0) {
+                    //create column for not allocated sources
+                    for (let k = 0; k < this.project.processNodes[i].materialInput.length; k++) {
+
+
+                        let vector: number[] = [];
+                        let name = this.project.processNodes[i].materialInput[k].materialName;
+                        console.log(name);
+                        for (let j = 0; j < this.economicflow.length; j++) {
+                            if (this.economicflow[j] == name) {
+                                vector.push(1);
+                            } else {
+                                vector.push(0);
+                            }
+                        }
+                        console.log(this.economicflow);
+                        console.log(vector);
+                        //push to result
+                        this.pushVectorIntoMAtrix(vector);
+                        //push processName
+                        this.processName.push(name);
+                        console.log(this.result)
+                    }
+                    
+                } else {
+                    this.project.processNodes[i].isSource = true;
+                }
+            }
+        }
+    }
+
+    pushVectorIntoMAtrix(vector: number[]) {
+        for (let i = 0; i < this.result.length; i++) {
+            this.result[i].push(vector[i]);
+        }
+    }
+    //check undeclared sources
+    checkSources() {
+
+    }
+
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
         this.router.navigate(['/process']);
