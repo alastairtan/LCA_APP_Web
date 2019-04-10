@@ -431,7 +431,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
                 //click event to add the process block in this area
                 rect.click((event) => {
-                    let index = this.addRect(this.idPrompt[rect.data('key')]);//removing all prompt rect and connectors
+
+                    let newRect;
+                    let index;
+                    if (this.isEdit == false) {
+                        this.isEdit = true;
+                        index = this.addRect(this.idPrompt[rect.data('key')]);//removing all prompt rect and connectors
+                        newRect = this.createProcessNodes(index, 0, true); 
+                        this.isEdit = false;
+                    } else {
+                        newRect = this.createProcessNodes(index, 0, true);
+                    }
                     let oldR = this.idPrompt[rect.data('key')];
                     console.log(this.idPrompt, rect.data('key'));
                     console.log(oldR.id, this.idPrompt[0].id)
@@ -460,7 +470,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         this.head = null;
                         this.tail = null;
                     }
-                    let newRect = this.createProcessNodes(index, 0, true);
                     console.log(newRect.node.id);
                     //creating arrow connectable
 
@@ -562,8 +571,19 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //click event to add the process block in this area
                 rect.click((event) => {
                     console.log(rect.data('key'));
-                    let index = this.addRect(this.idPrompt[rect.data('key')]);
-                    let newRect = this.createProcessNodes(index, 0, true);
+                    let index;
+                    console.log(this.idPrompt[rect.data('key')]);
+                    let newRect;
+                    if (this.isEdit == false) {
+                        this.isEdit = true;
+                        index = this.addRect(this.idPrompt[rect.data('key')]);
+                        newRect = this.createProcessNodes(index, 0, true);
+                        this.isEdit = false;
+                    } else {
+                        index = this.addRect(this.idPrompt[rect.data('key')]);
+                        newRect = this.createProcessNodes(index, 0, true);
+                    }
+                    
                     //creating arrow connectable
                     let svgIndex = rect.data('indexOfPrevSVG');
                     let prevNode = this.prevSVG[svgIndex];
