@@ -376,7 +376,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     continue;
                 }
 
+                //draw process node
                 let rect = this.draw.rect(100, 50);
+                let text = this.draw.text('Click to add "prodction of ' +  name + ' "');
+
                 rect.node.id = r.id;
                 rect.attr({
                     x: r.getX(),
@@ -394,6 +397,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     maxX: this.processContainerWidth,
                     maxY: this.processContainerHeight
                 });
+
+
+                text.attr({
+                    id: rect.node.id + "text"
+                });
+
+                text.move(rect.x(), rect.y() - 20);
 
                 //creating arrow connectable from prompt
                 let conn2 = rect.connectable({
@@ -414,7 +424,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
 
                 //index in the idPrompt of the type of input
-                rect.data('key', this.idPrompt.length - 1);
+                rect.data({
+                    key: this.idPrompt.length - 1,
+                    text: text.node.id
+                });
 
                 //click event to add the process block in this area
                 rect.click((event) => {
@@ -440,7 +453,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             console.log(connid);
                         }
                     }
-
+                    SVG.get(rect.data('text')).remove();
                     rect.remove();
                     if (this.head != null) {
                         this.head.stroke({ color: '#000000' });
@@ -498,6 +511,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
 
                 let rect = this.draw.rect(100, 50);
+                let text = this.draw.text('Click to add handle output of "' + name + '"');
+
                 rect.node.id = r.id;
                 console.log(rect.node.id);
                 rect.attr({
@@ -509,6 +524,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     'stroke-dasharray': 5
                 });
 
+
+                text.attr({
+                    id: rect.node.id + "text"
+                });
+
+                text.move(rect.x(), rect.y() - 20);
 
                 //creating arrow connectable from prompt
                 let conn2 = this.currentlySelectedNode.connectable({
@@ -534,7 +555,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 rect.data({
                     key: this.idPrompt.length - 1,
                     arrow: conn2.connector.node.id,
-                    indexOfPrevSVG: this.prevSVG.length - 1
+                    indexOfPrevSVG: this.prevSVG.length - 1,
+                    text: text.node.id
                 });
 
                 //click event to add the process block in this area
@@ -569,6 +591,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             svgIndex++;
                         }
                     }
+                    SVG.get(rect.data('text')).remove();
                     rect.remove();
                     if (this.head != null) {
                         this.head.stroke({ color: '#000000' });
@@ -1580,9 +1603,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let svgObj = SVG.get(this.idPrompt[i].id);
             svgObj.data('key', i);
         }
-    }
-
-    renameRemainingPromptRect() {
     }
 
 
