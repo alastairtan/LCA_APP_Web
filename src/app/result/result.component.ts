@@ -178,7 +178,6 @@ export class ResultComponent implements OnInit {
      * Record down the row and column that is hovered over, in order to highlight
      */
     onMouseOver(table, row, col) {
-        console.log(table, row, col);
         this.hoveredTable = table;
         this.hoveredRow = row;
         this.hoveredCol = col;
@@ -221,7 +220,7 @@ export class ResultComponent implements OnInit {
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
         
     }
-
+    
     //using object input to check
     isAdditionalSourceNodeExist() {
 
@@ -383,9 +382,20 @@ export class ResultComponent implements OnInit {
             this.result[i].push(vector[i]);
         }
     }
-    //check undeclared sources
-    checkSources() {
 
+    navToInput(processIndex, table, cellValue) {
+        if (parseFloat(cellValue) == 0) {
+            return;
+        }
+        var processId = this.project.processNodes[processIndex].id;
+        var tab = 1;
+        if (table == 2) {
+            tab = 6
+        } else if (parseFloat(cellValue) > 0) {
+            tab = 4;
+        }
+        var route = 'process/' + processId + '/' + tab;
+        this.router.navigate([route])
     }
 
     /**Save the current project to session storage, and navigate to the previous page */
