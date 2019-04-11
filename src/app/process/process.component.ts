@@ -406,15 +406,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     'stroke-dasharray': 5
                 });
 
-
-                rect.draggy({
-                    minX: 0,
-                    minY: 0,
-                    maxX: this.processContainerWidth,
-                    maxY: this.processContainerHeight
-                });
-
-
                 text.attr({
                     id: rect.node.id + "text"
                 });
@@ -566,12 +557,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 conn2.setConnectorColor("#000");
                 conn2.connector.style('stroke-dasharray', "5");
                 
-                rect.draggy({
-                    minX: 0,
-                    minY: 0,
-                    maxX: this.processContainerWidth,
-                    maxY: this.processContainerHeight
-                });
 
                 //include the new prompt into the general array
                 this.idPrompt.push(r);
