@@ -1,5 +1,5 @@
 
-    <form id="lifeStageDiv" [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+    <form id="lifeStageDiv" [formGroup]="projectForm" (ngSubmit)="onSubmit()" (click)="deselectAll()">
         <hr />
         <p class="title">
             System Boundary
@@ -27,14 +27,14 @@
                 <div id="{{'lifeStageContainer' + i}}" #item
                         class="example-box" *ngFor="let lifeStage of this.currentProject.lifeCycleStages; let i = index"
                         cdkDrag [attr.data-index]="i" (cdkDragStarted)="started($event)">
-                    <div class="container">
+                    <div class="container stage-container">
                         <div class="row">
-                            <div class="stageName col-md-8" cdkDragHandle (click)="onStageClick(i)" (contextmenu)="deleteItem(i)">
+                            <div class="stageName col-md-10" cdkDragHandle (click)="onStageClick(i)" (contextmenu)="deleteItem(i)">
                                 <input id="{{'lifeStage' + i}}" style="display:none" type="text" value="{{lifeStage}}"
                                         (blur)="doneEditing(i)" placeholder="Enter new stage name here" />
                                 <div id="{{'lifeStageValue' + i}}">{{lifeStage}}</div>
                             </div>
-                            <div class="col-md-4 stageEditButtons">
+                            <div class="col-md-2 stageEditButtons">
                                 <div class="buttonsContainer">
                                     <button type="button" class="btn btn-sq-xs btn-edit" (click)="editItem(i)">
                                         <i class="fa fa-edit fa-1x"></i><br />

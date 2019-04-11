@@ -101,6 +101,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
+    processIdMap = {};
     inputMenuBar = ['Material', 'Energy', 'Transport'];
     outputMenuBar = [' Material ', 'Byproduct', 'Emission'];
     selectedTab = this.inputMenuBar[0];
@@ -114,6 +115,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     project: Project = this.dataService.getProject();            //Object to contain all data of the current project
     lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
 
+    //================================================================
+    //                    STARTING FUNCTIONS
+    //================================================================
     constructor(private dataService: DataService, private router: Router,
                 private cd: ChangeDetectorRef, private cookies: CookieService,
                 public dialog: MatDialog, private fb: FormBuilder,
@@ -122,26 +126,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.navFromResult = params;
         });
     }
-    /**
-     * Check if this.project.processNodes is empty, 
-     * for the purpose of disallowing users from proceeding
-     */
-    hasNoProcess() {
-        var hasProcess: boolean = false;
-        for (var i = 0; i < this.project.processNodes.length; i++) {
-            hasProcess = hasProcess || this.project.lifeCycleStages.includes(this.project.processNodes[i].categories);
-        }
-        return !hasProcess;
-    }
-
-    /**
-     * */
-    isNavFromResult() {
-        if (this.navFromResult.hasOwnProperty('processId'))
-                return true;
-        return false;
-    }
-
+    
     ngOnInit() {
         this.project = this.dataService.getProject();
 
@@ -163,7 +148,16 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         pc.oncontextmenu = function () {
             return false;
         }
-        console.log(this.navFromResult, this.isNavFromResult());
+
+        //Initialize the rectId-to-process-name map
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            var node = this.project.processNodes[i];
+            this.processIdMap[node.id] = {
+                name: node.processName,
+                index: i
+            };
+        }
+        this.updateRelations();
     }
 
     ngAfterViewInit() {
@@ -174,6 +168,337 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.generatingAbandonedNodes();
     }
 
+    /**
+     * Generating lifecycle stages
+     * */
+    generatingComponents() {
+        this.svgOffsetLeft = this.svg.nativeElement.offsetLeft;
+        this.svgOffsetTop = this.svg.nativeElement.offsetTop;
+        this.headerWidth = this.containerHeader.nativeElement.offsetWidth;
+        this.headerHeight = this.containerHeader.nativeElement.offsetHeight;
+        this.processContainerHeight = this.processcontainer.nativeElement.offsetHeight;
+        this.processContainerWidth = this.processcontainer.nativeElement.offsetWidth;
+        this.draw.size(this.processContainerWidth, this.processContainerHeight);
+        //getting previous dimension 
+        this.previousDimensionArray = Object.assign([], this.project.dimensionArray);
+        this.project.processDimension = this.processContainerWidth;
+
+        let previousDimnesion = 0;
+        for (let i = 0; i < this.project.dimensionArray.length; i++) {
+            previousDimnesion += this.project.dimensionArray[i];
+        }
+        for (let i = 0; i < this.project.dimensionArray.length; i++) {
+            if (this.project.dimensionArray[i] != null) {
+                if (this.currentContainerWidth != null && this.currentContainerWidth != this.processContainerWidth) {
+
+                    this.project.dimensionArray[i] = this.project.dimensionArray[i] * this.processContainerWidth / this.currentContainerWidth;
+                } else if (this.processContainerWidth != previousDimnesion) {
+                    let scalingFactor = this.processContainerWidth / previousDimnesion;
+                    this.project.dimensionArray[i] = this.project.dimensionArray[i] * scalingFactor;
+                }
+            } else {
+                this.project.dimensionArray[i] = this.headerWidth;
+            }
+        }
+        this.lifeCycleStages = this.project.lifeCycleStages;
+        for (let i = 0; i < this.project.lifeCycleStages.length; i++) {
+            let width = this.project.dimensionArray[i];
+            if (width != null) {
+                document.getElementById("lifestage" + i).style.width = width + "px";
+            } else {
+                document.getElementById("lifestage" + i).style.width = this.headerWidth + "px";
+            }
+        }
+        let accumWidth = 0;
+        for (let i = 1; i < this.lifeCycleStages.length; i++) {
+            let line;
+            if (this.project.separatorArray.length == 0 || this.project.separatorArray[i - 1] == undefined) {
+                let startX = this.project.dimensionArray[i - 1] * i + 3 * (i - 1);
+                let endX = startX;
+                let endY = this.processContainerHeight - this.headerHeight - 10;
+                line = this.draw.line(startX, 5, endX, endY);
+                line.stroke({ color: '#000', width: 2, linecap: 'square' })
+                line.data('key', {
+                    posX: line.x(),
+                    index: i,
+                });
+                line.draggy();
+                this.arrayOfSeparators.push(new Line(startX, endY, line.node.id));
+            } else {
+                this.arrayOfSeparators = this.project.separatorArray;
+                let lineObj = this.project.separatorArray[i - 1];
+                accumWidth += this.project.dimensionArray[i - 1]
+                line = this.draw.line(accumWidth, 5, accumWidth, lineObj.endY);
+                //update id of the object
+                this.project.separatorArray[i - 1].id = line.node.id;
+                line.stroke({ color: '#000', width: 1, linecap: 'square' })
+                line.data('key', {
+                    posX: line.x(),
+                    index: i,
+                });
+                line.draggy();
+            }
+            line.on('mouseover', (event) => {
+                document.body.style.cursor = "e-resize";
+            });
+            line.on('mouseout', (event) => {
+                document.body.style.cursor = "default";
+            });
+
+            line.on('dragmove', (event) => {
+                //calculating the difference in the original position and the final position to get the change in position
+                let distanceMoved = line.data('key').posX - line.x();
+                let prevAccumulatedWidth = 0;
+                for (let i = 0; i < this.project.lifeCycleStages.length; i++) {
+
+                    if (i == line.data('key').index) { //next section
+                        //expand or contract the container
+                        line.move(this.mouseX - this.svgOffsetLeft, 10);
+                        if (this.project.dimensionArray[i] != null) {
+                            let newWidth = this.project.dimensionArray[i] + distanceMoved;
+                            document.getElementById("lifestage" + i).style.width = newWidth + "px";
+                            this.currentOnResizeWidthArray[0] = [newWidth, i];
+                        } else {
+                            document.getElementById("lifestage" + i).style.width = this.headerWidth + distanceMoved + "px";
+                            this.currentOnResizeWidthArray[0] = [this.headerWidth + distanceMoved, i];
+                        }
+
+                        //take note huge time overhead
+                        for (let j = 0; j < this.project.processNodes.length; j++) {
+                            let rectObj = this.project.processNodes[j];
+                            if (rectObj.categories == this.lifeCycleStages[i]) {
+                                let rectElement = SVG.get(rectObj.id);
+                                if (rectElement.x() - line.x() < 10) {
+                                    rectElement.move(rectElement.x() + 5, rectElement.y());
+                                }
+                            }
+                        }
+                    } else if (i + 1 == line.data('key').index) { // if it is the previous section
+                        //expand or contract
+                        if (this.project.dimensionArray[i] != null) {
+                            let newWidth = this.project.dimensionArray[i] - distanceMoved;
+                            document.getElementById("lifestage" + i).style.width = newWidth + "px";
+                            this.currentOnResizeWidthArray[1] = [newWidth, i];
+                        } else {
+                            document.getElementById("lifestage" + i).style.width = this.headerWidth - distanceMoved + "px";
+                            this.currentOnResizeWidthArray[1] = [this.headerWidth - distanceMoved, i];
+                        }
+                        for (let j = 0; j < this.project.processNodes.length; j++) {
+                            let rectObj = this.project.processNodes[j];
+                            if (rectObj.categories == this.lifeCycleStages[i]) {
+                                let rectElement = SVG.get(rectObj.id);
+                                if (line.x() - rectElement.x() < 110) {
+                                    rectElement.move(rectElement.x() - 5, rectElement.y());
+                                }
+                            }
+                        }
+                    } else {
+                        //stay put
+
+                        let dataWidth = this.project.dimensionArray[i];
+                        if (dataWidth != null) {
+                            document.getElementById("lifestage" + i).style.width = dataWidth + "px";
+                        } else {
+                            document.getElementById("lifestage" + i).style.width = this.headerWidth + "px";
+                        }
+                    }
+
+
+                }
+            });
+
+            line.on('dragend', (event) => {
+                for (let i = 0; i < this.currentOnResizeWidthArray.length; i++) {
+                    //updating dimensionArray 
+                    this.project.dimensionArray[this.currentOnResizeWidthArray[i][1]] = this.currentOnResizeWidthArray[i][0];
+                    line.data('key', {
+                        posX: line.x(),
+                        index: line.data('key').index
+                    });
+                    //updating separatorArray
+                    if (this.currentOnResizeWidthArray[i][1] != this.project.separatorArray.length) {
+                        let lineObj = this.project.separatorArray[this.currentOnResizeWidthArray[i][1]];
+                        let svgLine = SVG.get(lineObj.id);
+                        this.project.separatorArray[this.currentOnResizeWidthArray[i][1]].startX = svgLine.x();
+                    }
+                }
+            });
+        }
+        this.project.separatorArray = this.arrayOfSeparators;
+        this.currentContainerWidth = this.processContainerWidth;
+    }
+
+    /**
+     * gerating nodes by going through data
+     * */
+    generatingProcessNodes() {
+        //generating process nodes that was saved
+        for (let j = 0; j < this.project.processNodes.length; j++) {
+            var node = this.project.processNodes[j];
+            let accumWidth = 0;
+            let allocated = false;
+            for (let k = 0; k < this.project.lifeCycleStages.length; k++) {
+                if (node.getCategories() == this.project.lifeCycleStages[k]) {
+                    this.createProcessNodes(j, accumWidth, false);
+                    allocated = true;
+                }
+                //if could not find a categories, means that the category have been deleted
+                if (k == this.project.lifeCycleStages.length - 1 && !allocated) {
+                    this.abandonedNodes.push([node, j]); // [Rect object of unallocated node, index of unallocated node in process nodes]
+                } else {
+                    accumWidth += this.project.dimensionArray[k];
+
+                }
+
+            }
+        }
+
+        //generating process links that was saved
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            var current = this.project.processNodes[i];
+            //check if the node is decategorised
+            //true: skip the node
+            //false: go on to check if the nextID is decategorised
+            if (!this.checkIfNodeIsDecategorised(current.getId())) {
+                for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
+                    var next = this.project.processNodes[i].getNext()[j]
+                    //check if the nextID is decategorised
+                    //true: remove the node from the array
+                    //false: connect the two nodes together
+                    if (!this.checkIfNodeIsDecategorised(next)) {
+                        var head = SVG.get(this.project.processNodes[i].getId());
+                        var tail = SVG.get(next);
+                        this.creatingProcessLinks(head, tail, this.project.processNodes[i].getConnectors()[j]);
+                    } else {
+                        this.project.processNodes[i].getNext().splice(j, 1);
+                        this.project.processNodes[i].getConnectors().splice(j, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    generatingAbandonedNodes() {
+        for (let i = 0; i < this.abandonedNodes.length; i++) {
+            let node = this.abandonedNodes[i][0];
+            let indexAtProcesses = this.abandonedNodes[i][1];
+            node.clearNextArrayConnect();
+            this.createAbandonedNodes(node, i, indexAtProcesses);
+        }
+    }
+
+    //================================================================
+    //                    CHECKING FUNCTIONS
+    //================================================================
+    /**
+     * Check if this.project.processNodes is empty, 
+     * for the purpose of disallowing users from proceeding
+     */
+    hasNoProcess() {
+        var hasProcess: boolean = false;
+        for (var i = 0; i < this.project.processNodes.length; i++) {
+            hasProcess = hasProcess || this.project.lifeCycleStages.includes(this.project.processNodes[i].categories);
+        }
+        return !hasProcess;
+    }
+
+    /**
+     * Check if this component was nagivated back from result's matrix
+     */
+    isNavFromResult() {
+        if (this.navFromResult.hasOwnProperty('processId'))
+            return true;
+        return false;
+    }
+
+    /**
+     * Check if the currentlySelectedNode is a source process node
+     */
+    isCurrentProcessSource() {
+        if (this.currentlySelectedNode == null || this.currentlySelectedNode == undefined) {
+            return false;
+        } else {
+            return this.project.processNodes[this.currentlySelectedNode.data('key')].isSource;
+        }
+    }
+
+    /**
+     * Checking if a node is decategorise
+     * @param id id of the node from processNodes array while looping through the data
+     */
+    checkIfNodeIsDecategorised(id) {
+        for (let i = 0; i < this.abandonedNodes.length; i++) {
+            if (this.abandonedNodes[i][0].getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether a link has already be established 
+     * @returns boolean 
+     * */
+    checkIfLinkExist() {
+        let headObj = this.project.processNodes[this.head.data('key')];
+        let tailObj = this.project.processNodes[this.tail.data('key')];
+        for (let i = 0; i < headObj.nextId.length; i++) {
+            if (headObj.nextId[i] == tailObj.id) {
+                this.showLinkExistWarning();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if all inputs in the current tab are collapsed
+     * @param tab
+     */
+    areAllCollapsed(tab) {
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                for (var i = 0; i < this.materialList.length; i++) {
+                    if (!this.materialList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.inputMenuBar[1]:   //Energy Input
+                for (var i = 0; i < this.energyList.length; i++) {
+                    if (!this.energyList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.inputMenuBar[2]:   //Transportation Input
+                for (var i = 0; i < this.transportList.length; i++) {
+                    if (!this.transportList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.outputMenuBar[0]:   //Output
+                for (var i = 0; i < this.outputList.length; i++) {
+                    if (!this.outputList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.outputMenuBar[1]:   //Byproduct
+                for (var i = 0; i < this.byproductList.length; i++) {
+                    if (!this.byproductList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+            case this.outputMenuBar[2]:   //Direct Emission
+                for (var i = 0; i < this.emissionList.length; i++) {
+                    if (!this.emissionList.at(i).value.isCollapsed)
+                        return false;
+                }
+                return true;
+        }
+    }
+
+    //================================================================
+    //                  DETAILS-RELATED FUNCTIONS
+    //================================================================
     /**
      * Get the corresponding Rect obj from the processNodes array, given a SVG.Rect object
      * @param rect the SVG.Rect object to compare with
@@ -193,10 +518,19 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     getDetails() {
         //get corresponding rect 
+        if (this.currentlySelectedNode == undefined || this.currentlySelectedNode == null) {
+            return;
+        }
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
-        sourceCheck.checked = rectObj.isSource;
+        this.processIdMap[rectObj.id] = {
+            name: rectObj.processName,
+            index: this.currentlySelectedNode.data('key')
+        };
+        if (sourceCheck != null) {
+            sourceCheck.checked = rectObj.isSource;
+        }
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:           //Material Input
                 //Clear old data
@@ -265,17 +599,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //get corresponding node 
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
         this.prepareForUndoableAction();
-        
         //Update all material inputs
         switch (this.selectedTab) {
             case this.inputMenuBar[0]:       //Material Input
                 //Create new data array
                 var materialInputs: MaterialInput[] = [];
                 for (let j = 0; j < this.materialList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var materialInput = new MaterialInput();
                     materialInput.parseData(this.materialList.at(j).value);
-                    materialInputs.push(materialInput);
+                    if (!materialInput.equals(new MaterialInput()))
+                        materialInputs.push(materialInput);
                 }
                 //Update the array for the rect
                 rectObj.materialInput = materialInputs;
@@ -284,10 +618,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var energyInputs: EnergyInput[] = [];
                 for (let j = 0; j < this.energyList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var energyInput = new EnergyInput();
                     energyInput.parseData(this.energyList.at(j).value);
-                    energyInputs.push(energyInput);
+                    if (!energyInput.equals(new EnergyInput()))
+                        energyInputs.push(energyInput);
                 }
                 //Update the array for the rect
                 rectObj.energyInputs = energyInputs;
@@ -296,10 +631,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var transportationInputs: TransportationInput[] = [];
                 for (let j = 0; j < this.transportList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var transport = new TransportationInput();
                     transport.parseData(this.transportList.at(j).value);
-                    transportationInputs.push(transport);
+                    if (!transport.equals(new TransportationInput()))
+                        transportationInputs.push(transport);
                 }
                 //Update the array for the rect
                 rectObj.transportations = transportationInputs;
@@ -308,10 +644,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var outputs: Output[] = [];
                 for (let j = 0; j < this.outputList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var output = new Output();
                     output.parseData(this.outputList.at(j).value);
-                    outputs.push(output);
+                    if (!output.equals(new Output()))
+                        outputs.push(output);
                 }
                 //Update the array for the rect
                 rectObj.outputs = outputs;
@@ -320,10 +657,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var byproducts: Byproduct[] = [];
                 for (let j = 0; j < this.byproductList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var byproduct = new Byproduct();
                     byproduct.parseData(this.byproductList.at(j).value);
-                    byproducts.push(byproduct);
+                    if (!byproduct.equals(new Byproduct()))
+                        byproducts.push(byproduct);
                 }
                 //Update the array for the rect
                 rectObj.byproducts = byproducts;
@@ -332,10 +670,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Create new data array
                 var emissions: DirectEmission[] = [];
                 for (let j = 0; j < this.emissionList.length; j++) {
-                    //Push data to the array
+                    //Push data to the array if it's not empty
                     var emission = new DirectEmission();
                     emission.parseData(this.emissionList.at(j).value);
-                    emissions.push(emission);
+                    if (!emission.equals(new DirectEmission()))
+                        emissions.push(emission);
                 }
                 //Update the array for the rect
                 rectObj.directEmissions = emissions;
@@ -343,6 +682,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         //Save the process name and data to the app
         rectObj.processName = this.currentlySelectedNode.processName;
+        this.processIdMap[rectObj.id] = {
+            name: rectObj.processName,
+            index: this.currentlySelectedNode.data('key')
+        };
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         rectObj.isSource = sourceCheck.checked;
         this.currentlySelectedText.text(rectObj.processName);
@@ -662,11 +1005,45 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
     }
 
-    isCurrentProcessSource() {
-        if (this.currentlySelectedNode == null || this.currentlySelectedNode == undefined) {
-            return false;
-        } else {
-            return this.project.processNodes[this.currentlySelectedNode.data('key')].isSource;
+    /**
+     * Update relations between inputs and outputs of all nodes
+     * WARNING: This is a quite expensive function. Don't call it too often
+     */
+    updateRelations() {
+        //Loop through all nodes to assign their inputs
+        for (let fromNode of this.project.processNodes) {
+            for (let output of fromNode.outputs) {
+                var foundMatchingInput = false;
+                //Auto-assign to-process
+                for (let next of fromNode.nextId) {
+                    var toNode = this.project.processNodes[this.processIdMap[next]['index']];
+                    for (let input of toNode.materialInput) {
+                        if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
+                            foundMatchingInput = true;
+                            input.from = fromNode.processName;
+                            output.to = toNode.processName;
+                            //Update currently selected node, since it will be overwritten later if this is not done
+                            var fromNodeIndex = this.project.processNodes.indexOf(fromNode);
+                            if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == fromNodeIndex && this.selectedTab == this.outputMenuBar[0]) {
+                                var outputIndex = fromNode.outputs.indexOf(output);
+                                this.outputList.at(outputIndex).value.to = toNode.processName;
+                                output.to = toNode.processName;
+                            }
+                            var toNodeIndex = this.project.processNodes.indexOf(toNode);
+                            if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
+                                var inputIndex = toNode.materialInput.indexOf(input);
+                                this.materialList.at(inputIndex).value.from = fromNode.processName;
+                                input.from = fromNode.processName;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (!foundMatchingInput) {
+                    //Set the toProcess name to empty if no matching input is found
+                    output.to = '';
+                }
+            }
         }
     }
 
@@ -718,6 +1095,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 break;
         }
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
+        //this.updateRelations();
         this.getDetails();
     }
 
@@ -737,33 +1115,34 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
                 this.removePromptRect(index, rectObj, 'input');
-                this.materialList.removeAt(this.materialList.length - 1);
+                this.materialList.removeAt(index);
                 rectObj.materialInput = this.materialList.value;
                 console.log(index);
                 break;
             
             case this.inputMenuBar[1]:   //Energy Input
-                this.energyList.removeAt(this.energyList.length - 1);
+                this.energyList.removeAt(index);
                 rectObj.energyInputs = this.energyList.value;
                 break;
             case this.inputMenuBar[2]:   //Transportation Input
-                this.transportList.removeAt(this.transportList.length - 1);
+                this.transportList.removeAt(index);
                 rectObj.transportations = this.transportList.value;
                 break;
             case this.outputMenuBar[0]:   //Output
                 this.removePromptRect(index, rectObj, 'output');
-                this.outputList.removeAt(this.outputList.length - 1);
+                this.outputList.removeAt(index);
                 rectObj.outputs = this.outputList.value;
                 break;
             case this.outputMenuBar[1]:   //Byproduct
-                this.byproductList.removeAt(this.byproductList.length - 1);
+                this.byproductList.removeAt(index);
                 rectObj.byproducts = this.byproductList.value;
                 break;
             case this.outputMenuBar[2]:   //Direct Emission
-                this.emissionList.removeAt(this.emissionList.length - 1);
+                this.emissionList.removeAt(index);
                 rectObj.directEmissions = this.emissionList.value;
                 break;
         }
+        this.updateRelations();
         this.getDetails();
     }
 
@@ -777,180 +1156,194 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     /**
-     * Generating lifecycle stages
-     * */
-    generatingComponents() {
-        this.svgOffsetLeft = this.svg.nativeElement.offsetLeft;
-        this.svgOffsetTop = this.svg.nativeElement.offsetTop;
-        this.headerWidth = this.containerHeader.nativeElement.offsetWidth;
-        this.headerHeight = this.containerHeader.nativeElement.offsetHeight;
-        this.processContainerHeight = this.processcontainer.nativeElement.offsetHeight;
-        this.processContainerWidth = this.processcontainer.nativeElement.offsetWidth;
-        this.draw.size(this.processContainerWidth, this.processContainerHeight);
-        //getting previous dimension 
-        this.previousDimensionArray = Object.assign([], this.project.dimensionArray);
-        this.project.processDimension = this.processContainerWidth;
-
-        let previousDimnesion = 0;
-        for (let i = 0; i < this.project.dimensionArray.length; i++) {
-            previousDimnesion += this.project.dimensionArray[i];
+     * Collapse a corresponding detail to the appropriate data array at the specified index,
+     * based on the current selected tab
+     * @param tab name of the tab to collapse from
+     * @param index index of the input to collapse
+     */
+    collapseDetail(tab: string, index: number) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                this.materialList.at(index).value.isCollapsed = true;
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                this.energyList.at(index).value.isCollapsed = true;
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                this.transportList.at(index).value.isCollapsed = true;
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                this.outputList.at(index).value.isCollapsed = true;
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                this.byproductList.at(index).value.isCollapsed = true;
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                this.emissionList.at(index).value.isCollapsed = true;
+                rectObj.directEmissions = this.emissionList.value;
+                break;
         }
-        for (let i = 0; i < this.project.dimensionArray.length; i++) {
-            if (this.project.dimensionArray[i] != null) {
-                if (this.currentContainerWidth != null && this.currentContainerWidth != this.processContainerWidth) {
-
-                    this.project.dimensionArray[i] = this.project.dimensionArray[i] * this.processContainerWidth / this.currentContainerWidth;
-                } else if (this.processContainerWidth != previousDimnesion) {
-                    let scalingFactor = this.processContainerWidth / previousDimnesion;
-                    this.project.dimensionArray[i] = this.project.dimensionArray[i] * scalingFactor;
-                }
-            } else {
-                this.project.dimensionArray[i] = this.headerWidth;
-            }
-        }
-        this.lifeCycleStages = this.project.lifeCycleStages;
-        for (let i = 0; i < this.project.lifeCycleStages.length; i++) {
-            let width = this.project.dimensionArray[i];
-            if (width != null) {
-                document.getElementById("lifestage" + i).style.width = width + "px";
-            } else {
-                document.getElementById("lifestage" + i).style.width = this.headerWidth + "px";
-            }
-        }
-        let accumWidth = 0;
-        for (let i = 1; i < this.lifeCycleStages.length; i++) {
-            let line;
-            if (this.project.separatorArray.length == 0 || this.project.separatorArray[i - 1] == undefined) {
-                let startX = this.project.dimensionArray[i-1] * i + 3 * (i - 1);
-                let endX = startX;
-                let endY = this.processContainerHeight - this.headerHeight - 10;
-                line = this.draw.line(startX, 5, endX, endY);
-                line.stroke({ color: '#000', width: 2, linecap: 'square' })
-                line.data('key', {
-                    posX: line.x(),
-                    index: i,
-                });
-                line.draggy();
-                this.arrayOfSeparators.push(new Line(startX, endY, line.node.id));
-            } else {
-                this.arrayOfSeparators = this.project.separatorArray;
-                let lineObj = this.project.separatorArray[i - 1];
-                accumWidth += this.project.dimensionArray[i - 1]
-                line = this.draw.line(accumWidth, 5, accumWidth, lineObj.endY);
-                //update id of the object
-                this.project.separatorArray[i - 1].id = line.node.id;
-                line.stroke({ color: '#000', width: 1, linecap: 'square' })
-                line.data('key', {
-                    posX: line.x(),
-                    index: i,
-                });
-                line.draggy();
-            }
-            line.on('mouseover', (event) => {
-                document.body.style.cursor = "e-resize";
-            });
-            line.on('mouseout', (event) => {
-                document.body.style.cursor = "default";
-            });
-
-            line.on('dragmove', (event) => {
-                //calculating the difference in the original position and the final position to get the change in position
-                let distanceMoved = line.data('key').posX - line.x();
-                let prevAccumulatedWidth = 0;
-                for (let i = 0; i < this.project.lifeCycleStages.length; i++) {
-
-                    if (i == line.data('key').index) { //next section
-                        //expand or contract the container
-                        line.move(this.mouseX - this.svgOffsetLeft, 10);
-                        if (this.project.dimensionArray[i] != null) {
-                            let newWidth = this.project.dimensionArray[i] + distanceMoved;
-                            document.getElementById("lifestage" + i).style.width = newWidth + "px";
-                            this.currentOnResizeWidthArray[0] = [newWidth, i];
-                        } else {
-                            document.getElementById("lifestage" + i).style.width = this.headerWidth + distanceMoved + "px";
-                            this.currentOnResizeWidthArray[0] = [this.headerWidth + distanceMoved, i];
-                        }
-
-                        //take note huge time overhead
-                        for (let j = 0; j < this.project.processNodes.length; j++) {
-                            let rectObj = this.project.processNodes[j];
-                            if (rectObj.categories == this.lifeCycleStages[i]) {
-                                let rectElement = SVG.get(rectObj.id);
-                                if (rectElement.x() - line.x() < 10) {
-                                   rectElement.move(rectElement.x() + 5, rectElement.y());
-                                }
-                            }
-                        }
-                    } else if (i + 1 == line.data('key').index) { // if it is the previous section
-                        //expand or contract
-                        if (this.project.dimensionArray[i] != null) {
-                            let newWidth = this.project.dimensionArray[i] - distanceMoved;
-                            document.getElementById("lifestage" + i).style.width = newWidth + "px";
-                            this.currentOnResizeWidthArray[1]  = [newWidth, i];
-                        } else {
-                            document.getElementById("lifestage" + i).style.width = this.headerWidth - distanceMoved + "px";
-                            this.currentOnResizeWidthArray[1]  = [this.headerWidth - distanceMoved, i];
-                        }
-                        for (let j = 0; j < this.project.processNodes.length; j++) {
-                            let rectObj = this.project.processNodes[j];
-                            if (rectObj.categories == this.lifeCycleStages[i]) {
-                                let rectElement = SVG.get(rectObj.id);
-                                if (line.x() - rectElement.x() < 110) {
-                                    rectElement.move(rectElement.x() - 5, rectElement.y());
-                                }
-                            }
-                        }
-                    } else {
-                        //stay put
-                        
-                        let dataWidth = this.project.dimensionArray[i];
-                        if (dataWidth != null) {
-                            document.getElementById("lifestage" + i).style.width = dataWidth + "px";
-                        } else {
-                            document.getElementById("lifestage" + i).style.width = this.headerWidth + "px";
-                        }
-                    }
-
-                    
-                }
-            });
-
-            line.on('dragend', (event) => {
-                for (let i = 0; i < this.currentOnResizeWidthArray.length; i++) {
-                    //updating dimensionArray 
-                    this.project.dimensionArray[this.currentOnResizeWidthArray[i][1]] = this.currentOnResizeWidthArray[i][0];
-                    line.data('key',{
-                        posX: line.x(),
-                        index: line.data('key').index
-                    });
-                    //updating separatorArray
-                    if (this.currentOnResizeWidthArray[i][1] != this.project.separatorArray.length) {
-                        let lineObj = this.project.separatorArray[this.currentOnResizeWidthArray[i][1]];
-                        let svgLine = SVG.get(lineObj.id);
-                        this.project.separatorArray[this.currentOnResizeWidthArray[i][1]].startX = svgLine.x();   
-                    }
-                }
-            });
-        }
-        this.project.separatorArray = this.arrayOfSeparators;
-        this.currentContainerWidth = this.processContainerWidth;
-        
     }
 
-    
+    /**
+     * Collapse all details to the appropriate data array based on the current selected tab
+     * @param tab name of the tab to collapse from
+     */
+    collapseAll(tab: string) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                for (var i = 0; i < this.materialList.length; i++) {
+                    this.materialList.at(i).value.isCollapsed = true;
+                }
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                for (var i = 0; i < this.energyList.length; i++) {
+                    this.energyList.at(i).value.isCollapsed = true;
+                }
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                for (var i = 0; i < this.transportList.length; i++) {
+                    this.transportList.at(i).value.isCollapsed = true;
+                }
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                for (var i = 0; i < this.outputList.length; i++) {
+                    this.outputList.at(i).value.isCollapsed = true;
+                }
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                for (var i = 0; i < this.byproductList.length; i++) {
+                    this.byproductList.at(i).value.isCollapsed = true;
+                }
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                for (var i = 0; i < this.emissionList.length; i++) {
+                    this.emissionList.at(i).value.isCollapsed = true;
+                }
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+    }
+
+    /**
+     * Expand a corresponding detail to the appropriate data array at the specified index,
+     * based on the current selected tab
+     * @param tab name of the tab to expand from
+     * @param index index of the input to expand
+     */
+    expandDetail(tab: string, index: number) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                this.materialList.at(index).value.isCollapsed = false;
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                this.energyList.at(index).value.isCollapsed = false;
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                this.transportList.at(index).value.isCollapsed = false;
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                this.outputList.at(index).value.isCollapsed = false;
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                this.byproductList.at(index).value.isCollapsed = false;
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                this.emissionList.at(index).value.isCollapsed = false;
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+        this.getDetails();
+    }
+
+    /**
+     * Expand all details to the appropriate data array based on the current selected tab
+     * @param tab name of the tab to expand from
+     */
+    expandAll(tab: string) {
+        let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        switch (tab) {
+            case this.inputMenuBar[0]:   //Material Input
+                for (var i = 0; i < this.materialList.length; i++) {
+                    this.materialList.at(i).value.isCollapsed = false;
+                }
+                rectObj.materialInput = this.materialList.value;
+                break;
+            case this.inputMenuBar[1]:   //Energy Input
+                for (var i = 0; i < this.energyList.length; i++) {
+                    this.energyList.at(i).value.isCollapsed = false;
+                }
+                rectObj.energyInputs = this.energyList.value;
+                break;
+            case this.inputMenuBar[2]:   //Transportation Input
+                for (var i = 0; i < this.transportList.length; i++) {
+                    this.transportList.at(i).value.isCollapsed = false;
+                }
+                rectObj.transportations = this.transportList.value;
+                break;
+            case this.outputMenuBar[0]:   //Output
+                for (var i = 0; i < this.outputList.length; i++) {
+                    this.outputList.at(i).value.isCollapsed = false;
+                }
+                rectObj.outputs = this.outputList.value;
+                break;
+            case this.outputMenuBar[1]:   //Byproduct
+                for (var i = 0; i < this.byproductList.length; i++) {
+                    this.byproductList.at(i).value.isCollapsed = false;
+                }
+                rectObj.byproducts = this.byproductList.value;
+                break;
+            case this.outputMenuBar[2]:   //Direct Emission
+                for (var i = 0; i < this.emissionList.length; i++) {
+                    this.emissionList.at(i).value.isCollapsed = false;
+                }
+                rectObj.directEmissions = this.emissionList.value;
+                break;
+        }
+        this.getDetails();
+    }
+
+    /**
+     * On change tab
+     * @param tab string passed from process.html to set this.selectedTab to the tab that is changed/clicked
+     */
+    changeTab(tab) {
+        this.saveAndClearDetails();
+        this.selectedTab = tab;
+        this.getDetails();
+    }
+
+    //================================================================
+    //                 MOUSE-KEYBOARD EVENTS
+    //================================================================
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         switch (event.key) {
             //Arrow key events for ease of navigation
-            case 'Home':
+            case 'Home':        //For debugging purposes
+                console.log(this.project.processNodes);
                 break;
-            case 'Enter': case 'Escape':
-                if (document.activeElement.nodeName != 'BODY') {
-                    this.saveAndClearDetails();
-                    var focusedElement = <HTMLInputElement>document.activeElement;
-                    focusedElement.blur();
-                }
-                console.log(this.project.processNodes, this.project.separatorArray);
+            case 'End':
+                this.project.processNodes[this.currentlySelectedNode.data('key')].materialInput[0].materialName = "what";
+                this.getDetails();
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -983,98 +1376,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
     }
 
-    /**
-     * gerating nodes by going through data
-     * */
-    generatingProcessNodes() {
-        //generating process nodes that was saved
-        for (let j = 0; j < this.project.processNodes.length; j++) {
-            var node = this.project.processNodes[j];
-            let accumWidth = 0;
-            let allocated = false;
-            for (let k = 0; k < this.project.lifeCycleStages.length; k++) {
-                if (node.getCategories() == this.project.lifeCycleStages[k]) {
-                    this.createProcessNodes(j, accumWidth, false);
-                    allocated = true;
-                }
-                //if could not find a categories, means that the category have been deleted
-                if (k == this.project.lifeCycleStages.length -1 && !allocated) {
-                    this.abandonedNodes.push([node, j]); // [Rect object of unallocated node, index of unallocated node in process nodes]
-                } else {
-                    accumWidth += this.project.dimensionArray[k];
-
-                }
-
-            }
-        }
-
-        //generating process links that was saved
-        for (let i = 0; i < this.project.processNodes.length; i++) {
-            var current = this.project.processNodes[i];
-            //check if the node is decategorised
-            //true: skip the node
-            //false: go on to check if the nextID is decategorised
-            if (!this.checkIfNodeIsDecategorised(current.getId())) {
-                for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
-                    var next = this.project.processNodes[i].getNext()[j]
-                    //check if the nextID is decategorised
-                    //true: remove the node from the array
-                    //false: connect the two nodes together
-                    if (!this.checkIfNodeIsDecategorised(next)) {
-                        var head = SVG.get(this.project.processNodes[i].getId());
-                        var tail = SVG.get(next);
-                        this.creatingProcessLinks(head, tail, this.project.processNodes[i].getConnectors()[j]);
-                    } else {
-                        this.project.processNodes[i].getNext().splice(j, 1);
-                        this.project.processNodes[i].getConnectors().splice(j, 1);
-                    }
-                }
-            }
-        }
-    }
-
-    generatingAbandonedNodes() {
-        for (let i = 0; i < this.abandonedNodes.length; i++) {
-            let node = this.abandonedNodes[i][0];
-            let indexAtProcesses = this.abandonedNodes[i][1];
-            node.clearNextArrayConnect();
-            this.createAbandonedNodes(node, i, indexAtProcesses);
-        }
-    }
-
-    /**
-     * on window resize 
-     * */
-    onResize() {
-        window.clearTimeout(this.waitId);
-        //wait for resize to be over
-        this.waitId = setTimeout(() => {
-            this.doneResize();
-        }, 500);
-    }
-
-   /**
-    * Waiting resize to finish
-    * */
-    doneResize() {
-        this.draw.clear();
-        this.generatingComponents();
-        this.generatingProcessNodes();
-        this.head = null;
-        this.tail = null;
-    }
-
-
-
     //detecting the posistion of the mouse
     @HostListener('mousemove', ['$event'])
     onMousemove(event: MouseEvent) {
         this.mouseX = event.clientX;
         this.mouseY = event.clientY;
-        if (this.isAbandonedNodesSelected ){
+        if (this.isAbandonedNodesSelected) {
         }
     }
-    
+
     /**
      * When the mouse double clicks on the process container in process.html, creates a node
      * */
@@ -1101,22 +1411,31 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
     }
 
-    //check if a node has been decategorised
     /**
-     * checking if a node is decategorise
-     * 
-     * @param id id of the node from processNodes array while looping through the data
-     */
-    checkIfNodeIsDecategorised(id) {
-        for (let i = 0; i < this.abandonedNodes.length; i++) {
-            if (this.abandonedNodes[i][0].getId() == id) {
-                return true;
-            }
-        }
-        return false;
+     * on window resize 
+     * */
+    onResize() {
+        window.clearTimeout(this.waitId);
+        //wait for resize to be over
+        this.waitId = setTimeout(() => {
+            this.doneResize();
+        }, 500);
     }
 
-    //Pre-processing of abandonednodes 
+   /**
+    * Waiting resize to finish
+    * */
+    doneResize() {
+        this.draw.clear();
+        this.generatingComponents();
+        this.generatingProcessNodes();
+        this.head = null;
+        this.tail = null;
+    }
+
+    //================================================================
+    //                 NODES-RELATED FUNCTIONS
+    //================================================================
     /**
      * Pre-processing of abandoned nodes
      * 
@@ -1353,6 +1672,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.updateRect(rect.data('key'), rectObj);
                 this.onSelectedNodeChange(rect, text);
+                //this.updateRelations();
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -1361,6 +1681,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else {
                     this.currentlySelectedNode.stroke({ color: '#000000' })
                     this.saveAndClearDetails();
+                    this.updateRelations();
                     this.currentlySelectedNode = rect;
                     this.currentlySelectedText = text;
                     this.currentlySelectedNode.stroke({ color: '#ffa384' })
@@ -1372,9 +1693,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else {
                     this.selectedTab = this.inputMenuBar[0];
                 }
-                document.getElementById('processBoxDetailsContainer').style.display = 'block';
                 this.getDetails();
-                
             }
         });
 
@@ -1389,37 +1708,51 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.currentlySelectedNode = rect;
                 this.cd.detectChanges();                //To remedy *ngIf check in HTML file
                 this.currentlySelectedText = text;
-                console.log(rect);
-                this.currentlySelectedNode.stroke({ color: '#ffa384'})
+                this.currentlySelectedNode.stroke({ color: '#ffa384' })
                 this.getDetails();
                 switch (this.navFromResult['tab']) {
-                    case '4': this.changeTab(this.outputMenuBar[0]); break;
-                    case '6': this.changeTab(this.outputMenuBar[2]); break;
+                    case '1':
+                        for (let input of this.project.processNodes[this.currentlySelectedNode.data('key')].materialInput) {
+                            if (input.materialName.toLowerCase() == this.navFromResult['name'].toLowerCase()) {
+                                input.isCollapsed = false;
+                            } else {
+                                input.isCollapsed = true;
+                            }
+                        }
+                        this.getDetails();
+                        break;
+                    case '4': 
+                        for (let output of this.project.processNodes[this.currentlySelectedNode.data('key')].outputs) {
+                            if (output.outputName.toLowerCase() == this.navFromResult['name'].toLowerCase()) {
+                                output.isCollapsed = false;
+                            } else {
+                                output.isCollapsed = true;
+                            }
+                        }
+                        this.changeTab(this.outputMenuBar[0]);
+                        break;
+                    case '6':
+                        for (let emission of this.project.processNodes[this.currentlySelectedNode.data('key')].directEmissions) {
+                            if (emission.emissionType.toLowerCase() == this.navFromResult['name'].toLowerCase()) {
+                                emission.isCollapsed = false;
+                            } else {
+                                emission.isCollapsed = true;
+                            }
+                        }
+                        this.changeTab(this.outputMenuBar[2]);
+                        break;
                     default: break;
                 }
-                document.getElementById('processBoxDetailsContainer').style.display = 'block';
             }
         }
 
+        this.processIdMap[rect.node.id] = {
+            name: r.processName,
+            index: index
+        }
         return rect;
     }
 
-    /**
-     * check whether a link has already be established 
-     * 
-     * @returns boolean 
-     * */
-    checkIfLinkExist() {
-        let headObj = this.project.processNodes[this.head.data('key')];
-        let tailObj = this.project.processNodes[this.tail.data('key')];
-        for (let i = 0; i < headObj.nextId.length; i++) {
-            if (headObj.nextId[i] == tailObj.id) {
-                this.showLinkExistWarning();
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Show a confirmation dialog when user wants to establish a link between two nodes that has existing link
@@ -1474,7 +1807,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     onSelectedNodeChange(rect: SVG.Rect, text: SVG.Text) {
         if (this.head == null && this.tail == null || rect == this.currentlySelectedNode) {
-            document.getElementById('processBoxDetailsContainer').style.display = 'none';
             this.saveAndClearDetails();
             this.currentlySelectedNode = null;
             this.currentlySelectedText = null;
@@ -1487,7 +1819,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             } else {
                 this.selectedTab = this.inputMenuBar[0];
             }
-            document.getElementById('processBoxDetailsContainer').style.display = 'block';
             this.getDetails();
         }
 
@@ -1500,6 +1831,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     addRect(rect: Rect) {
         if (this.isEdit) {
             this.prepareForUndoableAction();
+            if (rect.processName == "") {
+                rect.processName = "P" + (this.project.processNodes.length + 1);
+            }
             this.project.processNodes.push(rect);
             return this.project.processNodes.length - 1;
         }
@@ -1509,8 +1843,20 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param connectorToBeRemoved: An array with [headIndex, indexOfConnector]
      * */
     removeConnector(connectorToBeRemoved) {
-        this.project.processNodes[connectorToBeRemoved[0]].getConnectors().splice(connectorToBeRemoved[1], 1);
-        this.project.processNodes[connectorToBeRemoved[0]].getNext().splice(connectorToBeRemoved[1], 1);
+        console.log(connectorToBeRemoved);
+        var thisNode = this.project.processNodes[connectorToBeRemoved[0]];
+        var thatNodeId = thisNode.getNext()[connectorToBeRemoved[1]];
+        var thatNode = this.project.processNodes[this.processIdMap[thatNodeId]['index']];
+        thisNode.getConnectors().splice(connectorToBeRemoved[1], 1);
+        thisNode.getNext().splice(connectorToBeRemoved[1], 1);
+        //Remove all fromProcess in thatNode's materialInput that is pointing to thisNode
+        for (let input of thatNode.materialInput) {
+            if (input.from == thisNode.processName) {
+                input.from = '';
+            }
+        }
+        this.updateRelations();
+        this.getDetails();
     }
 
     /**
@@ -1582,7 +1928,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     } else if (this.tail = rect) {
                         this.tail = null;
                     }
-                    this.removeAllPromptRect();
+                  this.removeAllPromptRect();
+                  delete this.processIdMap[rect.node.id];
                 }
             });
         }
@@ -1689,16 +2036,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     /**
-     * On change tab
-     * @param tab string passed from process.html to set this.selectedTab to the tab that is changed/clicked
-     */
-    changeTab(tab) {
-        this.saveAndClearDetails();
-        this.selectedTab = tab;
-        this.getDetails();
-    }
-
-    /**
      * onclick add button which manually add a node in process component
      * */
     addProcessNodeEvent() {
@@ -1717,7 +2054,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.isEdit = false;
         this.editMode();
         this.removeRect(this.currentlySelectedNode, this.currentlySelectedText);
-        this.currentlySelectedNode = null;
     }
 
     /**
@@ -1748,10 +2084,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
     }
 
-    /**================================================================
-     *                    FORM CONTROL FUNCTIONS
-     * ================================================================*/
-    // add a input form group
+    //================================================================
+    //                    FORM CONTROL FUNCTIONS
+    //================================================================
+    /**
+     * Add a input form group
+     */
     addInput(list: FormArray) {
         switch (list) {
             case this.materialList:
@@ -1791,6 +2129,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             formArray.removeAt(0);
         }
     }
+
+    //================================================================
+    //                  MISCELLANEOUS FUNCTIONS
+    //================================================================
 
     /**Read project data from dataService and update the form */
     readJSON(data) {
@@ -1894,6 +2236,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         recentProject.push(this.project);
         this.cookies.set('recent', JSON.stringify(recentProject, null, 2));
     }
+
+    //================================================================
+    //                    UNDO-REDO FUNCTIONS
+    //================================================================
     /**
      * Save the state of the current project, in preparation for an undoable action
      */
