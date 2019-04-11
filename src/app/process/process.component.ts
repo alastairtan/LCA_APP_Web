@@ -697,11 +697,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //Loop through all nodes to assign their inputs
         for (let fromNode of this.project.processNodes) {
             for (let output of fromNode.outputs) {
-                //Auto-assign to-process if it's empty
+                var foundMatchingInput = false;
+                //Auto-assign to-process
                 for (let next of fromNode.nextId) {
                     var toNode = this.project.processNodes[this.processIdMap[next]['index']];
                     for (let input of toNode.materialInput) {
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
+                            foundMatchingInput = true;
                             input.from = fromNode.processName;
                             output.to = toNode.processName;
                             //Update currently selected node, since it will be overwritten later if this is not done
@@ -709,15 +711,21 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == fromNodeIndex && this.selectedTab == this.outputMenuBar[0]) {
                                 var outputIndex = fromNode.outputs.indexOf(output);
                                 this.outputList.at(outputIndex).value.to = toNode.processName;
+                                output.to = toNode.processName;
                             }
                             var toNodeIndex = this.project.processNodes.indexOf(toNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
                                 this.materialList.at(inputIndex).value.from = fromNode.processName;
+                                input.from = fromNode.processName;
                             }
                             break;
                         }
                     }
+                }
+                if (!foundMatchingInput) {
+                    //Set the toProcess name to empty if no matching input is found
+                    output.to = '';
                 }
             }
         }
@@ -771,7 +779,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 break;
         }
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
-        this.updateRelations();
+        //this.updateRelations();
         this.getDetails();
     }
 
@@ -1006,7 +1014,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 console.log(this.project.processNodes);
                 break;
             case 'End':
-                console.log(this.processIdMap);
+                this.project.processNodes[this.currentlySelectedNode.data('key')].materialInput[0].materialName = "what";
+                this.getDetails();
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -1330,7 +1339,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.updateRect(rect.data('key'), rectObj);
                 this.onSelectedNodeChange(rect, text);
-                this.updateRelations();
+                //this.updateRelations();
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -1339,6 +1348,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else {
                     this.currentlySelectedNode.stroke({ color: '#000000' })
                     this.saveAndClearDetails();
+                    this.updateRelations();
                     this.currentlySelectedNode = rect;
                     this.currentlySelectedText = text;
                     this.currentlySelectedNode.stroke({ color: '#ffa384' })
@@ -1500,9 +1510,20 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param connectorToBeRemoved: An array with [headIndex, indexOfConnector]
      * */
     removeConnector(connectorToBeRemoved) {
-        this.project.processNodes[connectorToBeRemoved[0]].getConnectors().splice(connectorToBeRemoved[1], 1);
-        this.project.processNodes[connectorToBeRemoved[0]].getNext().splice(connectorToBeRemoved[1], 1);
+        console.log(connectorToBeRemoved);
+        var thisNode = this.project.processNodes[connectorToBeRemoved[0]];
+        var thatNodeId = thisNode.getNext()[connectorToBeRemoved[1]];
+        var thatNode = this.project.processNodes[this.processIdMap[thatNodeId]['index']];
+        thisNode.getConnectors().splice(connectorToBeRemoved[1], 1);
+        thisNode.getNext().splice(connectorToBeRemoved[1], 1);
+        //Remove all fromProcess in thatNode's materialInput that is pointing to thisNode
+        for (let input of thatNode.materialInput) {
+            if (input.from == thisNode.processName) {
+                input.from = '';
+            }
+        }
         this.updateRelations();
+        this.getDetails();
     }
 
     /**
