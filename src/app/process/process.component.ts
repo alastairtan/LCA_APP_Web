@@ -515,6 +515,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     getDetails() {
         //get corresponding rect 
+        if (this.currentlySelectedNode == undefined || this.currentlySelectedNode == null) {
+            return;
+        }
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         let sourceCheck = <HTMLInputElement>document.getElementById("sourceCheck");
         this.currentlySelectedNode.processName = rectObj.processName;
@@ -1348,7 +1351,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.selectedTab = this.inputMenuBar[0];
                 }
                 this.getDetails();
-                
             }
         });
 
@@ -1401,6 +1403,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
         }
 
+        this.processIdMap[rect.node.id] = {
+            name: r.processName,
+            index: index
+        }
         return rect;
     }
 
@@ -1482,6 +1488,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     addRect(rect: Rect) {
         if (this.isEdit) {
             this.prepareForUndoableAction();
+            if (rect.processName == "") {
+                rect.processName = "P" + (this.project.processNodes.length + 1);
+            }
             this.project.processNodes.push(rect);
             return this.project.processNodes.length - 1;
         }
@@ -1567,8 +1576,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     this.onSelectedNodeChange(null, null);
                 }
             });
-
-           
+            delete this.processIdMap[rect.node.id];
         }
     }
 
