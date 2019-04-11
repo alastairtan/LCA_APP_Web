@@ -33,7 +33,7 @@ export class MainMenuComponent implements OnInit {
             this.cookies.set('recent', JSON.stringify(this.recentProjects, null, 2));
         }
 
-        console.log(this.cookies.get('recent'));
+        //console.log(this.cookies.get('recent'));
         //Sort the array by lastModified
         this.recentProjects = this.recentProjects.sort((p1, p2) => p2[2] - p1[2]);
         this.recentProjects = this.recentProjects.splice(0, this.RECENT_PROJECT_DISPLAY_LIMIT);

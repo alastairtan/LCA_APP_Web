@@ -170,7 +170,6 @@ export class ResultComponent implements OnInit {
             });
             this.demandVector.push(valueFormGroup);
         }
-        console.log(this.result);
         this.rowCount = this.economicflow.length;
     }
 
@@ -383,7 +382,13 @@ export class ResultComponent implements OnInit {
         }
     }
 
-    navToInput(processIndex, table, cellValue) {
+    /**
+     * Read data from matrix cell, then navigate back to process component
+     * @param processIndex index of a process inside the matrix
+     * @param table 1 for Technical Matrix, 2 for Environmental Matrix
+     * @param cellValue text value of the cell clicked
+     */
+    navToInput(processIndex, table, cellValue, name) {
         if (parseFloat(cellValue) == 0) {
             return;
         }
@@ -394,7 +399,7 @@ export class ResultComponent implements OnInit {
         } else if (parseFloat(cellValue) > 0) {
             tab = 4;
         }
-        var route = 'process/' + processId + '/' + tab;
+        var route = 'process/' + processId + '/' + tab + '/' + name;
         this.router.navigate([route])
     }
 

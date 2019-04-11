@@ -6,17 +6,19 @@ export class Byproduct {
     unit: string;
     activityDataOrigin: string;
     downstreamOption: string;
-    remarks: string; 
+    remarks: string;
+    isCollapsed: boolean;
 
     constructor() {
         this.coproduct = false;
         this.waste = false;
         this.byproductName = '';
         this.quantity = '0';
-        this.unit = 'number';
+        this.unit = 'm3';
         this.activityDataOrigin = '';
         this.downstreamOption = '';
         this.remarks = 'N/A';
+        this.isCollapsed = false;
     }
 
     parseData(jsonObj) {
@@ -28,6 +30,7 @@ export class Byproduct {
         this.activityDataOrigin = jsonObj.activityDataOrigin;
         this.downstreamOption = jsonObj.downstreamOption;
         this.remarks = jsonObj.remarks;
+        this.isCollapsed = jsonObj.isCollapsed;
     }
 
     equals(other: Byproduct) {

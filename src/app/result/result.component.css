@@ -17,6 +17,7 @@ table {
     border-collapse: collapse;
     width: 100%;
     overflow: hidden;
+    cursor: default;
 }
 
 td, th {
@@ -44,6 +45,7 @@ input[type=number] {
 
 .highlightedDblClick {
     background-color: #ffdcd1;
+    cursor: pointer;
 }
 
 .subtitle {

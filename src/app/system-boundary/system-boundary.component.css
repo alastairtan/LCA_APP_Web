@@ -18,6 +18,7 @@
     font-family: 'Raleway', sans-serif;
     background-color: transparent;
     overflow: auto;
+    padding: 3px 0;
 }
 
 .example-box {
@@ -34,6 +35,12 @@
     height: 4.3em;
 }
 
+.stage-container {
+    background-color: #f2f3f2;
+    border-top: solid 1px #e5e7e5;
+    border-bottom: solid 1px #e5e7e5;
+}
+
 .stageName {
     padding: 20px 10px;
     display: flex;
@@ -41,6 +48,7 @@
     justify-content: space-between;
     font-size: 14px;
     height: 100%;
+    border-right: solid 2px #fff;
 }
 
 .stageName input {
@@ -68,6 +76,8 @@
 
 .example-box:last-child {
     border: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
@@ -115,9 +125,10 @@
 }
 
 .stageEditButtons {
-    padding: 10px 10px 0 0;
+    padding: 10px;
     display: flex;
     justify-content: flex-end;
+    cursor: default;
 }
 
 .addInput {
@@ -204,11 +215,13 @@
 .btn-edit, .btn-delete {
     background-color: #ffa384;
     border-radius: 4px;
-    margin-left: 3px;
-    margin-right: 3px;
     border: hidden;
-    height: 4vh;
-    padding-top: 0.5vh;
+    margin: auto 3px;
+    font-size: 1vw;
+    width: 2vw;
+    height: 4.3vh;
+    padding: 0.1vw;
+
 }
 
 form {

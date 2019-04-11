@@ -8,7 +8,8 @@ export class EnergyInput {
     activityDataOrigin: string;
     emissionFactorData: string;
     emissionFactorSource: string;
-    remarks: string; 
+    remarks: string;
+    isCollapsed: boolean;
 
     constructor() {
         this.equipmentName = '';
@@ -16,11 +17,12 @@ export class EnergyInput {
         this.processTime = '0';
         this.rating = '0.0001';
         this.quantity = '0';
-        this.unit = 'number';
+        this.unit = 'm3';
         this.activityDataOrigin = '';
         this.emissionFactorData = '';
         this.emissionFactorSource = '';
         this.remarks = 'N/A';
+        this.isCollapsed = false;
     }
 
     parseData(jsonObj) {
@@ -34,6 +36,7 @@ export class EnergyInput {
         this.emissionFactorData = jsonObj.emissionFactorData;
         this.emissionFactorSource = jsonObj.emissionFactorSource;
         this.remarks = jsonObj.remarks;
+        this.isCollapsed = jsonObj.isCollapsed;
     }
 
     equals(other: EnergyInput) {

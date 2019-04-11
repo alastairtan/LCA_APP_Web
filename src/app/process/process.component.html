@@ -76,9 +76,9 @@
                 <hr />
                 <div *ngIf="currentlySelectedNode != null" class="processNameDiv" id="processNameDiv">
                     <p>Process name</p>
-                    <input *ngIf="currentlySelectedNode != null" [(ngModel)]="currentlySelectedNode.processName" autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails()" />
+                    <input *ngIf="currentlySelectedNode != null" [(ngModel)]="currentlySelectedNode.processName" autocomplete="off" type="text" name="processName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
                 </div>
-                <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" style="display:none">
+                <div class="processBoxDetailsContainer" id="processBoxDetailsContainer" *ngIf="currentlySelectedNode != null">
                     <div class="detailBoxHeader">
                         {{processName}}
                     </div>
@@ -129,9 +129,26 @@
                                     <div class="col-md-2"></div>
                                 </div>
                                 <div class="add-container">
-                                    <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
-                                        <i class="fa fa-plus fa-1x"></i><br />
-                                    </button>
+                                    <div class="row">
+                                        <div class="col-md-5 update-relations-container">
+                                            <!--<button type="button" class="btn btn-sq-xs btn-collapse" (click)="saveAndClearDetails(); updateRelations(); getDetails()">
+                                                    Update links
+                                                </button>-->
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-sq-xs btn-add" (click)="addDetail(selectedTab)">
+                                                <i class="fa fa-plus fa-1x"></i><br />
+                                            </button>
+                                        </div>
+                                        <div class="col-md-5 collapse-all-container">
+                                            <button *ngIf="!areAllCollapsed(selectedTab)" type="button" class="btn btn-sq-xs btn-collapse" (click)="collapseAll(selectedTab)">
+                                                Collapse all
+                                            </button>
+                                            <button *ngIf="areAllCollapsed(selectedTab)" type="button" class="btn btn-sq-xs btn-collapse" (click)="expandAll(selectedTab)">
+                                                Expand all
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -146,89 +163,132 @@
                                 <div formArrayName="inputs">
                                     <div class="input-output" *ngFor="let input of materialList.controls; let i = index;">
                                         <div [formGroupName]="i">
-                                            <div class="odd-color">
-                                                <strong>Material Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Quantity
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                            <div *ngIf="!input.value.isCollapsed">
+                                                <div class="odd-color">
+                                                    <strong>Material Name</strong>
+                                                    <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            From process
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="from" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="" class="auto-select">auto</option>
+                                                                <option *ngFor="let node of project.processNodes" value="{{node.processName}}">{{node.processName}}</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="m3">m3</option>
-                                                            <option value="number">number</option>
-                                                            <option value="kg">kg</option>
-                                                            <option value="kWh">kWh</option>
-                                                            <option value="litre">litre</option>
-                                                            <option value="MJ">MJ</option>
-                                                            <option value="hours">hours</option>
-                                                            <option value="tkm">tkm</option>
-                                                        </select>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Quantity
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Carbon Storage
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails()" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Activity Data Origin
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Emission Factor Value
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="m3">m3</option>
+                                                                <option value="number">number</option>
+                                                                <option value="kg">kg</option>
+                                                                <option value="kWh">kWh</option>
+                                                                <option value="litre">litre</option>
+                                                                <option value="MJ">MJ</option>
+                                                                <option value="hours">hours</option>
+                                                                <option value="tkm">tkm</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Emission Factor Source
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Carbon Storage
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="even-color">
-                                                <div>
-                                                    Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Activity Data Origin
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Emission Factor Value
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Emission Factor Source
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="odd-color">
+                                                    <div>
+                                                        Remarks
+                                                        <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                                <div class="add-container">
+                                                    <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                        <i class="fa fa-trash fa-1x"></i><br />
+                                                    </button>
+                                                </div>
+                                                <div class="collapse-container" (click)="collapseDetail(selectedTab, i)">
+                                                    &#9650;
                                                 </div>
                                             </div>
-                                            <div class="add-container">
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
+                                            <div *ngIf="input.value.isCollapsed">
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            <strong>Material Name</strong>
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.materialName}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            From process
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.from}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="collapse-container" (click)="expandDetail(selectedTab, i)">
+                                                    &#9660;
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -247,103 +307,123 @@
                                 <div formArrayName="inputs">
                                     <div class="input-output" *ngFor="let input of energyList.controls; let i = index;">
                                         <div [formGroupName]="i">
-                                            <div class="odd-color">
-                                                <strong>Equipment Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="equipmentName" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="even-color">
-                                                Energy Type
-                                                <input autocomplete="off" type="text" formControlName="energyType" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Process Time
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="processTime" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                            <div *ngIf="!input.value.isCollapsed">
+                                                <div class="odd-color">
+                                                    <strong>Equipment Name</strong>
+                                                    <input autocomplete="off" type="text" formControlName="equipmentName" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                                <div class="even-color">
+                                                    Energy Type
+                                                    <input autocomplete="off" type="text" formControlName="energyType" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Process Time
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="processTime" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Rating
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="rating" class="material-input smaller-input" (change)="saveAndClearDetails()" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Quantity
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Rating
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="rating" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="m3">m3</option>
-                                                            <option value="number">number</option>
-                                                            <option value="kg">kg</option>
-                                                            <option value="kWh">kWh</option>
-                                                            <option value="litre">litre</option>
-                                                            <option value="MJ">MJ</option>
-                                                            <option value="hours">hours</option>
-                                                            <option value="tkm">tkm</option>
-                                                        </select>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Quantity
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Activity Data Origin
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Emission Factor Value
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Emission Factor Source
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="m3">m3</option>
+                                                                <option value="number">number</option>
+                                                                <option value="kg">kg</option>
+                                                                <option value="kWh">kWh</option>
+                                                                <option value="litre">litre</option>
+                                                                <option value="MJ">MJ</option>
+                                                                <option value="hours">hours</option>
+                                                                <option value="tkm">tkm</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="even-color">
-                                                <div>
-                                                    Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Activity Data Origin
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Emission Factor Value
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="emissionFactorData" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Emission Factor Source
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="emissionFactorSource" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="even-color">
+                                                    <div>
+                                                        Remarks
+                                                        <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                                <div class="add-container">
+                                                    <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                        <i class="fa fa-trash fa-1x"></i><br />
+                                                    </button>
+                                                </div>
+                                                <div class="collapse-container" (click)="collapseDetail(selectedTab, i)">
+                                                    &#9650;
                                                 </div>
                                             </div>
-                                            <div class="add-container">
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
+                                            <div *ngIf="input.value.isCollapsed">
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            <strong>Energy Type</strong>
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.energyType}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="collapse-container" (click)="expandDetail(selectedTab, i)">
+                                                    &#9660;
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -362,59 +442,79 @@
                                 <div formArrayName="inputs">
                                     <div class="input-output" *ngFor="let input of transportList.controls; let i = index;">
                                         <div [formGroupName]="i">
-                                            <div class="odd-color">
-                                                <strong>Transportation Type</strong>
-                                                <input autocomplete="off" type="text" formControlName="transportationType" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Quantity
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                            <div *ngIf="!input.value.isCollapsed">
+                                                <div class="odd-color">
+                                                    <strong>Transportation Type</strong>
+                                                    <input autocomplete="off" type="text" formControlName="transportationType" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Quantity
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="m3">m3</option>
-                                                            <option value="number">number</option>
-                                                            <option value="kg">kg</option>
-                                                            <option value="kWh">kWh</option>
-                                                            <option value="litre">litre</option>
-                                                            <option value="MJ">MJ</option>
-                                                            <option value="hours">hours</option>
-                                                            <option value="tkm">tkm</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Activity Data Origin
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="m3">m3</option>
+                                                                <option value="number">number</option>
+                                                                <option value="kg">kg</option>
+                                                                <option value="kWh">kWh</option>
+                                                                <option value="litre">litre</option>
+                                                                <option value="MJ">MJ</option>
+                                                                <option value="hours">hours</option>
+                                                                <option value="tkm">tkm</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="even-color">
-                                                <div>
-                                                    Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Activity Data Origin
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="even-color">
+                                                    <div>
+                                                        Remarks
+                                                        <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                                <div class="add-container">
+                                                    <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                        <i class="fa fa-trash fa-1x"></i><br />
+                                                    </button>
+                                                </div>
+                                                <div class="collapse-container" (click)="collapseDetail(selectedTab, i)">
+                                                    &#9650;
                                                 </div>
                                             </div>
-                                            <div class="add-container">
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
+                                            <div *ngIf="input.value.isCollapsed">
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-5 input-field">
+                                                            <strong>Transportation Type</strong>
+                                                        </div>
+                                                        <div class="col-md-7 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.transportationType}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="collapse-container" (click)="expandDetail(selectedTab, i)">
+                                                    &#9660;
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -433,73 +533,115 @@
                                 <div formArrayName="inputs">
                                     <div class="input-output" *ngFor="let input of outputList.controls; let i = index;">
                                         <div [formGroupName]="i">
-                                            <div class="odd-color">
-                                                <strong>Output Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Functional Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="functionalUnit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="true">true</option>
-                                                            <option value="false">false</option>
-                                                        </select>
+                                            <div *ngIf="!input.value.isCollapsed">
+                                                <div class="odd-color">
+                                                    <strong>Output Name</strong>
+                                                    <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            To process
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="to" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="">auto</option>
+                                                                <option *ngFor="let node of project.processNodes" value="{{node.processName}}">{{node.processName}}</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Quantity
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="m3">m3</option>
-                                                            <option value="number">number</option>
-                                                            <option value="kg">kg</option>
-                                                            <option value="kWh">kWh</option>
-                                                            <option value="litre">litre</option>
-                                                            <option value="MJ">MJ</option>
-                                                            <option value="hours">hours</option>
-                                                            <option value="tkm">tkm</option>
-                                                        </select>
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Functional Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="functionalUnit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="true">true</option>
+                                                                <option value="false">false</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Activity Data Origin
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Quantity
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="even-color">
-                                                <div>
-                                                    Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="m3">m3</option>
+                                                                <option value="number">number</option>
+                                                                <option value="kg">kg</option>
+                                                                <option value="kWh">kWh</option>
+                                                                <option value="litre">litre</option>
+                                                                <option value="MJ">MJ</option>
+                                                                <option value="hours">hours</option>
+                                                                <option value="tkm">tkm</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Activity Data Origin
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="odd-color">
+                                                    <div>
+                                                        Remarks
+                                                        <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                                <div class="add-container">
+                                                    <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                        <i class="fa fa-trash fa-1x"></i><br />
+                                                    </button>
+                                                </div>
+                                                <div class="collapse-container" (click)="collapseDetail(selectedTab, i)">
+                                                    &#9650;
                                                 </div>
                                             </div>
-                                            <div class="add-container">
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
+                                            <div *ngIf="input.value.isCollapsed">
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            <strong>Output Name</strong>
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.outputName}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            To Process
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.to}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="collapse-container" (click)="expandDetail(selectedTab, i)">
+                                                    &#9660;
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -518,96 +660,116 @@
                                 <div formArrayName="inputs">
                                     <div class="input-output" *ngFor="let input of byproductList.controls; let i = index;">
                                         <div [formGroupName]="i">
-                                            <div class="odd-color">
-                                                <strong>Byproduct Name</strong>
-                                                <input autocomplete="off" type="text" formControlName="byproductName" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Co-product
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="coproduct" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="true">true</option>
-                                                            <option value="false">false</option>
-                                                        </select>
+                                            <div *ngIf="!input.value.isCollapsed">
+                                                <div class="odd-color">
+                                                    <strong>Byproduct Name</strong>
+                                                    <input autocomplete="off" type="text" formControlName="byproductName" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Co-product
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="coproduct" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="true">true</option>
+                                                                <option value="false">false</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Waste
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="waste" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="true">true</option>
-                                                            <option value="false">false</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Quantity
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Waste
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="waste" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="true">true</option>
+                                                                <option value="false">false</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Quantity
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="m3">m3</option>
-                                                            <option value="number">number</option>
-                                                            <option value="kg">kg</option>
-                                                            <option value="kWh">kWh</option>
-                                                            <option value="litre">litre</option>
-                                                            <option value="MJ">MJ</option>
-                                                            <option value="hours">hours</option>
-                                                            <option value="tkm">tkm</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Activity Data Origin
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="m3">m3</option>
+                                                                <option value="number">number</option>
+                                                                <option value="kg">kg</option>
+                                                                <option value="kWh">kWh</option>
+                                                                <option value="litre">litre</option>
+                                                                <option value="MJ">MJ</option>
+                                                                <option value="hours">hours</option>
+                                                                <option value="tkm">tkm</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Downstream Option
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="downstreamOption" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Activity Data Origin
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="even-color">
-                                                <div>
-                                                    Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Downstream Option
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="downstreamOption" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="even-color">
+                                                    <div>
+                                                        Remarks
+                                                        <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                                <div class="add-container">
+                                                    <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                        <i class="fa fa-trash fa-1x"></i><br />
+                                                    </button>
+                                                </div>
+                                                <div class="collapse-container" (click)="collapseDetail(selectedTab, i)">
+                                                    &#9650;
                                                 </div>
                                             </div>
-                                            <div class="add-container">
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
+                                            <div *ngIf="input.value.isCollapsed">
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-5 input-field">
+                                                            <strong>Byproduct Name</strong>
+                                                        </div>
+                                                        <div class="col-md-7 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.byproductName}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="collapse-container" (click)="expandDetail(selectedTab, i)">
+                                                    &#9660;
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -626,60 +788,80 @@
                                 <div formArrayName="inputs">
                                     <div class="input-output" *ngFor="let input of emissionList.controls; let i = index;">
                                         <div [formGroupName]="i">
-                                            <div class="odd-color">
-                                                <strong>Emission Type</strong>
-                                                <input autocomplete="off" type="text" formControlName="emissionType" class="material-input" (change)="saveAndClearDetails()" />
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Quantity
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                            <div *ngIf="!input.value.isCollapsed">
+                                                <div class="odd-color">
+                                                    <strong>Emission Type</strong>
+                                                    <input autocomplete="off" type="text" formControlName="emissionType" class="material-input" (change)="saveAndClearDetails()" />
+                                                </div>
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Quantity
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="number" formControlName="quantity" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="container odd-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Unit
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                            <option value="m3">m3</option>
-                                                            <option value="number">number</option>
-                                                            <option value="kg">kg</option>
-                                                            <option value="kWh">kWh</option>
-                                                            <option value="litre">litre</option>
-                                                            <option value="MJ">MJ</option>
-                                                            <option value="hours">hours</option>
-                                                            <option value="tkm">tkm</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="container even-color">
-                                                <div class="row">
-                                                    <div class="col-md-6 input-field">
-                                                        Activity Data Origin
-                                                    </div>
-                                                    <div class="col-md-6 vcenter">
-                                                        <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Unit
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <select formControlName="unit" class="material-input smaller-input" (change)="saveAndClearDetails()">
+                                                                <option value="m3">m3</option>
+                                                                <option value="number">number</option>
+                                                                <option value="kg">kg</option>
+                                                                <option value="kWh">kWh</option>
+                                                                <option value="litre">litre</option>
+                                                                <option value="MJ">MJ</option>
+                                                                <option value="hours">hours</option>
+                                                                <option value="tkm">tkm</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="odd-color">
-                                                <div>
-                                                    Remarks
-                                                    <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Activity Data Origin
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input autocomplete="off" type="text" formControlName="activityDataOrigin" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="odd-color">
+                                                    <div>
+                                                        Remarks
+                                                        <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />
+                                                    </div>
+                                                </div>
+                                                <div class="add-container">
+                                                    <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
+                                                        <i class="fa fa-trash fa-1x"></i><br />
+                                                    </button>
+                                                </div>
+                                                <div class="collapse-container" (click)="collapseDetail(selectedTab, i)">
+                                                    &#9650;
                                                 </div>
                                             </div>
-                                            <div class="add-container">
-                                                <button type="button" class="btn btn-sq-xs btn-delete" (click)="deleteDetail(selectedTab, i)">
-                                                    <i class="fa fa-trash fa-1x"></i><br />
-                                                </button>
+                                            <div *ngIf="input.value.isCollapsed">
+                                                <div class="container odd-color">
+                                                    <div class="row">
+                                                        <div class="col-md-4 input-field">
+                                                            <strong>Emission Type</strong>
+                                                        </div>
+                                                        <div class="col-md-8 vcenter">
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.emissionType}}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="collapse-container" (click)="expandDetail(selectedTab, i)">
+                                                    &#9660;
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -91,42 +91,37 @@ export class DataService {
     * @returns returns the path to the saved file
     */
   saveElsewhere(filename: string, jsonContent: string) {
+      //Set every input to collapsed
+      for (let node of this.currentProject.processNodes) {
+          for (let input of node.materialInput) {
+              input.isCollapsed = true;
+          }
+          for (let input of node.energyInputs) {
+              input.isCollapsed = true;
+          }
+          for (let input of node.transportations) {
+              input.isCollapsed = true;
+          }
+          for (let input of node.outputs) {
+              input.isCollapsed = true;
+          }
+          for (let input of node.byproducts) {
+              input.isCollapsed = true;
+          }
+          for (let input of node.directEmissions) {
+              input.isCollapsed = true;
+          }
+      }
+      //Then download the file
+      var jsonData = this.currentProject.toString();
       var element = document.createElement('a');
-      element.setAttribute('href', "data:text/json;charset=UTF-8," + encodeURIComponent(jsonContent));
+      element.setAttribute('href', "data:text/json;charset=UTF-8," + encodeURIComponent(jsonData));
       element.setAttribute('download', filename + '.json');
 
       element.style.display = 'none';
       document.body.appendChild(element);
 
       element.click();
-        /*const fs = require('fs'); // Load the File System to execute our common tasks (CRUD)
-        const { dialog } = require("electron").remote;
-
-        var fileParam = {
-            title: 'Save new project',  //Title of the save dialog
-            defaultPath: filename,
-            filters: [{
-                name: 'Project file',
-                extensions: ['json']
-            }]
-        };
-        //The save dialog takes in the fileParam and returns the filePath 
-        dialog.showSaveDialog(fileParam, (filepath) => {
-            if (filepath === undefined) {
-                console.log("The user clicked the button, but didn't create a file :(");
-                return;
-            }
-            fs.writeFile(filepath, jsonContent, (err) => {
-                if (err) {
-                    console.log("An error occured with the creation");
-                    return;
-                }
-            });
-            console.log("File written at " + filepath);
-            //Save to recent projects
-            this.addToRecentProjects(filepath, filename);
-            return filepath;
-        });*/
     }
 
     /**

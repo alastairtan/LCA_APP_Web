@@ -69,6 +69,32 @@
     background-color: #f2f3f2;
 }
 
+.collapse-container {
+    margin: 0 -3px -3px -3px;
+    padding: 0;
+    text-align: center;
+    background-color: #d7dbd7;
+    font-size: 10px;
+    cursor: pointer;
+    z-index: 5;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+    .collapse-container:hover {
+        background-color: #cacfca;
+    }
+
+.update-relations-container {
+    text-align: left;
+    color: black;
+}
+
+.collapse-all-container {
+    text-align: right;
+    color: black;
+}
+
 .empty-text {
     font-style: italic;
     text-align: center;
@@ -123,9 +149,22 @@
 .input-field {
     padding: 0;
 }
+
+.auto-select {
+    color: #ffa384;
+}
 /*
     Add-delete buttons for MaterialInput
 */
+.btn {
+    color: #fff;
+    background-color: #ffa384;
+}
+
+    .btn:hover {
+        background-color: #ff7d51;
+    }
+
 .btn-sq-xs {
     margin: 1px;
     padding: 4px 9px;
@@ -134,18 +173,17 @@
     border-radius: 3px;
 }
 
-.btn-add {
-    color: #fff;
-    background-color: #7cc8a9;
-    border-color: #7cc883;
+.btn-collapse {
+    font-size: 0.8vw;
+    padding: 3px 5px;
+    color: black;
+    background-color: #f1aa92;
+    width: 5.5vw;
 }
 
-.btn-delete {
-    
-    color: #fff;
-    background-color: #c87c9b;
-    border-color: #c87cc1;
-}
+    .btn-collapse:hover {
+        background-color: #eb8765;
+    }
 
 .menuHeader {
     background: #fe6938;
@@ -190,7 +228,8 @@ input {
 }
 input[type=checkbox] {
     margin: 2px auto;
-    height: 1vw;
+    height: 2vh;
+    width: 2vh;
 }
 
 .example-container {
@@ -420,8 +459,4 @@ input[type=checkbox] {
     padding-right: 0;
     margin-right:0;
     margin-left:0;
-}
-
-.btn {
-    background-color: #ffa384;
 }

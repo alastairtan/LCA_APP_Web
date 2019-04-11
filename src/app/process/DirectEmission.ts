@@ -3,14 +3,16 @@ export class DirectEmission {
     quantity: string;
     unit: string;
     activityDataOrigin: string;
-    remarks: string; 
+    remarks: string;
+    isCollapsed: boolean;
 
     constructor() {
         this.emissionType = '';
         this.quantity = '0';
-        this.unit = 'number';
+        this.unit = 'm3';
         this.activityDataOrigin = '';
         this.remarks = 'N/A';
+        this.isCollapsed = false;
     }
 
     parseData(jsonObj) {
@@ -19,6 +21,7 @@ export class DirectEmission {
         this.unit = jsonObj.unit;
         this.activityDataOrigin = jsonObj.activityDataOrigin;
         this.remarks = jsonObj.remarks;
+        this.isCollapsed = jsonObj.isCollapsed;
     }
 
     equals(other: DirectEmission) {

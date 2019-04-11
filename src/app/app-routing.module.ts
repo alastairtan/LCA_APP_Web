@@ -14,7 +14,7 @@ const routes: Routes = [
     { path: 'createProject', component: CreateProjectComponent },
     { path: 'systemBoundary', component: SystemBoundaryComponent },
     { path: 'process', component: ProcessComponent },
-    { path: 'process/:processId/:tab', component: ProcessComponent },
+    { path: 'process/:processId/:tab/:name', component: ProcessComponent },
     { path: 'result', component: ResultComponent },
     { path: 'projectFooter', component: ProjectFooterComponent }
 ];
