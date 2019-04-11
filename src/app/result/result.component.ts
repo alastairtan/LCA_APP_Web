@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 import { Project } from '../project';
+import { Rect } from '../process/Rect';
 
 @Component({
     selector: 'app-result',
@@ -45,6 +46,10 @@ export class ResultComponent implements OnInit {
         this.sign();
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
         this.geratingEnvironmentalMatrix();
+        this.isAdditionalSourceNodeExist();
+        //this.checkDoubleOutputThatAreNotUsed();
+        this.allocationOfOutputs();
+        this.checkMatrixForMultipleSources();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -71,7 +76,8 @@ export class ResultComponent implements OnInit {
             let processNode = this.project.processNodes[i];
             let processUnit: Number[] = [];
             if (!processNode.isSource) {
-                this.processName.push(processNode.processName); let materialInputArr = processNode.materialInput;
+                this.processName.push(processNode.processName);
+                let materialInputArr = processNode.materialInput;
                 let materialOutputArr = processNode.outputs;
                 for (let j = 0; j < materialInputArr.length; j++) {
                     let materialInput = materialInputArr[j];
@@ -79,10 +85,10 @@ export class ResultComponent implements OnInit {
                     let index = this.economicVarExist(materialName.toLowerCase())
                     if (index == null) {
                         this.economicflow.push(materialName);
-                        processUnit.push(-materialInput.quantity);
-                    } else {
-                        this.insertUnit(index, -materialInput.quantity, processUnit);
-                    }
+                        index = this.economicflow.length - 1;
+                    } 
+                    this.insertUnit(index, -materialInput.quantity, processUnit);
+                    
                 }
 
                 for (let k = 0; k < materialOutputArr.length; k++) {
@@ -90,11 +96,11 @@ export class ResultComponent implements OnInit {
                     let outputName = output.outputName;
                     let index = this.economicVarExist(outputName)
                     if (index == null) {
-                        this.economicflow.push(outputName.toLowerCase());
-                        processUnit.push(+output.quantity);
-                    } else {
-                        this.insertUnit(index, +output.quantity, processUnit);
+                        this.economicflow.push(outputName);
+                        index = this.economicflow.length - 1;
                     }
+
+                    this.insertUnit(index, +output.quantity, processUnit);
                 }
                 this.process.push(processUnit);
             } else {
@@ -106,7 +112,7 @@ export class ResultComponent implements OnInit {
                     let index = this.economicVarExist(outputName)
                     this.processName.push(outputName)
                     if (index == null) {
-                        this.economicflow.push(outputName.toLowerCase());
+                        this.economicflow.push(outputName);
                         index = this.economicflow.length - 1;
                     } 
 
@@ -212,6 +218,168 @@ export class ResultComponent implements OnInit {
         //check if length of columns is equal to process name
         this.transformingDataIntoMatrix(this.environmentalflow, matrix, this.resultEnvironmental);
         
+    }
+    
+    //using object input to check
+    isAdditionalSourceNodeExist() {
+
+        //0 for not covered 1 for covered 
+        let coveredNodes: number[] = [];
+        //hash
+        let map = new Map<string, number>();
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            map.set(this.project.processNodes[i].id, i);
+            coveredNodes.push(0);
+        }
+
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            let node = this.project.processNodes[i];
+                for (let j = 0; j < node.nextId.length; j++) {
+                    let index = map.get(node.nextId[j]);
+                    coveredNodes[index] = 1;
+                }
+        }
+        for (let i = 0; i < coveredNodes.length; i++) {
+            if (coveredNodes[i] == 0) {
+                if (this.project.processNodes[i].materialInput.length != 0) {
+                    //create column for not allocated sources
+                    for (let k = 0; k < this.project.processNodes[i].materialInput.length; k++) {
+
+
+                        let vector: number[] = [];
+                        let name = this.project.processNodes[i].materialInput[k].materialName;
+                        for (let j = 0; j < this.economicflow.length; j++) {
+                            if (this.economicflow[j] == name) {
+                                vector.push(1);
+                            } else {
+                                vector.push(0);
+                            }
+                        }
+                        //push to result
+                        this.pushVectorIntoMAtrix(vector);
+                        //push processName
+                        this.processName.push(name);
+                    }
+                    
+                } else {
+                    this.project.processNodes[i].isSource = true;
+                }
+            }
+        }
+    }
+
+    checkDoubleOutputThatAreNotUsed() {
+        for (let i = 0; i < this.result.length; i++) {
+            let hasOutput: Boolean = false;
+            let hasInput: Boolean = false;
+            for (let j = 0; j < this.result[i].length; j++) {
+                if (this.result[i][j] > 0) {
+                    hasOutput = true;
+                }
+                if (this.result[i][j] < 0) {
+                    hasInput = true;
+                }
+            }
+            if (hasInput && !hasOutput) {
+                console.log("Matrix/Model creation error")
+            } else if (hasOutput && !hasInput) {
+                //create an column to handle the ouput of the material
+                let vector: number[] = [];
+                for (let j = 0; j < this.result.length; j++) {
+                    if (j == i) {
+                        vector.push(-1);
+                    } else {
+                        vector.push(0);
+                    }
+                }
+                this.pushVectorIntoMAtrix(vector);
+                this.processName.push("handle output of " + this.economicflow[i]);
+            } else {
+                console.log("No output or inputs")
+            }
+        }
+    }
+
+    //allocation
+    allocationOfOutputs() {
+        let colLength = this.result[0].length;
+        for (let j = 0; j < colLength; j++) {
+            let outputIndexArr: number[] = [];
+            let totalMassSum: number = 0;
+            let inputIndexArr: number[] = [];
+            let vector: any[] = [];
+            for (let i = 0; i < this.result.length; i++) {
+                if (this.result[i][j] > 0) {
+                    outputIndexArr.push(i);
+                    totalMassSum += this.result[i][j];
+                }
+                if (this.result[i][j] < 0) {
+                    inputIndexArr.push(i);
+                }
+                vector.push(this.result[i][j]);
+            }
+            if (outputIndexArr.length > 1) {
+                //allocate resource 
+
+                //default by mass ratio 
+                let k = outputIndexArr.length - 1;
+                while (k != -1) {
+                    if (k != 0) {
+                        let outputRow = outputIndexArr[k];
+                        let outputAmt = this.result[outputRow][j];
+                        vector[j] = outputAmt;
+                        this.result[outputRow][j] = 0;
+                        for (let i = 0; i < inputIndexArr.length; i++) {
+                            let row = inputIndexArr[i];
+                            vector[j] = this.result[row][j] * outputAmt / totalMassSum;
+                        }
+                        for (let i = 0; i < outputIndexArr.length; i++) {
+                            let col = outputIndexArr[i];
+                            if (i != k) {
+                                vector[col] = 0;
+                            }
+                        }
+                        this.pushVectorIntoMAtrix(vector);
+                        let name = this.processName[j];
+                        name = name.concat(k.toString());
+                        this.processName.push(name);
+                    } else {
+                        let outputRow = outputIndexArr[k];
+                        let outputAmt = this.result[outputRow][j];
+                        for (let i = 0; i < inputIndexArr.length; i++) {
+                            let row = inputIndexArr[i];
+                            this.result[row][j] = this.result[row][j] * outputAmt / totalMassSum;
+
+                        }
+                    }
+                    k--;
+                }
+            }
+        }
+    }
+
+    //check the matrix of multiple sources
+    checkMatrixForMultipleSources() {
+        for (let i = 0; i < this.result.length; i++) {
+            let hasOutput: Boolean = false;
+            let hasInput: Boolean = false;
+            for (let j = 0; j < this.result[i].length; j++) {
+                if (this.result[i][j] > 0) {
+                    if (hasOutput && hasInput) {
+                        console.log('multiple resources detected')
+                    } else if (hasOutput && !hasInput){
+                        console.log('matrix/model incorrect')
+                    }
+                }
+            }
+
+        }
+    }
+
+    pushVectorIntoMAtrix(vector: number[]) {
+        for (let i = 0; i < this.result.length; i++) {
+            this.result[i].push(vector[i]);
+        }
     }
 
     /**
