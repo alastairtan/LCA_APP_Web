@@ -174,11 +174,11 @@
 }
 
 .btn-collapse {
-    font-size: 14px;
+    font-size: 0.8vw;
     padding: 3px 5px;
     color: black;
     background-color: #f1aa92;
-    width: 90%;
+    width: 5.5vw;
 }
 
     .btn-collapse:hover {
@@ -228,7 +228,8 @@ input {
 }
 input[type=checkbox] {
     margin: 2px auto;
-    height: 1vw;
+    height: 2vh;
+    width: 2vh;
 }
 
 .example-container {
