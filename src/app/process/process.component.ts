@@ -129,7 +129,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     
     ngOnInit() {
         this.project = this.dataService.getProject();
-
+        console.log(this.project);
         this.materialForm   = this.fb.group({ inputs: this.fb.array([]) });
         this.energyForm     = this.fb.group({ inputs: this.fb.array([]) });
         this.transportForm  = this.fb.group({ inputs: this.fb.array([]) });
@@ -729,7 +729,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else {
                     yPrompt = y - 100 + 80 * (i);
                 }
-                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'input', promptRectNextid, [], false, false, rectObj.categories, name, [], promptRectOutput, [], [], [], [])
+                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'input', promptRectNextid, [], false, rectObj.categories, name, [], promptRectOutput, [], [], [], [])
                 console.log(r.id);
                 if (this.isPromptRectCreated(r.id)) {
                     continue;
@@ -832,7 +832,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     conn2.setConnectorColor("#ffa384");
                     conn2.connector.style('stroke-width', "3px");
                     conn2.connector.node.id = this.project.processNodes[index].connectors[0].id;
-                    this.project.processNodes[this.currentlySelectedNode.data('key')].isClicked = false;
                     this.onSelectedNodeChange(null,null)
                 });
 
@@ -864,7 +863,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     yPrompt = y + 100 + 80 * (i);
                 }
 
-                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'output', [], [], false, false, rectObj.categories, name, promptRectInput, [], [], [], [], [])
+                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'output', [], [], false, rectObj.categories, name, promptRectInput, [], [], [], [], [])
                 if (this.isPromptRectCreated(r.id)) {
                     continue;
                 }
@@ -961,7 +960,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         this.head.stroke({ color: '#000000' });
                         this.head = null;
                         this.tail = null;
-                        this.project.processNodes[this.currentlySelectedNode.data('key')].isClicked = false;
                     }
                     this.onSelectedNodeChange(null, null)
                 });
@@ -1393,7 +1391,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
 
             let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
-                [], [], false, false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
+                [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
             this.createProcessNodes(indexInProcessNodes, result[1], true);
         } else {
@@ -1468,7 +1466,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
                 let r = new Rect(this.mouseX - this.svgOffsetLeft - this.svgabandoned.nativeElement.offsetWidth, this.mouseY - this.svgOffsetTop,
-                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isClicked, rectObj.isSource, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
+                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isSource, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 this.project.processNodes[rect.data('key')] = r;
                 this.transferedRect = this.createProcessNodes(rect.data('key'), 0, false);
             } else {
@@ -1491,7 +1489,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let result = this.allocatingLifeStages(rect.x());
                 let rectObj = this.project.processNodes[rect.data('key')];
                 this.project.processNodes[rect.data('key')] = new Rect(rect.x() - this.svgabandoned.nativeElement.offsetWidth - result[1], rect.y(), rectObj.id, rectObj.nextId,
-                    rectObj.connectors, rectObj.isClicked, rectObj.isSource, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
+                    rectObj.connectors, rectObj.isSource, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 
                 rect.remove();
                 //TODO:
@@ -1505,13 +1503,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             //true: change the border color to black remove pointer to the node
             //false: change the border to blue, point to the node
             let rectObj = this.project.processNodes[rect.data('key')];
-            if (rectObj.isClicked) {
+            if (rect == this.currentlySelectedNode) {
                 rect.stroke({ color: '#000000' });
-                rectObj.isClicked = false;
                 this.head = null;
             } else {
                 rect.stroke({ color: '#4e14e0' });
-                rectObj.isClicked = true;
                 if (this.head == null) {
                     this.head = rect;
                 } else {
@@ -1590,7 +1586,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.prepareForUndoableAction();
             let result = this.allocatingLifeStages(rect.x());
             let oldObj = this.project.processNodes[rect.data('key')];
-            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isClicked, oldObj.isSource, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
+            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isSource, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
             this.updateRect(rect.data('key'), rectObj);
         });
 
@@ -1602,13 +1598,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //check if the node is clicked
                 //true: change the border color to black remove pointer to the node
                 //false: change the border to blue, point to the node
-                if (rectObj.isClicked) {
+                if (rect == this.currentlySelectedNode) {
                     rect.stroke({ color: '#000000' });
-                    rectObj.isClicked = false;
                     this.head = null;
                 } else {
                     rect.stroke({ color: '#ffa384' });
-                    rectObj.isClicked = true;
                     if (this.head == null) {
                         this.head = rect;
                     } else {
@@ -1654,10 +1648,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     //set connectorArray and nextIdArray for head object
                     headObj.nextId = nextIdArray;
                     headObj.connectors = connectorsArray;
-                    headObj.isClicked = false;
 
                     //update tail
-                    rectObj.isClicked = false;
                     this.updateRect(this.head.data('key'), headObj);
 
                     this.head = null;
@@ -2042,7 +2034,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.isEdit = false;
         this.editMode();
         let stageIndex = 0;
-        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
+        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
         let index = this.addRect(rectObj);
         this.createProcessNodes(index,0, true);
     }
