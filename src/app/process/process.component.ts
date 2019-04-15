@@ -696,7 +696,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rectObj.isSource = sourceCheck.checked;
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
-        this.creatingPromptRect(rectObj, this.currentlySelectedNode.data('key'));
+        if (this.isDisplayPrompt) {
+            this.creatingPromptRect(rectObj, this.currentlySelectedNode.data('key'));
+        }
         //check for input and output
 
     }
@@ -2025,50 +2027,54 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     //removing prompt rect if deleted from the details section
     removePromptRect(index: number, rectObj: Rect, option: string) {
-        let indexToRemove = null;
-        let j = index + 1;
-        console.log(this.idPrompt);
-        for (let i = 0; i < this.idPrompt.length; i++) {
+        if (this.isDisplayPrompt) {
+            let indexToRemove = null;
+            let j = index + 1;
+            console.log(this.idPrompt);
+            for (let i = 0; i < this.idPrompt.length; i++) {
+                switch (option) {
+                    case 'input':
+
+                        if (this.idPrompt[i][0].id == rectObj.id + index + 'input') {
+                            indexToRemove = i;
+                            console.log(indexToRemove, index);
+                        } else if (indexToRemove != null && this.idPrompt[i][0].id == rectObj.id + j + 'input') {
+                            let newIndex = j - 1;
+                            SVG.get(rectObj.id + j + 'input').node.id = rectObj.id + newIndex + 'input';
+                            console.log(SVG.get(rectObj.id + newIndex + 'input'));
+                            this.idPrompt[i][0].id = rectObj.id + newIndex + 'input';
+                            j++;
+                        }
+
+                    case 'output':
+                        if (this.idPrompt[i].id == rectObj.id + index + 'output') {
+                            indexToRemove = i;
+                        } else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'output') {
+                            let newIndex = j - 1;
+                            SVG.get(rectObj.id + j + 'output').node.id = rectObj.id + newIndex + 'output';
+                            this.idPrompt[i][0].id = rectObj.id + newIndex + 'output';
+                            j++;
+                        }
+                }
+            }
             switch (option) {
                 case 'input':
-
-                    if (this.idPrompt[i][0].id == rectObj.id + index + 'input') {
-                        indexToRemove = i;
-                        console.log(indexToRemove, index);
-                    } else if (indexToRemove != null && this.idPrompt[i][0].id == rectObj.id + j + 'input') {
-                        let newIndex = j - 1;
-                        SVG.get(rectObj.id + j + 'input').node.id = rectObj.id + newIndex + 'input';
-                        console.log(SVG.get(rectObj.id + newIndex + 'input'));
-                        this.idPrompt[i][0].id = rectObj.id + newIndex + 'input';
-                        j++;
-                    }
-
+                    SVG.get(rectObj.id + index + 'input').remove();
+                    SVG.get(this.idPrompt[indexToRemove].connectors[0].id).remove();
+                    break;
                 case 'output':
-                    if (this.idPrompt[i].id == rectObj.id + index + 'output') {
-                        indexToRemove = i;
-                    }else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'output') {
-                        let newIndex = j - 1;
-                        SVG.get(rectObj.id + j + 'output').node.id = rectObj.id + newIndex + 'output';
-                        this.idPrompt[i][0].id = rectObj.id + newIndex + 'output';
-                        j++;
-                    }
+                    SVG.get(SVG.get(rectObj.id + index + 'output').data('arrow')).remove();
+                    SVG.get(rectObj.id + index + 'output').remove();;
+                    break;
             }
-        }
-        switch (option) {
-            case 'input':
-                SVG.get(rectObj.id + index + 'input').remove();
-                SVG.get(this.idPrompt[indexToRemove].connectors[0].id).remove();
-                break;
-            case 'output':
-                SVG.get(SVG.get(rectObj.id + index + 'output').data('arrow')).remove();
-                SVG.get(rectObj.id + index + 'output').remove();;
-                break;
-        }
 
-        this.idPrompt.splice(indexToRemove, 1);
-        for (let i = indexToRemove; i < this.idPrompt.length; i++) {
-            let svgObj = SVG.get(this.idPrompt[i][0].id);
-            svgObj.data('key', i);
+            this.idPrompt.splice(indexToRemove, 1);
+            for (let i = indexToRemove; i < this.idPrompt.length; i++) {
+                let svgObj = SVG.get(this.idPrompt[i][0].id);
+                svgObj.data('key', i);
+            }
+
+        } else {
         }
     }
 
