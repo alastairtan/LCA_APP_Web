@@ -543,7 +543,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.clearFormArray(this.materialList);
                 //Add data to the list
                 for (let j = 0; j < rectObj.materialInput.length; j++) {
-                    this.materialList.push(this.fb.group(rectObj.materialInput[j]));
+                    this.materialList.push(this.fb.group(this.transformForFormBuilder(rectObj.materialInput[j])));
                 }
                 break;
             case this.inputMenuBar[1]:       //Energy Input
@@ -567,7 +567,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.clearFormArray(this.outputList);
                 //Add data to the list
                 for (let j = 0; j < rectObj.outputs.length; j++) {
-                    this.outputList.push(this.fb.group(rectObj.outputs[j]));
+                    this.outputList.push(this.fb.group(this.transformForFormBuilder(rectObj.outputs[j])));
                 }
                 break;
             case this.outputMenuBar[1]:       //Byproduct
@@ -1018,30 +1018,42 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * WARNING: This is a quite expensive function. Don't call it too often
      */
     updateRelations() {
+        var backwardMap = {};
+        for (let fromNode of this.project.processNodes) {
+            for (let next of fromNode.nextId) {
+                var toNode = this.project.processNodes[this.processIdMap[next]['index']];
+                //Add the relation to the backwardMap
+                if (!backwardMap.hasOwnProperty(toNode.processName)) {
+                    backwardMap[toNode.processName] = [];
+                }
+                this.addProcessToRelation(backwardMap[toNode.processName], fromNode.processName);
+            }
+        }
         //Loop through all nodes to assign their inputs
         for (let fromNode of this.project.processNodes) {
             for (let output of fromNode.outputs) {
-                var foundMatchingInput = false;
+                output.to = [];
                 //Auto-assign to-process
                 for (let next of fromNode.nextId) {
                     var toNode = this.project.processNodes[this.processIdMap[next]['index']];
+                    //Iterate through all inputs
                     for (let input of toNode.materialInput) {
+                        //Push into from/to array if matched
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
-                            foundMatchingInput = true;
-                            input.from = fromNode.processName;
-                            output.to = toNode.processName;
+                            this.addProcessToRelation(input.from, fromNode.processName);
+                            this.addProcessToRelation(output.to, toNode.processName);
                             //Update currently selected node, since it will be overwritten later if this is not done
                             var fromNodeIndex = this.project.processNodes.indexOf(fromNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == fromNodeIndex && this.selectedTab == this.outputMenuBar[0]) {
                                 var outputIndex = fromNode.outputs.indexOf(output);
-                                this.outputList.at(outputIndex).value.to = toNode.processName;
-                                output.to = toNode.processName;
+                                this.addProcessToRelation(this.outputList.at(outputIndex).value.to, toNode.processName);
+                                //this.addProcessToRelation(output.to, toNode.processName);
                             }
                             var toNodeIndex = this.project.processNodes.indexOf(toNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
-                                this.materialList.at(inputIndex).value.from = fromNode.processName;
-                                input.from = fromNode.processName;
+                                this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
+                                //this.addProcessToRelation(input.from, fromNode.processName);
                             }
                             this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex,outputIndex, inputIndex, input.materialName);
                             console.log(fromNode, next);
@@ -1049,12 +1061,50 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         }
                     }
                 }
-                if (!foundMatchingInput) {
-                    //Set the toProcess name to empty if no matching input is found
-                    output.to = '';
+            }
+        }
+
+        console.log(backwardMap);
+
+        //Loop through all inputs to delete obsolete fromProcess
+        for (let node of this.project.processNodes) {
+            var backwardRelation = backwardMap[node.processName];
+            for (let input of node.materialInput) {
+                for (var i = 0; i < input.from.length; i++) {
+                    if (backwardRelation != undefined && !backwardRelation.includes(input.from[i])) {
+                        input.from.splice(i, 1);
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Make sure that no duplicate is added to the array
+     * @param arr the array of relation to add to
+     * @param processName name of the process to be added
+     */
+    private addProcessToRelation(arr: string[], processName: string) {
+        var indexOfProc = arr.indexOf(processName);
+        if (indexOfProc >= 0) {
+            arr.splice(indexOfProc, 1);
+        }
+        arr.push(processName);
+    }
+
+    /**
+     * Transform any array property of an object to a FormArray,
+     * since FormBuilder cannot read array property
+     * @param obj the object to be used by FormBuilder
+     */
+    private transformForFormBuilder(obj) {
+        var clone = JSON.parse(JSON.stringify(obj));
+        for (var property in clone) {
+            if (clone.hasOwnProperty(property) && Array.isArray(clone[property])) {
+                clone[property] = this.fb.array(clone[property]);
+            }
+        }
+        return clone;
     }
 
     /**
@@ -1122,12 +1172,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         this.prepareForUndoableAction();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        console.log(rectObj.materialInput);
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
                 this.removePromptRect(index, rectObj, 'input');
                 this.materialList.removeAt(index);
                 rectObj.materialInput = this.materialList.value;
-                console.log(index);
                 break;
             
             case this.inputMenuBar[1]:   //Energy Input
@@ -1352,8 +1402,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 console.log(this.project.processNodes);
                 break;
             case 'End':
-                this.project.processNodes[this.currentlySelectedNode.data('key')].materialInput[0].materialName = "what";
-                this.getDetails();
+                console.log(this.outputList.value);
+                console.log(this.materialList.value);
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {
@@ -1676,7 +1726,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.updateRect(rect.data('key'), rectObj);
                 this.onSelectedNodeChange(rect, text);
-                //this.updateRelations();
+                this.updateRelations();
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -1855,8 +1905,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         thisNode.getNext().splice(connectorToBeRemoved[1], 1);
         //Remove all fromProcess in thatNode's materialInput that is pointing to thisNode
         for (let input of thatNode.materialInput) {
-            if (input.from == thisNode.processName) {
-                input.from = '';
+            var index = input.from.indexOf(thisNode.processName);
+            if (index >= 0) {
+                input.from.splice(index, 1);
             }
         }
         this.updateRelations();
@@ -1923,17 +1974,16 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         //after reaching the end, we then remove the node that was meant to remove
                         if (i == this.project.processNodes.length - 1) {
                             this.project.processNodes.splice(removedIndex, 1);
+                            this.removeAllPromptRect();
+                            if (this.currentlySelectedNode == rect) {
+                                this.head = null;
+                                this.currentlySelectedNode = null;
+                            }
                             rect.remove();
                             text.remove();
                         }
 
                     }
-                    if (this.head == rect) {
-                        this.head = null;
-                    } else if (this.tail = rect) {
-                        this.tail = null;
-                    }
-                    this.removeConnectedPromptRect(index);
                   delete this.processIdMap[rect.node.id];
                 }
             });
@@ -2177,7 +2227,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     addInput(list: FormArray) {
         switch (list) {
             case this.materialList:
-                this.materialList.push(this.fb.group(new MaterialInput()));
+                this.materialList.push(this.fb.group(this.transformForFormBuilder(new MaterialInput())));
                 break;
             case this.energyList:
                 this.energyList.push(this.fb.group(new EnergyInput()));
@@ -2186,7 +2236,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.transportList.push(this.fb.group(new TransportationInput()));
                 break;
             case this.outputList:
-                this.outputList.push(this.fb.group(new Output()));
+                this.outputList.push(this.fb.group(this.transformForFormBuilder(new Output())));
                 break;
             case this.byproductList:
                 this.byproductList.push(this.fb.group(new Byproduct()));
