@@ -174,10 +174,7 @@
                                                             From process
                                                         </div>
                                                         <div class="col-md-6 vcenter">
-                                                            <select formControlName="from" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                                <option value="" class="auto-select">auto</option>
-                                                                <option *ngFor="let node of project.processNodes" value="{{node.processName}}">{{node.processName}}</option>
-                                                            </select>
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.from.toString()}}" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -282,7 +279,7 @@
                                                             From process
                                                         </div>
                                                         <div class="col-md-8 vcenter">
-                                                            <input disabled class="material-input smaller-input" value="{{input.value.from}}" />
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.from.toString()}}" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -544,10 +541,7 @@
                                                             To process
                                                         </div>
                                                         <div class="col-md-6 vcenter">
-                                                            <select formControlName="to" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                                <option value="">auto</option>
-                                                                <option *ngFor="let node of project.processNodes" value="{{node.processName}}">{{node.processName}}</option>
-                                                            </select>
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.to.toString()}}" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -635,7 +629,7 @@
                                                             To Process
                                                         </div>
                                                         <div class="col-md-8 vcenter">
-                                                            <input disabled class="material-input smaller-input" value="{{input.value.to}}" />
+                                                            <input disabled class="material-input smaller-input" value="{{input.value.to.toString()}}" />
                                                         </div>
                                                     </div>
                                                 </div>

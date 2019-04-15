@@ -1,6 +1,6 @@
 export class MaterialInput {
     materialName: string;
-    from: string;
+    from: string[];
     quantity: string;
     unit: string;
     carbonStorage: string;
@@ -12,7 +12,7 @@ export class MaterialInput {
 
     constructor() {
         this.materialName = '';
-        this.from = "";
+        this.from = [''];
         this.quantity = '0';
         this.unit = 'm3';
         this.carbonStorage = '';
