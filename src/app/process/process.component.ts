@@ -95,7 +95,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private waitId;
 
     //list of promptRect generated
-    private idPrompt: Rect[] = [];
+    //stores an array [rectobj, index of the rectobj]
+    private idPrompt: any[] = [];
     private svgPrompt: any[] = [];
     private svgPromptConn: any[] = [];
     private svgText: any[] = [];
@@ -695,15 +696,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rectObj.isSource = sourceCheck.checked;
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
-        this.creatingPromptRect(rectObj);
+        this.creatingPromptRect(rectObj, this.currentlySelectedNode.data('key'));
         //check for input and output
 
     }
 
-    creatingPromptRect(rectObj: Rect) {
+    creatingPromptRect(rectObj: Rect, index: Number) {
         let materialInputArr = rectObj.materialInput;
         let outputArr = rectObj.outputs;
-
         for (let i = 0; i < materialInputArr.length; i++) {
             let input = materialInputArr[i];
             let name = input.materialName;
@@ -776,7 +776,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
                 //push to a general array of prompt rect
                 //push SVG object and connectors into the array
-                this.idPrompt.push(r);
+                this.idPrompt.push([r, index]);
                 this.svgPrompt.push(rect);
                 this.svgPromptConn.push(conn2.connector);
                 this.svgText.push(text);
@@ -794,21 +794,21 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     let index;
                     if (this.isEdit == false) {
                         this.isEdit = true;
-                        index = this.addRect(this.idPrompt[rect.data('key')]);//removing all prompt rect and connectors
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);//removing all prompt rect and connectors
                         newRect = this.createProcessNodes(index, 0, true); 
                         this.isEdit = false;
                     } else {
                         newRect = this.createProcessNodes(index, 0, true);
                     }
-                    let oldR = this.idPrompt[rect.data('key')];
-                    console.log(this.idPrompt, rect.data('key'));
-                    console.log(oldR.id, this.idPrompt[0].id)
+                    let oldR = this.idPrompt[rect.data('key')][0];
+                    console.log(this.idPrompt, rect.data('key')[0]);
+                    console.log(oldR.id, this.idPrompt[0][0].id)
                     for (let i = 0; i < oldR.connectors.length; i++) {
                         SVG.get(oldR.connectors[i].id).remove();
                     }
                     this.idPrompt.splice(rect.data('key'), 1);
                     for (let i = rect.data('key'); i < this.idPrompt.length; i++) {
-                        let svgObj = SVG.get(this.idPrompt[i].id);
+                        let svgObj = SVG.get(this.idPrompt[i][0].id);
                         if (svgObj.data('arrow') == null) {
                             svgObj.data('key', i);
                         } else {
@@ -909,7 +909,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 
 
                 //include the new prompt into the general array
-                this.idPrompt.push(r);
+                this.idPrompt.push([r, index]);
                 this.svgPrompt.push(rect);
                 this.svgPromptConn.push(conn2.connector);
                 this.svgText.push(text);
@@ -926,15 +926,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 rect.click((event) => {
                     console.log(rect.data('key'));
                     let index;
-                    console.log(this.idPrompt[rect.data('key')]);
+                    console.log(this.idPrompt[rect.data('key')][0]);
                     let newRect;
                     if (this.isEdit == false) {
                         this.isEdit = true;
-                        index = this.addRect(this.idPrompt[rect.data('key')]);
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);
                         newRect = this.createProcessNodes(index, 0, true);
                         this.isEdit = false;
                     } else {
-                        index = this.addRect(this.idPrompt[rect.data('key')]);
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);
                         newRect = this.createProcessNodes(index, 0, true);
                     }
                     
@@ -953,12 +953,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     headObj.connectors.push(new Connector(conn2.connector.node.id, prevNode.data('key'), headObj.connectors.length));
                     headObj.nextId.push(this.project.processNodes[index].id);
                     //removing all prompt rect and connectors
-                    let r = this.idPrompt[rect.data('key')];
                     SVG.get(rect.data('arrow')).remove();
                     this.idPrompt.splice(rect.data('key'), 1);
                     this.prevSVG.splice(svgIndex, 1);
                     for (let i = rect.data('key'); i < this.idPrompt.length; i++) {
-                        let svgObj = SVG.get(this.idPrompt[i].id);
+                        let svgObj = SVG.get(this.idPrompt[i][0].id);
                         svgObj.data('key', i);
                         if (svgObj.data('indexOfPrevSVG') != null) {
                             svgObj.data('indexOfPrevSVG', svgIndex)
@@ -1044,6 +1043,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                                 this.materialList.at(inputIndex).value.from = fromNode.processName;
                                 input.from = fromNode.processName;
                             }
+                            this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex,outputIndex, inputIndex, input.materialName);
+                            console.log(fromNode, next);
                             break;
                         }
                     }
@@ -1157,7 +1158,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     isPromptRectCreated(id: string) {
         for (let i = 0; i < this.idPrompt.length; i++) {
-            if (this.idPrompt[i].id == id) {
+            if (this.idPrompt[i][0].id == id) {
                 return true;
             }
         }
@@ -1886,6 +1887,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     if (!choseYes) {
                         return;
                     }
+                    let index = rect.data('key');
                     this.prepareForUndoableAction();
 
 
@@ -1917,7 +1919,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             //changing all index of remaning nodes
                             SVG.get(this.project.processNodes[i].id).data('key', i - 1);
                         }
-
+                        
                         //after reaching the end, we then remove the node that was meant to remove
                         if (i == this.project.processNodes.length - 1) {
                             this.project.processNodes.splice(removedIndex, 1);
@@ -1931,7 +1933,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     } else if (this.tail = rect) {
                         this.tail = null;
                     }
-                  this.removeAllPromptRect();
+                    this.removeConnectedPromptRect(index);
                   delete this.processIdMap[rect.node.id];
                 }
             });
@@ -1941,11 +1943,37 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     removeAllPromptRect() {
         for (let i = 0; i < this.idPrompt.length; i++) {
-            SVG.get(this.idPrompt[i].id).remove();
-            SVG.get(this.idPrompt[i].connectors[0].id).remove();
+            SVG.get(this.svgPrompt[i].node.id).remove();
+            SVG.get(this.svgPromptConn[i].node.id).remove();
+            SVG.get(this.svgText[i].node.id).remove();
+        }
+        this.svgPrompt = [];
+        this.svgPromptConn = [];
+        this.idPrompt = [];
+    }
+
+    //remove all prompt rect linking to the node 
+    removeConnectedPromptRect(index: Number) {
+        let removedIndex = [];
+        for (let i = 0; i < this.idPrompt.length; i++) {
+            if (this.idPrompt[i][1] == index) {
+                SVG.get(this.svgPrompt[i].node.id).remove();
+                SVG.get(this.svgPromptConn[i].node.id).remove();
+                SVG.get(this.svgText[i].node.id).remove();
+               
+                removedIndex.push(i);
+            }
+        }
+        console.log(this.idPrompt);
+        for (let i = 0; i < removedIndex.length; i++) {
+            this.idPrompt.splice(removedIndex[i], 1);
+            this.svgPrompt.splice(i, 1);
+            this.svgPromptConn.splice(i, 1);
+            this.svgText.splice(i, 1);
         }
     }
 
+    //removing prompt rect if deleted from the details section
     removePromptRect(index: number, rectObj: Rect, option: string) {
         let indexToRemove = null;
         let j = index + 1;
@@ -1954,14 +1982,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             switch (option) {
                 case 'input':
 
-                    if (this.idPrompt[i].id == rectObj.id + index + 'input') {
+                    if (this.idPrompt[i][0].id == rectObj.id + index + 'input') {
                         indexToRemove = i;
                         console.log(indexToRemove, index);
-                    }else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'input') {
+                    } else if (indexToRemove != null && this.idPrompt[i][0].id == rectObj.id + j + 'input') {
                         let newIndex = j - 1;
                         SVG.get(rectObj.id + j + 'input').node.id = rectObj.id + newIndex + 'input';
                         console.log(SVG.get(rectObj.id + newIndex + 'input'));
-                        this.idPrompt[i].id = rectObj.id + newIndex + 'input';
+                        this.idPrompt[i][0].id = rectObj.id + newIndex + 'input';
                         j++;
                     }
 
@@ -1971,7 +1999,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     }else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'output') {
                         let newIndex = j - 1;
                         SVG.get(rectObj.id + j + 'output').node.id = rectObj.id + newIndex + 'output';
-                        this.idPrompt[i].id = rectObj.id + newIndex + 'output';
+                        this.idPrompt[i][0].id = rectObj.id + newIndex + 'output';
                         j++;
                     }
             }
@@ -1989,12 +2017,65 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
         this.idPrompt.splice(indexToRemove, 1);
         for (let i = indexToRemove; i < this.idPrompt.length; i++) {
-            let svgObj = SVG.get(this.idPrompt[i].id);
+            let svgObj = SVG.get(this.idPrompt[i][0].id);
             svgObj.data('key', i);
         }
     }
 
+    /**
+     * 
+     * @param rectObj
+     * @param index index of the head/tail
+     */
+    checkUnnecesaryPrompt(indexOut: Number, indexIn: Number, materialOutIndex, materialInIndex, name: string) {
+        let removedPrompt = [];
+        console.log(indexOut, indexIn);
+        for (let i = 0; i < this.idPrompt.length; i++) {
+            if (this.idPrompt[i][1] == indexOut || this.idPrompt[i][1] == indexIn) {
 
+                console.log(name);
+                let output = this.idPrompt[i][0].outputs[materialOutIndex];
+                let input = this.idPrompt[i][0].materialInput[materialInIndex];
+                if (output != undefined && input != undefined) {
+                    if (output.outputName == name || input.materialName == name) {
+                        console.log(this.idPrompt[i][1], name);
+                        console.log(name);
+                        SVG.get(this.svgPrompt[i].node.id).remove();
+                        SVG.get(this.svgPromptConn[i].node.id).remove();
+                        SVG.get(this.svgText[i].node.id).remove();
+                        removedPrompt.push(i);
+                        break;
+                    }
+                } else if (input != undefined) {
+                    if (input.materialName == name) {
+                        console.log(this.idPrompt[i][1], name);
+                        console.log(name);
+                        SVG.get(this.svgPrompt[i].node.id).remove();
+                        SVG.get(this.svgPromptConn[i].node.id).remove();
+                        SVG.get(this.svgText[i].node.id).remove();
+                        removedPrompt.push(i);
+                        break;
+                    }
+                } else {
+                    if (output.outputName == name ) {
+                        console.log(this.idPrompt[i][1], name);
+                        console.log(name);
+                        SVG.get(this.svgPrompt[i].node.id).remove();
+                        SVG.get(this.svgPromptConn[i].node.id).remove();
+                        SVG.get(this.svgText[i].node.id).remove();
+                        removedPrompt.push(i);
+                        break;
+                    }
+                }
+            }
+        }
+        for (let i = 0; i < removedPrompt.length; i++) {
+            this.idPrompt.splice(removedPrompt[i], 1);
+            this.svgPrompt.splice(removedPrompt[i], 1);
+            this.svgPromptConn.splice(removedPrompt[i], 1);
+            this.svgText.splice(removedPrompt[i], 1);
+        }
+    }
     /**
      * update data of the node at project.processNodes
      * 
@@ -2229,22 +2310,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         if (this.isDisplayPrompt) {
             this.isDisplayPrompt = false;
             //remove all prompt nodes 
-            for (let i = 0; i < this.svgPrompt.length; i++) {
-                let idNode = this.svgPrompt[i].node.id;
-                let idConn = this.svgPromptConn[i].node.id;
-                let idText = this.svgText[i].node.id;
-                SVG.get(idNode).remove();
-                SVG.get(idConn).remove();
-                SVG.get(idText).remove();
-            }
+            this.removeAllPromptRect();
         } else {
             this.isDisplayPrompt = true;
-            this.svgPrompt = [];
-            this.svgPromptConn = [];
-            this.idPrompt = [];
             for (let i = 0; i < this.project.processNodes.length; i++) {
                 let rectObj = this.project.processNodes[i];
-                this.creatingPromptRect(rectObj);
+                this.creatingPromptRect(rectObj, i);
             }
         }
     }
