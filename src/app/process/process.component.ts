@@ -96,8 +96,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     //list of promptRect generated
     private idPrompt: Rect[] = [];
+    private svgPrompt: any[] = [];
+    private svgPromptConn: any[] = [];
+    private svgText: any[] = [];
+
     private prevSVG: any[] = [];
 
+    private isDisplayPrompt: Boolean = true;
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
@@ -770,8 +775,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 r.connectors = connectorArr;
 
                 //push to a general array of prompt rect
+                //push SVG object and connectors into the array
                 this.idPrompt.push(r);
-
+                this.svgPrompt.push(rect);
+                this.svgPromptConn.push(conn2.connector);
+                this.svgText.push(text);
 
                 //index in the idPrompt of the type of input
                 rect.data({
@@ -902,6 +910,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
                 //include the new prompt into the general array
                 this.idPrompt.push(r);
+                this.svgPrompt.push(rect);
+                this.svgPromptConn.push(conn2.connector);
+                this.svgText.push(text);
                 console.log(this.currentlySelectedNode);
                 this.prevSVG.push(this.currentlySelectedNode);
                 rect.data({
@@ -2213,6 +2224,31 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.router.navigate(['/mainMenu']);
         this.pushToCookie();
     }
+
+    displayPromptNode() {
+        if (this.isDisplayPrompt) {
+            this.isDisplayPrompt = false;
+            //remove all prompt nodes 
+            for (let i = 0; i < this.svgPrompt.length; i++) {
+                let idNode = this.svgPrompt[i].node.id;
+                let idConn = this.svgPromptConn[i].node.id;
+                let idText = this.svgText[i].node.id;
+                SVG.get(idNode).remove();
+                SVG.get(idConn).remove();
+                SVG.get(idText).remove();
+            }
+        } else {
+            this.isDisplayPrompt = true;
+            this.svgPrompt = [];
+            this.svgPromptConn = [];
+            this.idPrompt = [];
+            for (let i = 0; i < this.project.processNodes.length; i++) {
+                let rectObj = this.project.processNodes[i];
+                this.creatingPromptRect(rectObj);
+            }
+        }
+    }
+
     /**
      * push data up to cookies
      * */

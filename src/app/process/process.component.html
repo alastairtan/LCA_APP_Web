@@ -46,6 +46,12 @@
                                 <button class="processButtons" (click)="zoomOut()">
                                     Zoom out
                                 </button>
+                                <button *ngIf="!isDisplayPrompt" class="processButtons" (click)="displayPromptNode()">
+                                    Display Prompt
+                                </button>
+                                <button *ngIf="isDisplayPrompt" class="processButtons viewButton" (click)="displayPromptNode()">
+                                    Display Prompt
+                                </button>
                                 <button class="processButtons doneButton" (click)="navNext()">
                                     Done
                                 </button>
