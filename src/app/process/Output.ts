@@ -3,7 +3,7 @@ import { isEmbeddedView } from "@angular/core/src/view/util";
 export class Output {
     functionalUnit: boolean;
     outputName: string;
-    to: string;
+    to: string[];
     quantity: string;
     unit: string;
     activityDataOrigin: string;
@@ -13,7 +13,7 @@ export class Output {
     constructor() {
         this.functionalUnit = false;
         this.outputName = '';
-        this.to = "";
+        this.to = [''];
         this.quantity = '0';
         this.unit = 'm3';
         this.activityDataOrigin = '';
