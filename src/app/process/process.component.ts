@@ -705,6 +705,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     creatingPromptRect(rectObj: Rect, index: Number) {
+        this.removeAllPromptRect();
         let materialInputArr = rectObj.materialInput;
         let outputArr = rectObj.outputs;
         for (let i = 0; i < materialInputArr.length; i++) {
