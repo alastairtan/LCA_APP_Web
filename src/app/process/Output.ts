@@ -36,7 +36,14 @@ export class Output {
         var isEqual = true;
         isEqual = isEqual && (this.functionalUnit == other.functionalUnit);
         isEqual = isEqual && (this.outputName == other.outputName);
-        isEqual = isEqual && (this.to == other.to);
+        if (other.to.length != this.to.length) {
+            return false;
+        }
+        for (let i = 0; i < other.to.length; i++) {
+            if (other.to[i] != this.to[i]) {
+                return false;
+            }
+        }
         isEqual = isEqual && (this.quantity == other.quantity);
         isEqual = isEqual && (this.unit == other.unit);
         isEqual = isEqual && (this.activityDataOrigin == other.activityDataOrigin);

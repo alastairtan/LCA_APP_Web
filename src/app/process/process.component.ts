@@ -614,8 +614,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     //Push data to the array if it's not empty
                     var materialInput = new MaterialInput();
                     materialInput.parseData(this.materialList.at(j).value);
-                    if (!materialInput.equals(new MaterialInput()))
+                    if (!materialInput.equals(new MaterialInput())) {
                         materialInputs.push(materialInput);
+                    }
                 }
                 //Update the array for the rect
                 rectObj.materialInput = materialInputs;
@@ -800,6 +801,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         newRect = this.createProcessNodes(index, 0, true); 
                         this.isEdit = false;
                     } else {
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);
                         newRect = this.createProcessNodes(index, 0, true);
                     }
                     let oldR = this.idPrompt[rect.data('key')][0];
@@ -1042,6 +1044,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     for (let input of toNode.materialInput) {
                         //Push into from/to array if matched
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
+                            console.log(input);
+                            console.log(output)
                             this.addProcessToRelation(input.from, fromNode.processName);
                             this.addProcessToRelation(output.to, toNode.processName);
                             //Update currently selected node, since it will be overwritten later if this is not done
@@ -1054,6 +1058,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             var toNodeIndex = this.project.processNodes.indexOf(toNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
+                                console.log(this.materialList.at(inputIndex).value.from)
                                 this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
                                 //this.addProcessToRelation(input.from, fromNode.processName);
                             }
@@ -2112,8 +2117,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         removedPrompt.push(i);
                         break;
                     }
-                } else {
-                    if (output.outputName == name ) {
+                } else if (output != undefined) {
+                    if (output.outputName == name) {
                         console.log(this.idPrompt[i][1], name);
                         console.log(name);
                         SVG.get(this.svgPrompt[i].node.id).remove();
@@ -2122,6 +2127,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         removedPrompt.push(i);
                         break;
                     }
+                } else {
+                    console.log("bug occured");
+                    console.log(this.idPrompt);
                 }
             }
         }
