@@ -45,11 +45,13 @@ export class ResultComponent implements OnInit {
 
         this.sign();
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
+        let primary = this.result;
+        console.log(primary);
+        
         this.geratingEnvironmentalMatrix();
-        this.isAdditionalSourceNodeExist();
-        //this.checkDoubleOutputThatAreNotUsed();
+        this.resourceExpansion();
         this.allocationOfOutputs();
-        this.checkMatrixForMultipleSources();
+        //this.checkMatrixForMultipleSources();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -180,6 +182,7 @@ export class ResultComponent implements OnInit {
         this.hoveredTable = table;
         this.hoveredRow = row;
         this.hoveredCol = col;
+        console.log(row, col)
     }
 
     geratingEnvironmentalMatrix() {
@@ -237,8 +240,9 @@ export class ResultComponent implements OnInit {
                 for (let j = 0; j < node.nextId.length; j++) {
                     let index = map.get(node.nextId[j]);
                     coveredNodes[index] = 1;
-                }
+            }
         }
+        console.log(coveredNodes);
         for (let i = 0; i < coveredNodes.length; i++) {
             if (coveredNodes[i] == 0) {
                 if (this.project.processNodes[i].materialInput.length != 0) {
@@ -268,6 +272,25 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    //resource expansion 
+    resourceExpansion() {
+        for (let i = 0; i < this.result.length; i++) {
+            let hasOutput: Boolean = false;
+            let index = i;
+            for (let j = 0; j < this.result[i].length; j++) {
+                if (this.result[i][j] > 0) {
+                    hasOutput = true;
+                }
+            }
+            if (!hasOutput) {
+                let vector = new Array<any>(this.economicflow.length);
+                vector.fill(0);
+                vector[index] = 1;
+                this.pushVectorIntoMAtrix(vector);
+                this.processName.push(this.economicflow[index]);
+            }
+        }
+    }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
             let hasOutput: Boolean = false;
@@ -316,8 +339,9 @@ export class ResultComponent implements OnInit {
                 if (this.result[i][j] < 0) {
                     inputIndexArr.push(i);
                 }
-                vector.push(this.result[i][j]);
+                vector.push(+this.result[i][j]);
             }
+
             if (outputIndexArr.length > 1) {
                 //allocate resource 
 
@@ -325,18 +349,23 @@ export class ResultComponent implements OnInit {
                 let k = outputIndexArr.length - 1;
                 while (k != -1) {
                     if (k != 0) {
+                        console.log(inputIndexArr);
                         let outputRow = outputIndexArr[k];
                         let outputAmt = this.result[outputRow][j];
-                        vector[j] = outputAmt;
+                        vector[outputRow] = +outputAmt;
                         this.result[outputRow][j] = 0;
                         for (let i = 0; i < inputIndexArr.length; i++) {
                             let row = inputIndexArr[i];
-                            vector[j] = this.result[row][j] * outputAmt / totalMassSum;
+                            vector[row] = (this.result[row][j] * outputAmt / totalMassSum).toFixed(3);
                         }
                         for (let i = 0; i < outputIndexArr.length; i++) {
                             let col = outputIndexArr[i];
                             if (i != k) {
                                 vector[col] = 0;
+                            } else {
+
+                                vector[outputRow] = +outputAmt;
+                                console.log(outputAmt)
                             }
                         }
                         this.pushVectorIntoMAtrix(vector);
@@ -348,7 +377,7 @@ export class ResultComponent implements OnInit {
                         let outputAmt = this.result[outputRow][j];
                         for (let i = 0; i < inputIndexArr.length; i++) {
                             let row = inputIndexArr[i];
-                            this.result[row][j] = this.result[row][j] * outputAmt / totalMassSum;
+                            this.result[row][j] = (this.result[row][j] * outputAmt / totalMassSum).toFixed(3);
 
                         }
                     }
