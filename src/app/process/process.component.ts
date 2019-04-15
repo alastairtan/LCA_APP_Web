@@ -1011,6 +1011,16 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     updateRelations() {
         var backwardMap = {};
+        for (let fromNode of this.project.processNodes) {
+            for (let next of fromNode.nextId) {
+                var toNode = this.project.processNodes[this.processIdMap[next]['index']];
+                //Add the relation to the backwardMap
+                if (!backwardMap.hasOwnProperty(toNode.processName)) {
+                    backwardMap[toNode.processName] = [];
+                }
+                this.addProcessToRelation(backwardMap[toNode.processName], fromNode.processName);
+            }
+        }
         //Loop through all nodes to assign their inputs
         for (let fromNode of this.project.processNodes) {
             for (let output of fromNode.outputs) {
@@ -1018,11 +1028,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Auto-assign to-process
                 for (let next of fromNode.nextId) {
                     var toNode = this.project.processNodes[this.processIdMap[next]['index']];
-                    //Add the relation to the backwardMap
-                    if (!backwardMap.hasOwnProperty(toNode.processName)) {
-                        backwardMap[toNode.processName] = [];
-                    }
-                    this.addProcessToRelation(backwardMap[toNode.processName], fromNode.processName);
                     //Iterate through all inputs
                     for (let input of toNode.materialInput) {
                         //Push into from/to array if matched
@@ -1034,13 +1039,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == fromNodeIndex && this.selectedTab == this.outputMenuBar[0]) {
                                 var outputIndex = fromNode.outputs.indexOf(output);
                                 this.addProcessToRelation(this.outputList.at(outputIndex).value.to, toNode.processName);
-                                this.addProcessToRelation(output.to, toNode.processName);
+                                //this.addProcessToRelation(output.to, toNode.processName);
                             }
                             var toNodeIndex = this.project.processNodes.indexOf(toNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
                                 this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
-                                this.addProcessToRelation(input.from, fromNode.processName);
+                                //this.addProcessToRelation(input.from, fromNode.processName);
                             }
                             break;
                         }
@@ -1049,23 +1054,19 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
         }
 
+        console.log(backwardMap);
+
         //Loop through all inputs to delete obsolete fromProcess
         for (let node of this.project.processNodes) {
             var backwardRelation = backwardMap[node.processName];
             for (let input of node.materialInput) {
                 for (var i = 0; i < input.from.length; i++) {
-                    if (node.processName == 'P2') {
-                        console.log(backwardRelation, input.from[i], backwardRelation.includes(input.from[i]));
-                    }
-                    if (!backwardRelation.includes(input.from[i])) {
-                        console.log('Slicing', input.from[i], 'away from', input.from);
+                    if (backwardRelation != undefined && !backwardRelation.includes(input.from[i])) {
                         input.from.splice(i, 1);
-                        console.log(input.from);
                     }
                 }
             }
         }
-        //console.log(this.project.processNodes);
     }
 
     /**
@@ -1161,6 +1162,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         this.prepareForUndoableAction();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
+        console.log(rectObj.materialInput);
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
                 this.removePromptRect(index, rectObj, 'input');
@@ -1720,7 +1722,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.updateRect(rect.data('key'), rectObj);
                 this.onSelectedNodeChange(rect, text);
-                //this.updateRelations();
+                this.updateRelations();
             } else {
                 if (this.currentlySelectedNode == null) {
                     this.currentlySelectedNode = rect;
@@ -1901,7 +1903,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         for (let input of thatNode.materialInput) {
             var index = input.from.indexOf(thisNode.processName);
             if (index >= 0) {
-                input.from = input.from.slice(index, index + 1);
+                input.from.splice(index, 1);
             }
         }
         this.updateRelations();
@@ -1967,17 +1969,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         //after reaching the end, we then remove the node that was meant to remove
                         if (i == this.project.processNodes.length - 1) {
                             this.project.processNodes.splice(removedIndex, 1);
+                            this.removeAllPromptRect();
+                            if (this.currentlySelectedNode == rect) {
+                                this.head = null;
+                                this.currentlySelectedNode = null;
+                            }
                             rect.remove();
                             text.remove();
                         }
 
                     }
-                    if (this.head == rect) {
-                        this.head = null;
-                    } else if (this.tail = rect) {
-                        this.tail = null;
-                    }
-                  this.removeAllPromptRect();
+                    console.log(this.currentlySelectedNode);
                   delete this.processIdMap[rect.node.id];
                 }
             });
