@@ -36,6 +36,17 @@ export class ResultComponent implements OnInit {
     demandVectorForm: FormGroup;
     demandVector: FormArray;
 
+    //boolean check for showing containers
+    isShowPrimary: Boolean = true;
+    isShowExpanded: Boolean = true;
+    isShowFinal: Boolean = true;
+    input: Boolean = false;
+
+    //manual input of matrix
+    processInputName: string[] = [];
+    manualResult: string[] = [];
+    
+
     //Variable for highlighting the table
     hoveredTable = null;
     hoveredRow = null;
@@ -48,8 +59,12 @@ export class ResultComponent implements OnInit {
                 private fb: FormBuilder) { }
 
     ngOnInit() {
+        //do not show manual input 
+        
+        //initializing the demand vector
         this.demandVectorForm = this.fb.group({ inputs: this.fb.array([]) });
         this.demandVector = this.demandVectorForm.get('inputs') as FormArray;
+
 
         //putting plus and minus on inputs and outputs
         this.sign();
@@ -64,6 +79,8 @@ export class ResultComponent implements OnInit {
         this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
         //this.checkMatrixForMultipleSources();
+        let inputContainer = document.getElementById('manualInputContainer');
+        inputContainer.style.display = 'none';
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -469,5 +486,81 @@ export class ResultComponent implements OnInit {
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
         this.router.navigate(['/process']);
+    }
+
+    isPrimary() {
+        let container = <HTMLInputElement>document.getElementById('primaryContainer');
+        if (!this.isShowPrimary) {
+            container.style.display = 'block';
+            this.isShowPrimary = true;
+        } else {
+            this.isShowPrimary = false;
+            container.style.display = 'none';
+
+        }
+    }
+
+    isExpanded() {
+        let container = document.getElementById('expandedContainer');
+        if (!this.isShowExpanded) {
+            container.style.display = 'block'
+            this.isShowExpanded = true;
+        } else {
+            container.style.display = 'none';
+            this.isShowExpanded = false;
+        }
+    }
+
+    isFinal() {
+        let container = document.getElementById('finalContainer');
+        if (!this.isShowFinal) {
+            container.style.display = 'block';
+            this.isShowFinal = true;
+        } else {
+            container.style.display = 'none';
+            this.isShowFinal = false;
+        }
+    }
+
+    deleteColumn(index) {
+        
+    }
+
+    manualAdd() {
+
+    }
+
+    showManualInputMatrix() {
+        let primaryContainer = document.getElementById('primaryContainer');
+        let expandedContainer = document.getElementById('expandedContainer');
+        let finalContainer = document.getElementById('finalContainer');
+        let manualInputContainer = document.getElementById('manualInputContainer');
+        if (this.input) {
+            //switch everything back on
+            this.input = false;
+            this.isShowFinal = true;
+            this.isShowPrimary = true;
+            this.isShowExpanded = true;
+            primaryContainer.style.display = 'block';
+            expandedContainer.style.display = 'block';
+            finalContainer.style.display = 'block';
+            //turn of manual input
+            manualInputContainer.style.display = 'none';
+        } else {
+            this.input = true;
+            this.isShowFinal = false;
+            this.isShowPrimary = false;
+            this.isShowExpanded = false;
+           
+            primaryContainer.style.display = 'none';
+            expandedContainer.style.display = 'none';
+            finalContainer.style.display = 'none';
+            manualInputContainer.style.display = 'block';
+        }
+        //if there is something in the result matrix prompt the user to clear current data or not
+    }
+
+    generatingModel() {
+
     }
 }
