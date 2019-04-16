@@ -23,7 +23,15 @@ export class ResultComponent implements OnInit {
     environmentalflow: String[] = [];
 
     //display matrix 
+    //final matrix
     result: any[] = [];
+    //primary matrix
+    primary: any[] = [];
+    primaryProcessName: String[] = [];
+    //expanded matrix
+    expanded: any[] = []; 
+    expandedProcessName: String[] = [];
+
     resultEnvironmental: any[] = [];
     demandVectorForm: FormGroup;
     demandVector: FormArray;
@@ -43,13 +51,17 @@ export class ResultComponent implements OnInit {
         this.demandVectorForm = this.fb.group({ inputs: this.fb.array([]) });
         this.demandVector = this.demandVectorForm.get('inputs') as FormArray;
 
+        //putting plus and minus on inputs and outputs
         this.sign();
+
+        //generating primary matrix
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
-        let primary = this.result;
-        console.log(primary);
-        
+        this.primary = this.clone(this.result,false);
+        this.primaryProcessName = this.clone(this.processName,true);
         this.geratingEnvironmentalMatrix();
         this.resourceExpansion();
+        this.expanded = this.clone(this.result, false);
+        this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
         //this.checkMatrixForMultipleSources();
     }
@@ -77,6 +89,7 @@ export class ResultComponent implements OnInit {
         for (let i = 0; i < this.project.processNodes.length; i++) {
             let processNode = this.project.processNodes[i];
             let processUnit: Number[] = [];
+            //if the process Node is not a source, we just push a row in the matrix
             if (!processNode.isSource) {
                 this.processName.push(processNode.processName);
                 let materialInputArr = processNode.materialInput;
@@ -411,6 +424,27 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    /**
+     * Cloning a 2-D array
+     * @param target
+     * @param source
+     */
+    clone(target: any[], isName: Boolean) {
+        let source = [];
+        console.log(target);
+        for (let i = 0; i < target.length; i++) {
+            if (isName) {
+                source.push(target[i]);
+            } else {
+                source.push([]);
+                for (let j = 0; j < target[i].length; j++) {
+                    console.log(target[i][j]);
+                    source[i].push(target[i][j]);
+                }
+            }
+        }
+        return source;
+    }
     /**
      * Read data from matrix cell, then navigate back to process component
      * @param processIndex index of a process inside the matrix
