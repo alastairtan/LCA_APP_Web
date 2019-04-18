@@ -113,6 +113,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     selectedTab = this.inputMenuBar[0];
 
     navFromResult = {};
+    previousSelect = "";
 
     isOpen = false;
 
@@ -1061,6 +1062,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                                 var inputIndex = toNode.materialInput.indexOf(input);
                                 console.log(this.materialList.at(inputIndex).value.from)
                                 this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
+                                
                                 //this.addProcessToRelation(input.from, fromNode.processName);
                             }
                             this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex,outputIndex, inputIndex, input.materialName);
@@ -1072,8 +1074,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
         }
 
-        console.log(backwardMap);
-
         //Loop through all inputs to delete obsolete fromProcess
         for (let node of this.project.processNodes) {
             var backwardRelation = backwardMap[node.processName];
@@ -1084,6 +1084,26 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Add a process relation to the from/to array of process in the specified input
+     * @param tab currently selected tab
+     * @param index index of the input within its respective list
+     */
+    addProcessRelation(tab: string, index: number) {
+        switch (tab) {
+            case this.inputMenuBar[0]:
+                let fromControls = this.materialList.controls[index]['controls']['from'];
+                fromControls.push(this.fb.control(''));
+                break;
+            case this.outputMenuBar[0]:
+                let toControls = this.outputList.controls[index]['controls']['to'];
+                toControls.push(this.fb.control(''));
+                break;
+            default:
+                return;
         }
     }
 
@@ -1113,6 +1133,50 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
         }
         return clone;
+    }
+
+    /**
+     * Save the value of the select before a change
+     * @param value old value before change
+     */
+    memorizeSelect(value) {
+        this.previousSelect = value;
+    }
+
+    /**
+     * Update the connectable based on the change
+     * @param tab currently selected tab
+     * @param index index of the input within its respective list
+     * @param newValue value of the new select
+     */
+    updateConnection(tab: string, index: number, newValue) {
+        var headName, headId, headIndex;
+        var tailName, tailId, tailIndex;
+        //Decide head/tail based on currently selected tab
+        switch (tab) {
+            case this.inputMenuBar[0]:
+                headName = newValue;
+                tailName = this.previousSelect;
+                break;
+            case this.outputMenuBar[0]:
+                headName = this.previousSelect;
+                tailName = newValue;
+                break;
+            default:
+                return;
+        }
+        //Find the id of the head and the tail
+        for (var i = 0; i < this.project.processNodes.length; i++) {
+            var proc = this.project.processNodes[i];
+            if (proc.processName == headName) {
+                headId = proc.id;
+                headIndex = i;
+            } else if (proc.processName == tailName) {
+                tailId = proc.id;
+                tailIndex = i;
+            } 
+        }
+        console.log(headName, "(" + headId + ")", "is changed to", tailName, "(" + tailId + ")")
     }
 
     /**
@@ -1407,7 +1471,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.project.processNodes);
+                console.log(this.materialList.value[0]['from']);
                 break;
             case 'End':
                 console.log(this.outputList.value);

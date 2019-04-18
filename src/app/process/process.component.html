@@ -174,13 +174,30 @@
                                                     <strong>Material Name</strong>
                                                     <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
                                                 </div>
-                                                <div class="container even-color">
-                                                    <div class="row">
-                                                        <div class="col-md-6 input-field">
-                                                            From process
-                                                        </div>
-                                                        <div class="col-md-6 vcenter">
-                                                            <input disabled class="material-input smaller-input" value="{{input.value.from.toString()}}" />
+                                                <div formArrayName="from">
+                                                    <div *ngFor="let choice of input.controls.from.controls; let j = index" class="container even-color">
+                                                        <div class="row">
+                                                            <div class="col-md-6 input-field">
+                                                                <span *ngIf="j == 0">
+                                                                    From process
+                                                                    <button *ngIf="input.controls.from.controls.length <= 1" type="button" class="btn btn-sq-xxs" (click)="addProcessRelation(selectedTab, i)">
+                                                                        <i class="fa fa-plus fa-1x"></i><br />
+                                                                    </button>
+                                                                </span>
+                                                                <span *ngIf="j == 1" style="margin-left: 2em">
+                                                                    <button type="button" class="btn btn-sq-xxs" (click)="addProcessRelation(selectedTab, i)">
+                                                                        <i class="fa fa-plus fa-1x"></i><br />
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                            <div class="col-md-6 vcenter" >
+                                                                <select class="material-input smaller-input" (mousedown)="memorizeSelect($event.target.value)" (change)="updateConnection(selectedTab, j, $event.target.value); saveAndClearDetails()" [formControlName]="j" >
+                                                                    <option value="" hidden>Choose process...</option>
+                                                                    <ng-container *ngFor="let proc of project.processNodes" >
+                                                                        <option *ngIf="proc.processName != currentlySelectedNode.processName" value="{{proc.processName}}">{{proc.processName}}</option>
+                                                                    </ng-container>
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -541,13 +558,30 @@
                                                     <strong>Output Name</strong>
                                                     <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
                                                 </div>
-                                                <div class="container even-color">
-                                                    <div class="row">
-                                                        <div class="col-md-6 input-field">
-                                                            To process
-                                                        </div>
-                                                        <div class="col-md-6 vcenter">
-                                                            <input disabled class="material-input smaller-input" value="{{input.value.to.toString()}}" />
+                                                <div formArrayName="to">
+                                                    <div *ngFor="let choice of input.controls.to.controls; let j = index" class="container even-color">
+                                                        <div class="row">
+                                                            <div class="col-md-6 input-field">
+                                                                <span *ngIf="j == 0">
+                                                                    To process
+                                                                    <button *ngIf="input.controls.to.controls.length <= 1" type="button" class="btn btn-sq-xxs" (click)="addProcessRelation(selectedTab, i)">
+                                                                        <i class="fa fa-plus fa-1x"></i><br />
+                                                                    </button>
+                                                                </span>
+                                                                <span *ngIf="j == 1" style="margin-left: 1.5em">
+                                                                    <button type="button" class="btn btn-sq-xxs" (click)="addProcessRelation(selectedTab, i)">
+                                                                        <i class="fa fa-plus fa-1x"></i><br />
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                            <div class="col-md-6 vcenter">
+                                                                <select class="material-input smaller-input" (change)="saveAndClearDetails()" [formControlName]="j">
+                                                                    <option value="" hidden>Choose process...</option>
+                                                                    <ng-container *ngFor="let proc of project.processNodes">
+                                                                        <option *ngIf="proc.processName != currentlySelectedNode.processName" value="{{proc.processName}}">{{proc.processName}}</option>
+                                                                    </ng-container>
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

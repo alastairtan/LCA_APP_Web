@@ -37,11 +37,12 @@ export class ProjectFooterComponent implements OnInit {
     }
 
     private transformForFormBuilder(obj) {
-        for (var property in obj) {
-            if (obj.hasOwnProperty(property) && Array.isArray(obj[property])) {
-                obj[property] = this.fb.array(obj[property]);
+        var clone = JSON.parse(JSON.stringify(obj));
+        for (var property in clone) {
+            if (clone.hasOwnProperty(property) && Array.isArray(clone[property])) {
+                clone[property] = this.fb.array(clone[property]);
             }
         }
-        return obj;
+        return clone;
     }
 }
