@@ -15,6 +15,30 @@
             <button class="processButtons" (click)="navPrev()">
                 Previous
             </button>
+            <button *ngIf="isShowPrimary" class="processButtons viewButton" (click)="isPrimary()">
+                Primary Matrix
+            </button>
+            <button *ngIf="!isShowPrimary" class="processButtons" (click)="isPrimary()">
+                Primary Matrix
+            </button>
+            <button *ngIf="isShowExpanded" class="processButtons viewButton" (click)="isExpanded()">
+                Expanded Matrix
+            </button>
+            <button *ngIf="!isShowExpanded" class="processButtons" (click)="isExpanded()">
+                Expanded Matrix
+            </button>
+            <button *ngIf="isShowFinal" class="processButtons viewButton" (click)="isFinal()">
+                Final Matrix
+            </button>
+            <button *ngIf="!isShowFinal" class="processButtons" (click)="isFinal()">
+                Final Matrix
+            </button>
+            <button *ngIf="input" class="processButtons viewButton" (click)="showManualInputMatrix()">
+                Input Matrix
+            </button>
+            <button *ngIf="!input" class="processButtons" (click)="showManualInputMatrix()">
+                Input Matrix
+            </button>
             <button class="processButtons" (click)="navNext()">
                 Done
             </button>
@@ -24,12 +48,72 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="placeholder defaultCursor">
-                    <p class="title">
-                        Generated results
-                    </p>
+                <p class="title">
+                    Generated results
+                </p>
+                <p class="subtitle">
+                    Technical Matrix
+                </p>
+                <div id="primaryContainer">
+
                     <p class="subtitle">
-                        Technical Matrix
+                        Primary Matrix
+                    </p>
+
+                    <table (mouseleave)="onMouseOver(0, null, null)">
+                        <thead>
+                            <tr>
+                                <th>Entity</th>
+                                <th *ngFor="let name of primaryProcessName; let j = index" (mouseenter)="onMouseOver(1, null, j)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == j}">
+                                    {{name}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of primary; let value of demandVector.controls; let i = index;">
+                                <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
+                                    {{economicflow[i]}}
+                                </th>
+                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
+                                    [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                    {{col}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="expandedContainer">
+                    <p class="subtitle">
+                        Expanded Matrix
+                    </p>
+
+                    <table (mouseleave)="onMouseOver(0, null, null)">
+                        <thead>
+                            <tr>
+                                <th>Entity</th>
+                                <th *ngFor="let name of expandedProcessName; let j = index" (mouseenter)="onMouseOver(1, null, j)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == j}">
+                                    {{name}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of expanded; let value of demandVector.controls; let i = index;">
+                                <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
+                                    {{economicflow[i]}}
+                                </th>
+                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
+                                    [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                    {{col}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="finalContainer" class="placeholder defaultCursor">
+                    <p class="subtitle">
+                        Final Matrix
                     </p>
                     <form [formGroup]="demandVectorForm" id="demandVectorForm">
                         <table formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
@@ -49,8 +133,8 @@
                                     <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
                                         {{economicflow[i]}}
                                     </th>
-                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)" 
-                                        [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i), 
+                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
+                                        [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
                                                     highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                         {{col}}
                                     </td>
@@ -63,12 +147,57 @@
                     </form>
                 </div>
 
+                <div id="manualInputContainer" class="placeholder defaultCursor">
+                    <p class="subtitle">
+                        Final Matrix
+                    </p>
+                        <table (mouseleave)="onMouseOver(0, null, null)">
+                            <thead>
+                                <tr>
+                                    <th>Entity</th>
+                                    <th *ngFor="let name of processInputName; let j = index" (mouseenter)="onMouseOver(1, null, j)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == j}">
+                                        {{name}}
+                                    </th>
+                                    <th (mouseenter)="onMouseOver(1, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == rowCount + 2}">
+                                        <input />
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of manualResult;let i = index;">
+                                    <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
+                                        {{economicflow[i]}}
+                                        <button>
+                                            delete
+                                        </button>
+                                    </th>
+                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
+                                        [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                        {{col}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <input />
+                                    </th>
+                                    <td style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input autocomplete="off" />
+                                        <button>
+                                            add
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>
+
             </div>
             <!-- Show last saved timing at the bottom right hand corner-->
         </div>
         <div class="row">
             <div class="col-md-12">
-                <div class="placeholder defaultCursor">
+                <div id="environmentalContainer" class="placeholder defaultCursor">
                     <p class="subtitle">
                         Environmental Matrix
                     </p>

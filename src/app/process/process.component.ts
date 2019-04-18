@@ -95,9 +95,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     private waitId;
 
     //list of promptRect generated
-    private idPrompt: Rect[] = [];
+    //stores an array [rectobj, index of the rectobj]
+    private idPrompt: any[] = [];
+    private svgPrompt: any[] = [];
+    private svgPromptConn: any[] = [];
+    private svgText: any[] = [];
+
     private prevSVG: any[] = [];
 
+    private isDisplayPrompt: Boolean = true;
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
@@ -129,7 +135,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     
     ngOnInit() {
         this.project = this.dataService.getProject();
-
+        console.log(this.project);
         this.materialForm   = this.fb.group({ inputs: this.fb.array([]) });
         this.energyForm     = this.fb.group({ inputs: this.fb.array([]) });
         this.transportForm  = this.fb.group({ inputs: this.fb.array([]) });
@@ -608,8 +614,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     //Push data to the array if it's not empty
                     var materialInput = new MaterialInput();
                     materialInput.parseData(this.materialList.at(j).value);
-                    if (!materialInput.equals(new MaterialInput()))
+                    if (!materialInput.equals(new MaterialInput())) {
                         materialInputs.push(materialInput);
+                    }
                 }
                 //Update the array for the rect
                 rectObj.materialInput = materialInputs;
@@ -690,15 +697,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         rectObj.isSource = sourceCheck.checked;
         this.currentlySelectedText.text(rectObj.processName);
         this.project.processNodes[this.currentlySelectedNode.data('key')] = rectObj;
-        this.creatingPromptRect(rectObj);
+        if (this.isDisplayPrompt) {
+            this.creatingPromptRect(rectObj, this.currentlySelectedNode.data('key'));
+        }
         //check for input and output
 
     }
 
-    creatingPromptRect(rectObj: Rect) {
+    creatingPromptRect(rectObj: Rect, index: Number) {
+        this.removeAllPromptRect();
         let materialInputArr = rectObj.materialInput;
         let outputArr = rectObj.outputs;
-
         for (let i = 0; i < materialInputArr.length; i++) {
             let input = materialInputArr[i];
             let name = input.materialName;
@@ -729,7 +738,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else {
                     yPrompt = y - 100 + 80 * (i);
                 }
-                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'input', promptRectNextid, [], false, false, rectObj.categories, name, [], promptRectOutput, [], [], [], [])
+                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'input', promptRectNextid, [], false, rectObj.categories, name, [], promptRectOutput, [], [], [], [])
                 console.log(r.id);
                 if (this.isPromptRectCreated(r.id)) {
                     continue;
@@ -770,8 +779,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 r.connectors = connectorArr;
 
                 //push to a general array of prompt rect
-                this.idPrompt.push(r);
-
+                //push SVG object and connectors into the array
+                this.idPrompt.push([r, index]);
+                this.svgPrompt.push(rect);
+                this.svgPromptConn.push(conn2.connector);
+                this.svgText.push(text);
 
                 //index in the idPrompt of the type of input
                 rect.data({
@@ -786,21 +798,22 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     let index;
                     if (this.isEdit == false) {
                         this.isEdit = true;
-                        index = this.addRect(this.idPrompt[rect.data('key')]);//removing all prompt rect and connectors
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);//removing all prompt rect and connectors
                         newRect = this.createProcessNodes(index, 0, true); 
                         this.isEdit = false;
                     } else {
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);
                         newRect = this.createProcessNodes(index, 0, true);
                     }
-                    let oldR = this.idPrompt[rect.data('key')];
-                    console.log(this.idPrompt, rect.data('key'));
-                    console.log(oldR.id, this.idPrompt[0].id)
+                    let oldR = this.idPrompt[rect.data('key')][0];
+                    console.log(this.idPrompt, rect.data('key')[0]);
+                    console.log(oldR.id, this.idPrompt[0][0].id)
                     for (let i = 0; i < oldR.connectors.length; i++) {
                         SVG.get(oldR.connectors[i].id).remove();
                     }
                     this.idPrompt.splice(rect.data('key'), 1);
                     for (let i = rect.data('key'); i < this.idPrompt.length; i++) {
-                        let svgObj = SVG.get(this.idPrompt[i].id);
+                        let svgObj = SVG.get(this.idPrompt[i][0].id);
                         if (svgObj.data('arrow') == null) {
                             svgObj.data('key', i);
                         } else {
@@ -832,7 +845,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     conn2.setConnectorColor("#ffa384");
                     conn2.connector.style('stroke-width', "3px");
                     conn2.connector.node.id = this.project.processNodes[index].connectors[0].id;
-                    this.project.processNodes[this.currentlySelectedNode.data('key')].isClicked = false;
                     this.onSelectedNodeChange(null,null)
                 });
 
@@ -864,7 +876,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     yPrompt = y + 100 + 80 * (i);
                 }
 
-                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'output', [], [], false, false, rectObj.categories, name, promptRectInput, [], [], [], [], [])
+                let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'output', [], [], false, rectObj.categories, name, promptRectInput, [], [], [], [], [])
                 if (this.isPromptRectCreated(r.id)) {
                     continue;
                 }
@@ -902,7 +914,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 
 
                 //include the new prompt into the general array
-                this.idPrompt.push(r);
+                this.idPrompt.push([r, index]);
+                this.svgPrompt.push(rect);
+                this.svgPromptConn.push(conn2.connector);
+                this.svgText.push(text);
                 console.log(this.currentlySelectedNode);
                 this.prevSVG.push(this.currentlySelectedNode);
                 rect.data({
@@ -916,15 +931,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 rect.click((event) => {
                     console.log(rect.data('key'));
                     let index;
-                    console.log(this.idPrompt[rect.data('key')]);
+                    console.log(this.idPrompt[rect.data('key')][0]);
                     let newRect;
                     if (this.isEdit == false) {
                         this.isEdit = true;
-                        index = this.addRect(this.idPrompt[rect.data('key')]);
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);
                         newRect = this.createProcessNodes(index, 0, true);
                         this.isEdit = false;
                     } else {
-                        index = this.addRect(this.idPrompt[rect.data('key')]);
+                        index = this.addRect(this.idPrompt[rect.data('key')][0]);
                         newRect = this.createProcessNodes(index, 0, true);
                     }
                     
@@ -943,12 +958,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     headObj.connectors.push(new Connector(conn2.connector.node.id, prevNode.data('key'), headObj.connectors.length));
                     headObj.nextId.push(this.project.processNodes[index].id);
                     //removing all prompt rect and connectors
-                    let r = this.idPrompt[rect.data('key')];
                     SVG.get(rect.data('arrow')).remove();
                     this.idPrompt.splice(rect.data('key'), 1);
                     this.prevSVG.splice(svgIndex, 1);
                     for (let i = rect.data('key'); i < this.idPrompt.length; i++) {
-                        let svgObj = SVG.get(this.idPrompt[i].id);
+                        let svgObj = SVG.get(this.idPrompt[i][0].id);
                         svgObj.data('key', i);
                         if (svgObj.data('indexOfPrevSVG') != null) {
                             svgObj.data('indexOfPrevSVG', svgIndex)
@@ -961,7 +975,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         this.head.stroke({ color: '#000000' });
                         this.head = null;
                         this.tail = null;
-                        this.project.processNodes[this.currentlySelectedNode.data('key')].isClicked = false;
                     }
                     this.onSelectedNodeChange(null, null)
                 });
@@ -1032,6 +1045,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     for (let input of toNode.materialInput) {
                         //Push into from/to array if matched
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
+                            console.log(input);
+                            console.log(output)
                             this.addProcessToRelation(input.from, fromNode.processName);
                             this.addProcessToRelation(output.to, toNode.processName);
                             //Update currently selected node, since it will be overwritten later if this is not done
@@ -1044,9 +1059,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             var toNodeIndex = this.project.processNodes.indexOf(toNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
+                                console.log(this.materialList.at(inputIndex).value.from)
                                 this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
                                 //this.addProcessToRelation(input.from, fromNode.processName);
                             }
+                            this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex,outputIndex, inputIndex, input.materialName);
+                            console.log(fromNode, next);
                             break;
                         }
                     }
@@ -1198,7 +1216,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     isPromptRectCreated(id: string) {
         for (let i = 0; i < this.idPrompt.length; i++) {
-            if (this.idPrompt[i].id == id) {
+            if (this.idPrompt[i][0].id == id) {
                 return true;
             }
         }
@@ -1443,7 +1461,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let result = this.allocatingLifeStages(this.mouseX - this.svgOffsetLeft);
 
             let rectObj = new Rect(this.mouseX - this.svgOffsetLeft - result[1], this.mouseY - this.svgOffsetTop, this.project.processNodes.length,
-                [], [], false, false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
+                [], [], false, this.project.lifeCycleStages[result[0]], "", [], [], [], [], [], []);
             let indexInProcessNodes = this.addRect(rectObj);
             this.createProcessNodes(indexInProcessNodes, result[1], true);
         } else {
@@ -1518,7 +1536,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
                 let r = new Rect(this.mouseX - this.svgOffsetLeft - this.svgabandoned.nativeElement.offsetWidth, this.mouseY - this.svgOffsetTop,
-                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isClicked, rectObj.isSource, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
+                    rectObj.id, rectObj.nextId, rectObj.connectors, rectObj.isSource, this.lifeCycleStages[0], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 this.project.processNodes[rect.data('key')] = r;
                 this.transferedRect = this.createProcessNodes(rect.data('key'), 0, false);
             } else {
@@ -1541,7 +1559,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let result = this.allocatingLifeStages(rect.x());
                 let rectObj = this.project.processNodes[rect.data('key')];
                 this.project.processNodes[rect.data('key')] = new Rect(rect.x() - this.svgabandoned.nativeElement.offsetWidth - result[1], rect.y(), rectObj.id, rectObj.nextId,
-                    rectObj.connectors, rectObj.isClicked, rectObj.isSource, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
+                    rectObj.connectors, rectObj.isSource, this.lifeCycleStages[result[0]], rectObj.processName, rectObj.materialInput, rectObj.outputs, rectObj.byproducts, rectObj.energyInputs, rectObj.transportations, rectObj.directEmissions);
                 
                 rect.remove();
                 //TODO:
@@ -1555,13 +1573,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             //true: change the border color to black remove pointer to the node
             //false: change the border to blue, point to the node
             let rectObj = this.project.processNodes[rect.data('key')];
-            if (rectObj.isClicked) {
+            if (rect == this.currentlySelectedNode) {
                 rect.stroke({ color: '#000000' });
-                rectObj.isClicked = false;
                 this.head = null;
             } else {
                 rect.stroke({ color: '#4e14e0' });
-                rectObj.isClicked = true;
                 if (this.head == null) {
                     this.head = rect;
                 } else {
@@ -1640,7 +1656,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.prepareForUndoableAction();
             let result = this.allocatingLifeStages(rect.x());
             let oldObj = this.project.processNodes[rect.data('key')];
-            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isClicked, oldObj.isSource, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
+            let rectObj = new Rect(rect.x() - result[1], rect.y(), oldObj.id, oldObj.nextId, oldObj.connectors, oldObj.isSource, this.lifeCycleStages[result[0]], oldObj.processName, oldObj.materialInput, oldObj.outputs, oldObj.byproducts, oldObj.energyInputs, oldObj.transportations, oldObj.directEmissions);
             this.updateRect(rect.data('key'), rectObj);
         });
 
@@ -1652,13 +1668,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //check if the node is clicked
                 //true: change the border color to black remove pointer to the node
                 //false: change the border to blue, point to the node
-                if (rectObj.isClicked) {
+                if (rect == this.currentlySelectedNode) {
                     rect.stroke({ color: '#000000' });
-                    rectObj.isClicked = false;
                     this.head = null;
                 } else {
                     rect.stroke({ color: '#ffa384' });
-                    rectObj.isClicked = true;
                     if (this.head == null) {
                         this.head = rect;
                     } else {
@@ -1704,10 +1718,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     //set connectorArray and nextIdArray for head object
                     headObj.nextId = nextIdArray;
                     headObj.connectors = connectorsArray;
-                    headObj.isClicked = false;
 
                     //update tail
-                    rectObj.isClicked = false;
                     this.updateRect(this.head.data('key'), headObj);
 
                     this.head = null;
@@ -1934,6 +1946,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     if (!choseYes) {
                         return;
                     }
+                    let index = rect.data('key');
                     this.prepareForUndoableAction();
 
 
@@ -1965,7 +1978,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             //changing all index of remaning nodes
                             SVG.get(this.project.processNodes[i].id).data('key', i - 1);
                         }
-
+                        
                         //after reaching the end, we then remove the node that was meant to remove
                         if (i == this.project.processNodes.length - 1) {
                             this.project.processNodes.splice(removedIndex, 1);
@@ -1979,7 +1992,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         }
 
                     }
-                    console.log(this.currentlySelectedNode);
                   delete this.processIdMap[rect.node.id];
                 }
             });
@@ -1989,60 +2001,146 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     removeAllPromptRect() {
         for (let i = 0; i < this.idPrompt.length; i++) {
-            SVG.get(this.idPrompt[i].id).remove();
-            SVG.get(this.idPrompt[i].connectors[0].id).remove();
+            SVG.get(this.svgPrompt[i].node.id).remove();
+            SVG.get(this.svgPromptConn[i].node.id).remove();
+            SVG.get(this.svgText[i].node.id).remove();
         }
+        this.svgPrompt = [];
+        this.svgPromptConn = [];
+        this.idPrompt = [];
     }
 
-    removePromptRect(index: number, rectObj: Rect, option: string) {
-        let indexToRemove = null;
-        let j = index + 1;
-        console.log(this.idPrompt);
+    //remove all prompt rect linking to the node 
+    removeConnectedPromptRect(index: Number) {
+        let removedIndex = [];
         for (let i = 0; i < this.idPrompt.length; i++) {
-            switch (option) {
-                case 'input':
-
-                    if (this.idPrompt[i].id == rectObj.id + index + 'input') {
-                        indexToRemove = i;
-                        console.log(indexToRemove, index);
-                    }else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'input') {
-                        let newIndex = j - 1;
-                        SVG.get(rectObj.id + j + 'input').node.id = rectObj.id + newIndex + 'input';
-                        console.log(SVG.get(rectObj.id + newIndex + 'input'));
-                        this.idPrompt[i].id = rectObj.id + newIndex + 'input';
-                        j++;
-                    }
-
-                case 'output':
-                    if (this.idPrompt[i].id == rectObj.id + index + 'output') {
-                        indexToRemove = i;
-                    }else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'output') {
-                        let newIndex = j - 1;
-                        SVG.get(rectObj.id + j + 'output').node.id = rectObj.id + newIndex + 'output';
-                        this.idPrompt[i].id = rectObj.id + newIndex + 'output';
-                        j++;
-                    }
+            if (this.idPrompt[i][1] == index) {
+                SVG.get(this.svgPrompt[i].node.id).remove();
+                SVG.get(this.svgPromptConn[i].node.id).remove();
+                SVG.get(this.svgText[i].node.id).remove();
+               
+                removedIndex.push(i);
             }
         }
-        switch (option) {
-            case 'input':
-                SVG.get(rectObj.id + index + 'input').remove();
-                SVG.get(this.idPrompt[indexToRemove].connectors[0].id).remove();
-                break;
-            case 'output':
-                SVG.get(SVG.get(rectObj.id + index + 'output').data('arrow')).remove();
-                SVG.get(rectObj.id + index + 'output').remove();;
-                break;
-        }
-
-        this.idPrompt.splice(indexToRemove, 1);
-        for (let i = indexToRemove; i < this.idPrompt.length; i++) {
-            let svgObj = SVG.get(this.idPrompt[i].id);
-            svgObj.data('key', i);
+        console.log(this.idPrompt);
+        for (let i = 0; i < removedIndex.length; i++) {
+            this.idPrompt.splice(removedIndex[i], 1);
+            this.svgPrompt.splice(i, 1);
+            this.svgPromptConn.splice(i, 1);
+            this.svgText.splice(i, 1);
         }
     }
 
+    //removing prompt rect if deleted from the details section
+    removePromptRect(index: number, rectObj: Rect, option: string) {
+        if (this.isDisplayPrompt) {
+            let indexToRemove = null;
+            let j = index + 1;
+            console.log(this.idPrompt);
+            for (let i = 0; i < this.idPrompt.length; i++) {
+                switch (option) {
+                    case 'input':
 
+                        if (this.idPrompt[i][0].id == rectObj.id + index + 'input') {
+                            indexToRemove = i;
+                            console.log(indexToRemove, index);
+                        } else if (indexToRemove != null && this.idPrompt[i][0].id == rectObj.id + j + 'input') {
+                            let newIndex = j - 1;
+                            SVG.get(rectObj.id + j + 'input').node.id = rectObj.id + newIndex + 'input';
+                            console.log(SVG.get(rectObj.id + newIndex + 'input'));
+                            this.idPrompt[i][0].id = rectObj.id + newIndex + 'input';
+                            j++;
+                        }
+
+                    case 'output':
+                        if (this.idPrompt[i].id == rectObj.id + index + 'output') {
+                            indexToRemove = i;
+                        } else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'output') {
+                            let newIndex = j - 1;
+                            SVG.get(rectObj.id + j + 'output').node.id = rectObj.id + newIndex + 'output';
+                            this.idPrompt[i][0].id = rectObj.id + newIndex + 'output';
+                            j++;
+                        }
+                }
+            }
+            switch (option) {
+                case 'input':
+                    SVG.get(rectObj.id + index + 'input').remove();
+                    SVG.get(this.idPrompt[indexToRemove].connectors[0].id).remove();
+                    break;
+                case 'output':
+                    SVG.get(SVG.get(rectObj.id + index + 'output').data('arrow')).remove();
+                    SVG.get(rectObj.id + index + 'output').remove();;
+                    break;
+            }
+
+            this.idPrompt.splice(indexToRemove, 1);
+            for (let i = indexToRemove; i < this.idPrompt.length; i++) {
+                let svgObj = SVG.get(this.idPrompt[i][0].id);
+                svgObj.data('key', i);
+            }
+
+        } else {
+        }
+    }
+
+    /**
+     * 
+     * @param rectObj
+     * @param index index of the head/tail
+     */
+    checkUnnecesaryPrompt(indexOut: Number, indexIn: Number, materialOutIndex, materialInIndex, name: string) {
+        let removedPrompt = [];
+        console.log(indexOut, indexIn);
+        for (let i = 0; i < this.idPrompt.length; i++) {
+            if (this.idPrompt[i][1] == indexOut || this.idPrompt[i][1] == indexIn) {
+
+                console.log(name);
+                let output = this.idPrompt[i][0].outputs[materialOutIndex];
+                let input = this.idPrompt[i][0].materialInput[materialInIndex];
+                if (output != undefined && input != undefined) {
+                    if (output.outputName == name || input.materialName == name) {
+                        console.log(this.idPrompt[i][1], name);
+                        console.log(name);
+                        SVG.get(this.svgPrompt[i].node.id).remove();
+                        SVG.get(this.svgPromptConn[i].node.id).remove();
+                        SVG.get(this.svgText[i].node.id).remove();
+                        removedPrompt.push(i);
+                        break;
+                    }
+                } else if (input != undefined) {
+                    if (input.materialName == name) {
+                        console.log(this.idPrompt[i][1], name);
+                        console.log(name);
+                        SVG.get(this.svgPrompt[i].node.id).remove();
+                        SVG.get(this.svgPromptConn[i].node.id).remove();
+                        SVG.get(this.svgText[i].node.id).remove();
+                        removedPrompt.push(i);
+                        break;
+                    }
+                } else if (output != undefined) {
+                    if (output.outputName == name) {
+                        console.log(this.idPrompt[i][1], name);
+                        console.log(name);
+                        SVG.get(this.svgPrompt[i].node.id).remove();
+                        SVG.get(this.svgPromptConn[i].node.id).remove();
+                        SVG.get(this.svgText[i].node.id).remove();
+                        removedPrompt.push(i);
+                        break;
+                    }
+                } else {
+                    console.log("bug occured");
+                    console.log(this.idPrompt);
+                }
+            }
+        }
+        for (let i = 0; i < removedPrompt.length; i++) {
+            this.idPrompt.splice(removedPrompt[i], 1);
+            this.svgPrompt.splice(removedPrompt[i], 1);
+            this.svgPromptConn.splice(removedPrompt[i], 1);
+            this.svgText.splice(removedPrompt[i], 1);
+        }
+    }
     /**
      * update data of the node at project.processNodes
      * 
@@ -2093,7 +2191,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.isEdit = false;
         this.editMode();
         let stageIndex = 0;
-        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
+        let rectObj = new Rect(this.svgOffsetLeft, 10, this.project.processNodes.length, [], [], false, this.project.lifeCycleStages[stageIndex], "", [], [], [], [], [], []);
         let index = this.addRect(rectObj);
         this.createProcessNodes(index,0, true);
     }
@@ -2272,6 +2370,21 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.router.navigate(['/mainMenu']);
         this.pushToCookie();
     }
+
+    displayPromptNode() {
+        if (this.isDisplayPrompt) {
+            this.isDisplayPrompt = false;
+            //remove all prompt nodes 
+            this.removeAllPromptRect();
+        } else {
+            this.isDisplayPrompt = true;
+            for (let i = 0; i < this.project.processNodes.length; i++) {
+                let rectObj = this.project.processNodes[i];
+                this.creatingPromptRect(rectObj, i);
+            }
+        }
+    }
+
     /**
      * push data up to cookies
      * */

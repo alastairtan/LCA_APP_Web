@@ -23,10 +23,29 @@ export class ResultComponent implements OnInit {
     environmentalflow: String[] = [];
 
     //display matrix 
+    //final matrix
     result: any[] = [];
+    //primary matrix
+    primary: any[] = [];
+    primaryProcessName: String[] = [];
+    //expanded matrix
+    expanded: any[] = []; 
+    expandedProcessName: String[] = [];
+
     resultEnvironmental: any[] = [];
     demandVectorForm: FormGroup;
     demandVector: FormArray;
+
+    //boolean check for showing containers
+    isShowPrimary: Boolean = true;
+    isShowExpanded: Boolean = true;
+    isShowFinal: Boolean = true;
+    input: Boolean = false;
+
+    //manual input of matrix
+    processInputName: string[] = [];
+    manualResult: string[] = [];
+    
 
     //Variable for highlighting the table
     hoveredTable = null;
@@ -40,16 +59,28 @@ export class ResultComponent implements OnInit {
                 private fb: FormBuilder) { }
 
     ngOnInit() {
+        //do not show manual input 
+        
+        //initializing the demand vector
         this.demandVectorForm = this.fb.group({ inputs: this.fb.array([]) });
         this.demandVector = this.demandVectorForm.get('inputs') as FormArray;
 
+
+        //putting plus and minus on inputs and outputs
         this.sign();
+
+        //generating primary matrix
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
+        this.primary = this.clone(this.result,false);
+        this.primaryProcessName = this.clone(this.processName,true);
         this.geratingEnvironmentalMatrix();
-        this.isAdditionalSourceNodeExist();
-        //this.checkDoubleOutputThatAreNotUsed();
+        this.resourceExpansion();
+        this.expanded = this.clone(this.result, false);
+        this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
-        this.checkMatrixForMultipleSources();
+        //this.checkMatrixForMultipleSources();
+        let inputContainer = document.getElementById('manualInputContainer');
+        inputContainer.style.display = 'none';
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -75,6 +106,7 @@ export class ResultComponent implements OnInit {
         for (let i = 0; i < this.project.processNodes.length; i++) {
             let processNode = this.project.processNodes[i];
             let processUnit: Number[] = [];
+            //if the process Node is not a source, we just push a row in the matrix
             if (!processNode.isSource) {
                 this.processName.push(processNode.processName);
                 let materialInputArr = processNode.materialInput;
@@ -180,6 +212,7 @@ export class ResultComponent implements OnInit {
         this.hoveredTable = table;
         this.hoveredRow = row;
         this.hoveredCol = col;
+        console.log(row, col)
     }
 
     geratingEnvironmentalMatrix() {
@@ -237,8 +270,9 @@ export class ResultComponent implements OnInit {
                 for (let j = 0; j < node.nextId.length; j++) {
                     let index = map.get(node.nextId[j]);
                     coveredNodes[index] = 1;
-                }
+            }
         }
+        console.log(coveredNodes);
         for (let i = 0; i < coveredNodes.length; i++) {
             if (coveredNodes[i] == 0) {
                 if (this.project.processNodes[i].materialInput.length != 0) {
@@ -268,6 +302,25 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    //resource expansion 
+    resourceExpansion() {
+        for (let i = 0; i < this.result.length; i++) {
+            let hasOutput: Boolean = false;
+            let index = i;
+            for (let j = 0; j < this.result[i].length; j++) {
+                if (this.result[i][j] > 0) {
+                    hasOutput = true;
+                }
+            }
+            if (!hasOutput) {
+                let vector = new Array<any>(this.economicflow.length);
+                vector.fill(0);
+                vector[index] = 1;
+                this.pushVectorIntoMAtrix(vector);
+                this.processName.push(this.economicflow[index]);
+            }
+        }
+    }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
             let hasOutput: Boolean = false;
@@ -316,8 +369,9 @@ export class ResultComponent implements OnInit {
                 if (this.result[i][j] < 0) {
                     inputIndexArr.push(i);
                 }
-                vector.push(this.result[i][j]);
+                vector.push(+this.result[i][j]);
             }
+
             if (outputIndexArr.length > 1) {
                 //allocate resource 
 
@@ -325,18 +379,23 @@ export class ResultComponent implements OnInit {
                 let k = outputIndexArr.length - 1;
                 while (k != -1) {
                     if (k != 0) {
+                        console.log(inputIndexArr);
                         let outputRow = outputIndexArr[k];
                         let outputAmt = this.result[outputRow][j];
-                        vector[j] = outputAmt;
+                        vector[outputRow] = +outputAmt;
                         this.result[outputRow][j] = 0;
                         for (let i = 0; i < inputIndexArr.length; i++) {
                             let row = inputIndexArr[i];
-                            vector[j] = this.result[row][j] * outputAmt / totalMassSum;
+                            vector[row] = (this.result[row][j] * outputAmt / totalMassSum).toFixed(3);
                         }
                         for (let i = 0; i < outputIndexArr.length; i++) {
                             let col = outputIndexArr[i];
                             if (i != k) {
                                 vector[col] = 0;
+                            } else {
+
+                                vector[outputRow] = +outputAmt;
+                                console.log(outputAmt)
                             }
                         }
                         this.pushVectorIntoMAtrix(vector);
@@ -348,7 +407,7 @@ export class ResultComponent implements OnInit {
                         let outputAmt = this.result[outputRow][j];
                         for (let i = 0; i < inputIndexArr.length; i++) {
                             let row = inputIndexArr[i];
-                            this.result[row][j] = this.result[row][j] * outputAmt / totalMassSum;
+                            this.result[row][j] = (this.result[row][j] * outputAmt / totalMassSum).toFixed(3);
 
                         }
                     }
@@ -383,6 +442,27 @@ export class ResultComponent implements OnInit {
     }
 
     /**
+     * Cloning a 2-D array
+     * @param target
+     * @param source
+     */
+    clone(target: any[], isName: Boolean) {
+        let source = [];
+        console.log(target);
+        for (let i = 0; i < target.length; i++) {
+            if (isName) {
+                source.push(target[i]);
+            } else {
+                source.push([]);
+                for (let j = 0; j < target[i].length; j++) {
+                    console.log(target[i][j]);
+                    source[i].push(target[i][j]);
+                }
+            }
+        }
+        return source;
+    }
+    /**
      * Read data from matrix cell, then navigate back to process component
      * @param processIndex index of a process inside the matrix
      * @param table 1 for Technical Matrix, 2 for Environmental Matrix
@@ -406,5 +486,81 @@ export class ResultComponent implements OnInit {
     /**Save the current project to session storage, and navigate to the previous page */
     navPrev() {
         this.router.navigate(['/process']);
+    }
+
+    isPrimary() {
+        let container = <HTMLInputElement>document.getElementById('primaryContainer');
+        if (!this.isShowPrimary) {
+            container.style.display = 'block';
+            this.isShowPrimary = true;
+        } else {
+            this.isShowPrimary = false;
+            container.style.display = 'none';
+
+        }
+    }
+
+    isExpanded() {
+        let container = document.getElementById('expandedContainer');
+        if (!this.isShowExpanded) {
+            container.style.display = 'block'
+            this.isShowExpanded = true;
+        } else {
+            container.style.display = 'none';
+            this.isShowExpanded = false;
+        }
+    }
+
+    isFinal() {
+        let container = document.getElementById('finalContainer');
+        if (!this.isShowFinal) {
+            container.style.display = 'block';
+            this.isShowFinal = true;
+        } else {
+            container.style.display = 'none';
+            this.isShowFinal = false;
+        }
+    }
+
+    deleteColumn(index) {
+        
+    }
+
+    manualAdd() {
+
+    }
+
+    showManualInputMatrix() {
+        let primaryContainer = document.getElementById('primaryContainer');
+        let expandedContainer = document.getElementById('expandedContainer');
+        let finalContainer = document.getElementById('finalContainer');
+        let manualInputContainer = document.getElementById('manualInputContainer');
+        if (this.input) {
+            //switch everything back on
+            this.input = false;
+            this.isShowFinal = true;
+            this.isShowPrimary = true;
+            this.isShowExpanded = true;
+            primaryContainer.style.display = 'block';
+            expandedContainer.style.display = 'block';
+            finalContainer.style.display = 'block';
+            //turn of manual input
+            manualInputContainer.style.display = 'none';
+        } else {
+            this.input = true;
+            this.isShowFinal = false;
+            this.isShowPrimary = false;
+            this.isShowExpanded = false;
+           
+            primaryContainer.style.display = 'none';
+            expandedContainer.style.display = 'none';
+            finalContainer.style.display = 'none';
+            manualInputContainer.style.display = 'block';
+        }
+        //if there is something in the result matrix prompt the user to clear current data or not
+    }
+
+    generatingModel() {
+
     }
 }

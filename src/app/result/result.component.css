@@ -53,3 +53,27 @@ input[type=number] {
     font-size: 1.25vw;
     font-weight: bold;
 }
+
+.processButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: transparent;
+    font-size: 1vw;
+    border: 2px solid #a7a9ab;
+    border-radius: 5px;
+    margin: auto 1.9vw;
+}
+
+    .processButtons:hover {
+        background: #e8e9e9;
+    }
+
+.viewButton {
+    border: 2px solid #ff6a38;
+    background: #ffa384;
+}
+
+    .viewButton:hover {
+        background: #ffc9b7;
+    }

@@ -1,3 +1,5 @@
+import { isEmbeddedView } from "@angular/core/src/view/util";
+
 export class MaterialInput {
     materialName: string;
     from: string[];
@@ -39,7 +41,14 @@ export class MaterialInput {
     equals(other: MaterialInput) {
         var isEqual = true;
         isEqual = isEqual && (this.materialName == other.materialName);
-        isEqual = isEqual && (this.from == other.from);
+        if (other.from.length != this.from.length) {
+            return false;
+        }
+        for (let i = 0; i < other.from.length && i < this.from.length; i++) {
+            if (this.from[i] != other.from[i]) {
+                isEqual = false;
+            }
+        }
         isEqual = isEqual && (this.quantity == other.quantity);
         isEqual = isEqual && (this.unit == other.unit);
         isEqual = isEqual && (this.carbonStorage == other.carbonStorage);
@@ -53,14 +62,27 @@ export class MaterialInput {
     static areEqual(thisInput: MaterialInput, thatInput: MaterialInput) {
         var isEqual = true;
         isEqual = isEqual && (thisInput.materialName == thatInput.materialName);
-        isEqual = isEqual && (thisInput.from == thatInput.from);
+        console.log(isEqual);
+        for (let i = 0; i < thisInput.from.length; i++) {
+            if (thisInput.from[i] != thatInput.from[i]) {
+                isEqual = false;
+            }
+        }
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.quantity == thatInput.quantity);
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.unit == thatInput.unit);
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.carbonStorage == thatInput.carbonStorage);
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.activityDataOrigin == thatInput.activityDataOrigin);
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.emissionFactorData == thatInput.emissionFactorData);
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.emissionFactorSource == thatInput.emissionFactorSource);
+        console.log(isEqual);
         isEqual = isEqual && (thisInput.remarks == thatInput.remarks);
+        console.log(isEqual);
         return isEqual;
     }
 }
