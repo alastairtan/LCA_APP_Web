@@ -173,6 +173,14 @@
     border-radius: 3px;
 }
 
+.btn-sq-xxs {
+    margin: 1px;
+    padding: 2px 6px;
+    font-size: 10px;
+    line-height: 1.5;
+    border-radius: 2px;
+}
+
 .btn-collapse {
     font-size: 0.8vw;
     padding: 3px 5px;

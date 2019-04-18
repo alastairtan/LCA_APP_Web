@@ -1045,6 +1045,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
                                 this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
+                                
                                 //this.addProcessToRelation(input.from, fromNode.processName);
                             }
                             break;
@@ -1053,8 +1054,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
             }
         }
-
-        console.log(backwardMap);
 
         //Loop through all inputs to delete obsolete fromProcess
         for (let node of this.project.processNodes) {
@@ -1066,6 +1065,26 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Add a process relation to the from/to array of process in the specified input
+     * @param tab currently selected tab
+     * @param index index of the input within its respective list
+     */
+    addProcessRelation(tab: string, index: number) {
+        switch (tab) {
+            case this.inputMenuBar[0]:
+                let fromControls = this.materialList.controls[index]['controls']['from'];
+                fromControls.push(this.fb.control(''));
+                break;
+            case this.outputMenuBar[0]:
+                let toControls = this.outputList.controls[index]['controls']['to'];
+                toControls.push(this.fb.control(''));
+                break;
+            default:
+                return;
         }
     }
 
@@ -1389,7 +1408,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.project.processNodes);
+                console.log(this.materialList.value[0]['from']);
                 break;
             case 'End':
                 console.log(this.outputList.value);
