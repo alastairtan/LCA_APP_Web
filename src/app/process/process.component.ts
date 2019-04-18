@@ -107,6 +107,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     selectedTab = this.inputMenuBar[0];
 
     navFromResult = {};
+    previousSelect = "";
 
     isOpen = false;
 
@@ -1114,6 +1115,50 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
         }
         return clone;
+    }
+
+    /**
+     * Save the value of the select before a change
+     * @param value old value before change
+     */
+    memorizeSelect(value) {
+        this.previousSelect = value;
+    }
+
+    /**
+     * Update the connectable based on the change
+     * @param tab currently selected tab
+     * @param index index of the input within its respective list
+     * @param newValue value of the new select
+     */
+    updateConnection(tab: string, index: number, newValue) {
+        var headName, headId, headIndex;
+        var tailName, tailId, tailIndex;
+        //Decide head/tail based on currently selected tab
+        switch (tab) {
+            case this.inputMenuBar[0]:
+                headName = newValue;
+                tailName = this.previousSelect;
+                break;
+            case this.outputMenuBar[0]:
+                headName = this.previousSelect;
+                tailName = newValue;
+                break;
+            default:
+                return;
+        }
+        //Find the id of the head and the tail
+        for (var i = 0; i < this.project.processNodes.length; i++) {
+            var proc = this.project.processNodes[i];
+            if (proc.processName == headName) {
+                headId = proc.id;
+                headIndex = i;
+            } else if (proc.processName == tailName) {
+                tailId = proc.id;
+                tailIndex = i;
+            } 
+        }
+        console.log(headName, "(" + headId + ")", "is changed to", tailName, "(" + tailId + ")")
     }
 
     /**
