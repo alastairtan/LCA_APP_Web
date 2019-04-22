@@ -1196,6 +1196,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * then fetch new data to the HTML inputs
      */
     addDetail(tab: string) {
+        console.log('i am here');
         this.prepareForUndoableAction();
         this.saveAndClearDetails();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')]
@@ -2096,6 +2097,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     //removing prompt rect if deleted from the details section
     removePromptRect(index: number, rectObj: Rect, option: string) {
+        console.log(index);
         if (this.isDisplayPrompt) {
             let indexToRemove = null;
             let j = index + 1;
@@ -2114,7 +2116,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             this.idPrompt[i][0].id = rectObj.id + newIndex + 'input';
                             j++;
                         }
-
+                        break;
                     case 'output':
                         if (this.idPrompt[i].id == rectObj.id + index + 'output') {
                             indexToRemove = i;
@@ -2124,20 +2126,32 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             this.idPrompt[i][0].id = rectObj.id + newIndex + 'output';
                             j++;
                         }
+                        break;
                 }
             }
             switch (option) {
                 case 'input':
+                    let svgRect = SVG.get(rectObj.id + index + 'input');
+                    let ind = svgRect.data('key');
                     SVG.get(rectObj.id + index + 'input').remove();
-                    SVG.get(this.idPrompt[indexToRemove].connectors[0].id).remove();
+                    SVG.get(this.svgPromptConn[ind].node.id).remove();
+                    SVG.get(this.svgText[ind].node.id).remove();
                     break;
                 case 'output':
-                    SVG.get(SVG.get(rectObj.id + index + 'output').data('arrow')).remove();
-                    SVG.get(rectObj.id + index + 'output').remove();;
+                    let svgRectOut = SVG.get(rectObj.id + index + 'output');
+                    let indOut = svgRectOut.data('key');
+                    SVG.get(svgRectOut.data('arrow')).remove();
+                    SVG.get(rectObj.id + index + 'output').remove();
+                    SVG.get(this.svgText[indOut].node.id).remove();
                     break;
             }
 
             this.idPrompt.splice(indexToRemove, 1);
+            console.log(this.svgText)
+            this.svgText.splice(indexToRemove, 1);
+            this.svgPromptConn.splice(indexToRemove, 1);
+
+            //re ordering index key for all SVG Rect
             for (let i = indexToRemove; i < this.idPrompt.length; i++) {
                 let svgObj = SVG.get(this.idPrompt[i][0].id);
                 svgObj.data('key', i);
