@@ -702,7 +702,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.creatingPromptRect(rectObj, this.currentlySelectedNode.data('key'));
         }
         //check for input and output
-
     }
 
     creatingPromptRect(rectObj: Rect, index: Number) {
@@ -886,7 +885,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let text = this.draw.text('Click to add handle output of "' + name + '"');
 
                 rect.node.id = r.id;
-                console.log(rect.node.id);
+                //console.log(rect.node.id);
                 rect.attr({
                     x: r.getX(),
                     y: r.getY(),
@@ -919,7 +918,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.svgPrompt.push(rect);
                 this.svgPromptConn.push(conn2.connector);
                 this.svgText.push(text);
-                console.log(this.currentlySelectedNode);
+                //console.log(this.currentlySelectedNode);
                 this.prevSVG.push(this.currentlySelectedNode);
                 rect.data({
                     key: this.idPrompt.length - 1,
@@ -1046,8 +1045,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     for (let input of toNode.materialInput) {
                         //Push into from/to array if matched
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
-                            console.log(input);
-                            console.log(output)
                             this.addProcessToRelation(input.from, fromNode.processName);
                             this.addProcessToRelation(output.to, toNode.processName);
                             //Update currently selected node, since it will be overwritten later if this is not done
@@ -1070,6 +1067,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             break;
                         }
                     }
+                }
+                if (output.to.length == 0) {
+                    output.to = [''];
                 }
             }
         }
@@ -1471,7 +1471,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.materialList.value[0]['from']);
+                console.log(this.outputList.value[0]['to']);
                 break;
             case 'End':
                 console.log(this.outputList.value);
@@ -2521,5 +2521,19 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.project = this.dataService.getProject();
         this.getDetails();
         this.cd.detectChanges();
+    }
+
+    debugClone(obj) {
+        if (obj instanceof Array) {
+            var result = [];
+            for (let item of obj) {
+                result.push(this.debugClone(item));
+            }
+            return result;
+        } else if (obj instanceof Object) {
+            return JSON.parse(JSON.stringify(obj));
+        } else {
+            return obj;
+        }
     }
 }

@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/cor
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { Matrix, inverse } from 'ml-matrix';
 
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
@@ -25,6 +26,7 @@ export class ResultComponent implements OnInit {
     //display matrix 
     //final matrix
     result: any[] = [];
+    invertedMatrix: Matrix;
     //primary matrix
     primary: any[] = [];
     primaryProcessName: String[] = [];
@@ -35,6 +37,7 @@ export class ResultComponent implements OnInit {
     resultEnvironmental: any[] = [];
     demandVectorForm: FormGroup;
     demandVector: FormArray;
+    scalingVector: Matrix;
 
     //boolean check for showing containers
     isShowPrimary: Boolean = true;
@@ -78,6 +81,7 @@ export class ResultComponent implements OnInit {
         this.expanded = this.clone(this.result, false);
         this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
+        this.calculateScalingVector();
         //this.checkMatrixForMultipleSources();
         let inputContainer = document.getElementById('manualInputContainer');
         inputContainer.style.display = 'none';
@@ -95,7 +99,7 @@ export class ResultComponent implements OnInit {
                 console.log(vector);
                 break;
             case 'End':
-                console.log(this.economicflow);
+                console.log(this.demandVector.value);
             default:
                 //Other keyboard events
                 break;
@@ -212,7 +216,6 @@ export class ResultComponent implements OnInit {
         this.hoveredTable = table;
         this.hoveredRow = row;
         this.hoveredCol = col;
-        console.log(row, col)
     }
 
     geratingEnvironmentalMatrix() {
@@ -379,7 +382,7 @@ export class ResultComponent implements OnInit {
                 let k = outputIndexArr.length - 1;
                 while (k != -1) {
                     if (k != 0) {
-                        console.log(inputIndexArr);
+                        //console.log(inputIndexArr);
                         let outputRow = outputIndexArr[k];
                         let outputAmt = this.result[outputRow][j];
                         vector[outputRow] = +outputAmt;
@@ -417,6 +420,41 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    /**
+     * Invert the result matrix and calculate the scaling vector based on the demand vector
+     * */
+    calculateScalingVector() {
+        var resultMatrix = new Matrix(this.result);
+        this.invertedMatrix = inverse(resultMatrix);
+        var demandVectorValue = [];
+        for (let val of this.demandVector.value) {
+            demandVectorValue.push(val['value']);
+        }
+        var demandVec = Matrix.columnVector(demandVectorValue);
+        this.scalingVector = this.invertedMatrix.mmul(demandVec);
+        console.log(this.scalingVector.to1DArray());
+    }
+
+    scenario1Example() {
+        var scenario1 = new Matrix([
+            [1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0.94, -1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0.06, 0, -1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0.9, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0.1, 0, 0, -1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0.278, 0, 0, -1, 0, 0, 0],
+            [0, 0, 0, 0, 0.98, -1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0.02, 0, 0, 0, 0, -1, 0],
+            [0, 0, 0, 0, 0, 0.7, 0, 0, 0, 0, -1],
+            [0, 0, 0, 0, 0, 0.541, 0, 0, -1, 0, 0]
+        ]);
+        var inverted1 = inverse(scenario1);
+        var demand1 = Matrix.columnVector([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]);
+        var scaling1 = inverted1.mmul(demand1);
+        console.log(scaling1);
+    }
+
     //check the matrix of multiple sources
     checkMatrixForMultipleSources() {
         for (let i = 0; i < this.result.length; i++) {
@@ -448,14 +486,14 @@ export class ResultComponent implements OnInit {
      */
     clone(target: any[], isName: Boolean) {
         let source = [];
-        console.log(target);
+        //console.log(target);
         for (let i = 0; i < target.length; i++) {
             if (isName) {
                 source.push(target[i]);
             } else {
                 source.push([]);
                 for (let j = 0; j < target[i].length; j++) {
-                    console.log(target[i][j]);
+                    //console.log(target[i][j]);
                     source[i].push(target[i][j]);
                 }
             }
@@ -488,40 +526,6 @@ export class ResultComponent implements OnInit {
         this.router.navigate(['/process']);
     }
 
-    isPrimary() {
-        let container = <HTMLInputElement>document.getElementById('primaryContainer');
-        if (!this.isShowPrimary) {
-            container.style.display = 'block';
-            this.isShowPrimary = true;
-        } else {
-            this.isShowPrimary = false;
-            container.style.display = 'none';
-
-        }
-    }
-
-    isExpanded() {
-        let container = document.getElementById('expandedContainer');
-        if (!this.isShowExpanded) {
-            container.style.display = 'block'
-            this.isShowExpanded = true;
-        } else {
-            container.style.display = 'none';
-            this.isShowExpanded = false;
-        }
-    }
-
-    isFinal() {
-        let container = document.getElementById('finalContainer');
-        if (!this.isShowFinal) {
-            container.style.display = 'block';
-            this.isShowFinal = true;
-        } else {
-            container.style.display = 'none';
-            this.isShowFinal = false;
-        }
-    }
-
     deleteColumn(index) {
         
     }
@@ -531,9 +535,6 @@ export class ResultComponent implements OnInit {
     }
 
     showManualInputMatrix() {
-        let primaryContainer = document.getElementById('primaryContainer');
-        let expandedContainer = document.getElementById('expandedContainer');
-        let finalContainer = document.getElementById('finalContainer');
         let manualInputContainer = document.getElementById('manualInputContainer');
         if (this.input) {
             //switch everything back on
@@ -541,9 +542,6 @@ export class ResultComponent implements OnInit {
             this.isShowFinal = true;
             this.isShowPrimary = true;
             this.isShowExpanded = true;
-            primaryContainer.style.display = 'block';
-            expandedContainer.style.display = 'block';
-            finalContainer.style.display = 'block';
             //turn of manual input
             manualInputContainer.style.display = 'none';
         } else {
@@ -551,10 +549,6 @@ export class ResultComponent implements OnInit {
             this.isShowFinal = false;
             this.isShowPrimary = false;
             this.isShowExpanded = false;
-           
-            primaryContainer.style.display = 'none';
-            expandedContainer.style.display = 'none';
-            finalContainer.style.display = 'none';
             manualInputContainer.style.display = 'block';
         }
         //if there is something in the result matrix prompt the user to clear current data or not

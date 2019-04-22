@@ -62,27 +62,18 @@ export class MaterialInput {
     static areEqual(thisInput: MaterialInput, thatInput: MaterialInput) {
         var isEqual = true;
         isEqual = isEqual && (thisInput.materialName == thatInput.materialName);
-        console.log(isEqual);
         for (let i = 0; i < thisInput.from.length; i++) {
             if (thisInput.from[i] != thatInput.from[i]) {
                 isEqual = false;
             }
         }
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.quantity == thatInput.quantity);
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.unit == thatInput.unit);
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.carbonStorage == thatInput.carbonStorage);
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.activityDataOrigin == thatInput.activityDataOrigin);
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.emissionFactorData == thatInput.emissionFactorData);
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.emissionFactorSource == thatInput.emissionFactorSource);
-        console.log(isEqual);
         isEqual = isEqual && (thisInput.remarks == thatInput.remarks);
-        console.log(isEqual);
         return isEqual;
     }
 }
