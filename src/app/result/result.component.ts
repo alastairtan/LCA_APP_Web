@@ -323,6 +323,12 @@ export class ResultComponent implements OnInit {
                 this.processName.push(this.economicflow[index]);
             }
         }
+        //default environmental vector
+        let enviVector = [];
+        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+            enviVector.push(0.1);
+        }
+        this.pushVectorIntoEnviMatrix(enviVector);
     }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
@@ -374,6 +380,11 @@ export class ResultComponent implements OnInit {
                 }
                 vector.push(+this.result[i][j]);
             }
+            //Get the environmental vector
+            let enviVector: any[] = [];
+            for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                enviVector.push(+this.resultEnvironmental[i][j]);
+            }
 
             if (outputIndexArr.length > 1) {
                 //allocate resource 
@@ -402,6 +413,10 @@ export class ResultComponent implements OnInit {
                             }
                         }
                         this.pushVectorIntoMAtrix(vector);
+                        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                            enviVector[i] = (this.resultEnvironmental[i][j] * outputAmt / totalMassSum).toFixed(3);
+                        }
+                        this.pushVectorIntoEnviMatrix(enviVector);
                         let name = this.processName[j];
                         name = name.concat(k.toString());
                         this.processName.push(name);
@@ -412,6 +427,9 @@ export class ResultComponent implements OnInit {
                             let row = inputIndexArr[i];
                             this.result[row][j] = (this.result[row][j] * outputAmt / totalMassSum).toFixed(3);
 
+                        }
+                        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                            this.resultEnvironmental[i][j] = (this.resultEnvironmental[i][j] * outputAmt / totalMassSum).toFixed(3);
                         }
                     }
                     k--;
@@ -476,6 +494,12 @@ export class ResultComponent implements OnInit {
     pushVectorIntoMAtrix(vector: number[]) {
         for (let i = 0; i < this.result.length; i++) {
             this.result[i].push(vector[i]);
+        }
+    }
+
+    pushVectorIntoEnviMatrix(vector: number[]) {
+        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+            this.resultEnvironmental[i].push(vector[i]);
         }
     }
 
