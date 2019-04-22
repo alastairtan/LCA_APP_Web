@@ -466,20 +466,23 @@ export class ResultComponent implements OnInit {
             scalingVec = this.invertedMatrix.mmul(demandVec);
         }
         //Calculate the cumulative environmental matrix
-        this.cumulativeEnvironmental = new Matrix(this.resultEnvironmental).mmul(scalingVec).to1DArray();
-        //Transform scalingVec (Matrix) to scalingVector (Array)
-        this.scalingVector = scalingVec.to1DArray();
-        //Set the values to 3dp, if they are not integer
-        for (let i = 0; i < this.scalingVector.length; i++) {
-            let value = this.scalingVector[i];
-            if (value - parseInt(value) != 0)
-                this.scalingVector[i] = this.scalingVector[i].toFixed(3);
+        if (this.resultEnvironmental != 0) {
+            this.cumulativeEnvironmental = new Matrix(this.resultEnvironmental).mmul(scalingVec).to1DArray();
+            //Transform scalingVec (Matrix) to scalingVector (Array)
+            this.scalingVector = scalingVec.to1DArray();
+            //Set the values to 3dp, if they are not integer
+            for (let i = 0; i < this.scalingVector.length; i++) {
+                let value = this.scalingVector[i];
+                if (value - parseInt(value) != 0)
+                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);
+            }
+            for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
+                let value = this.cumulativeEnvironmental[i];
+                if (value - parseInt(value) != 0)
+                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);
+            }
         }
-        for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
-            let value = this.cumulativeEnvironmental[i];
-            if (value - parseInt(value) != 0)
-                this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);
-        }
+        
     }
 
     scenario1Example() {
