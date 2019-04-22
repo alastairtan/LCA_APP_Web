@@ -149,9 +149,9 @@
 
                 <div id="manualInputContainer" class="placeholder defaultCursor">
                     <p class="subtitle">
-                        Final Matrix
+                       Manual Entry
                     </p>
-                        <table (mouseleave)="onMouseOver(0, null, null)">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>Entity</th>
@@ -159,14 +159,15 @@
                                         {{name}}
                                     </th>
                                     <th (mouseenter)="onMouseOver(1, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == rowCount + 2}">
-                                        <input />
+                                        <input id="processNameInput"/>
+                                        <input id="stagesInput"/>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let row of manualResult;let i = index;">
                                     <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
-                                        {{economicflow[i]}}
+                                        {{economicInputName[i]}}
                                         <button>
                                             delete
                                         </button>
@@ -179,17 +180,35 @@
                                 </tr>
                                 <tr>
                                     <th>
-                                        <input />
+                                        <input id="resourceNameInput" />
                                     </th>
+
                                     <td style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
-                                        <input autocomplete="off" />
-                                        <button>
-                                            add
+                                        <input autocomplete="off" id="valueInput" />
+
+                                        <button (click)="addrow()">
+                                            add row
+                                        </button>
+                                        <button (click)="done(-1)">
+                                            done
+                                        </button>
+                                    </td>
+                                    <td *ngFor="let row of processInputName;let i = index;" style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input autocomplete="off" id="{{'input' + i}}" />
+
+                                        <button (click)="addrow(i)">
+                                            add row
+                                        </button>
+                                        <button (click)="done()">
+                                            done
                                         </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    <button (click) ="generatingModel">
+                        generate model
+                    </button>
                 </div>
 
             </div>

@@ -115,11 +115,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     navFromResult = {};
 
     isOpen = false;
-
-    //currently selected Node
-
+    
     project: Project = this.dataService.getProject();            //Object to contain all data of the current project
     lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
+
 
     //================================================================
     //                    STARTING FUNCTIONS
@@ -705,7 +704,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     creatingPromptRect(rectObj: Rect, index: Number) {
-        this.removeAllPromptRect();
+       // this.removeAllPromptRect();
         let materialInputArr = rectObj.materialInput;
         let outputArr = rectObj.outputs;
         for (let i = 0; i < materialInputArr.length; i++) {
