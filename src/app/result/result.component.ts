@@ -37,14 +37,16 @@ export class ResultComponent implements OnInit {
     expandedProcessName: String[] = [];
 
     resultEnvironmental: any[] = [];
+    cumulativeEnvironmental: any[] = [];
     demandVectorForm: FormGroup;
     demandVector: FormArray;
-    scalingVector: Matrix;
+    scalingVector: any[];
 
     //boolean check for showing containers
     isShowPrimary: Boolean = true;
     isShowExpanded: Boolean = true;
     isShowFinal: Boolean = true;
+    isShowScaling: Boolean = false;
     input: Boolean = false;
 
     //manual input of matrix
@@ -87,6 +89,7 @@ export class ResultComponent implements OnInit {
         this.expanded = this.clone(this.result, false);
         this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
+        this.invertedMatrix = inverse(new Matrix(this.result));
         this.calculateScalingVector();
         //this.checkMatrixForMultipleSources();
         let inputContainer = document.getElementById('manualInputContainer');
@@ -98,14 +101,10 @@ export class ResultComponent implements OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':
-                let vector = [];
-                for (let val of this.demandVector.value) {
-                    vector.push(val.value);
-                }
-                console.log(vector);
+                this.demandVector.controls[0].setValue({ value: 1000 });
                 break;
             case 'End':
-                console.log(this.demandVector.value);
+                console.log(this.invertedMatrix);
             default:
                 //Other keyboard events
                 break;
@@ -207,10 +206,12 @@ export class ResultComponent implements OnInit {
                 }
             }
             result.push(row);
-            var valueFormGroup = new FormGroup({
-                value: new FormControl(0)
-            });
-            this.demandVector.push(valueFormGroup);
+            if (label == this.economicflow) {
+                var valueFormGroup = new FormGroup({
+                    value: new FormControl(0)
+                });
+                this.demandVector.push(valueFormGroup);
+            }
         }
         this.rowCount = this.economicflow.length;
     }
@@ -329,6 +330,12 @@ export class ResultComponent implements OnInit {
                 this.processName.push(this.economicflow[index]);
             }
         }
+        //default environmental vector
+        let enviVector = [];
+        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+            enviVector.push((0.1).toFixed(3));
+        }
+        this.pushVectorIntoEnviMatrix(enviVector);
     }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
@@ -380,6 +387,11 @@ export class ResultComponent implements OnInit {
                 }
                 vector.push(+this.result[i][j]);
             }
+            //Get the environmental vector
+            let enviVector: any[] = [];
+            for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                enviVector.push(+this.resultEnvironmental[i][j]);
+            }
 
             if (outputIndexArr.length > 1) {
                 //allocate resource 
@@ -402,12 +414,15 @@ export class ResultComponent implements OnInit {
                             if (i != k) {
                                 vector[col] = 0;
                             } else {
-
                                 vector[outputRow] = +outputAmt;
-                                console.log(outputAmt)
+                                //console.log(outputAmt)
                             }
                         }
                         this.pushVectorIntoMAtrix(vector);
+                        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                            enviVector[i] = (this.resultEnvironmental[i][j] * outputAmt / totalMassSum).toFixed(3);
+                        }
+                        this.pushVectorIntoEnviMatrix(enviVector);
                         let name = this.processName[j];
                         name = name.concat(k.toString());
                         this.processName.push(name);
@@ -419,6 +434,9 @@ export class ResultComponent implements OnInit {
                             this.result[row][j] = (this.result[row][j] * outputAmt / totalMassSum).toFixed(3);
 
                         }
+                        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                            this.resultEnvironmental[i][j] = (this.resultEnvironmental[i][j] * outputAmt / totalMassSum).toFixed(3);
+                        }
                     }
                     k--;
                 }
@@ -426,21 +444,42 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    updateDemand(index, newValue) {
+        this.demandVector.at(index).setValue({ value: parseFloat(newValue) });
+    }
+
     /**
      * Invert the result matrix and calculate the scaling vector based on the demand vector
      * */
     calculateScalingVector() {
-        /*
-        var resultMatrix = new Matrix(this.result);
-        this.invertedMatrix = inverse(resultMatrix);
-        var demandVectorValue = [];
-        for (let val of this.demandVector.value) {
-            demandVectorValue.push(val['value']);
+        var scalingVec: Matrix;
+        if (this.result.length <= 0 || this.result.length != this.result[0].length) {
+            scalingVec = Matrix.ones(this.result.length, 1);
+            this.cumulativeEnvironmental = Matrix.zeros(this.resultEnvironmental.length, 1).to1DArray();
+            return;
+        } else {
+            var demandVectorValue = [];
+            for (let val of this.demandVector.value) {
+                demandVectorValue.push(val['value']);
+            }
+            var demandVec = Matrix.columnVector(demandVectorValue);
+            scalingVec = this.invertedMatrix.mmul(demandVec);
         }
-        var demandVec = Matrix.columnVector(demandVectorValue);
-        this.scalingVector = this.invertedMatrix.mmul(demandVec);
-        console.log(this.scalingVector.to1DArray());
-        */
+        //Calculate the cumulative environmental matrix
+        this.cumulativeEnvironmental = new Matrix(this.resultEnvironmental).mmul(scalingVec).to1DArray();
+        //Transform scalingVec (Matrix) to scalingVector (Array)
+        this.scalingVector = scalingVec.to1DArray();
+        //Set the values to 3dp, if they are not integer
+        for (let i = 0; i < this.scalingVector.length; i++) {
+            let value = this.scalingVector[i];
+            if (value - parseInt(value) != 0)
+                this.scalingVector[i] = this.scalingVector[i].toFixed(3);
+        }
+        for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
+            let value = this.cumulativeEnvironmental[i];
+            if (value - parseInt(value) != 0)
+                this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);
+        }
     }
 
     scenario1Example() {
@@ -484,6 +523,12 @@ export class ResultComponent implements OnInit {
     pushVectorIntoMAtrix(vector: number[]) {
         for (let i = 0; i < this.result.length; i++) {
             this.result[i].push(vector[i]);
+        }
+    }
+
+    pushVectorIntoEnviMatrix(vector: number[]) {
+        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+            this.resultEnvironmental[i].push(vector[i]);
         }
     }
 
@@ -540,6 +585,14 @@ export class ResultComponent implements OnInit {
 
     manualAdd() {
 
+    }
+
+    toggleShowScaling() {
+        this.input = false;
+        this.isShowPrimary = this.isShowScaling;
+        this.isShowExpanded = this.isShowScaling;
+        this.isShowFinal = this.isShowScaling;
+        this.isShowScaling = !this.isShowScaling;
     }
 
     showManualInputMatrix() {

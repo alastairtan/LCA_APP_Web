@@ -3,6 +3,7 @@ import { DataService } from "../data.service";
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Project } from "../project"
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Matrix, inverse } from 'ml-matrix';
 
 @Component({
   selector: 'app-project-footer',
@@ -12,7 +13,13 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class ProjectFooterComponent implements OnInit {
 
     ngOnInit(): void {
-        this.doStuff();
+        //===========================
+        // inverse and pseudo-inverse
+        //===========================
+
+        var A = new Matrix([[2, 3, 5], [4, 1, 6], [1, 3, 0]]);
+        var inverseA = inverse(A);
+        console.log(inverseA);
     }
 
     constructor(private dataService: DataService, private fb: FormBuilder) { }

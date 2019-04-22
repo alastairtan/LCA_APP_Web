@@ -33,6 +33,12 @@
             <button *ngIf="!isShowFinal" class="processButtons" (click)="isShowFinal = true">
                 Final Matrix
             </button>
+            <button *ngIf="isShowScaling" class="processButtons viewButton" (click)="toggleShowScaling()">
+                Demand/Scaling
+            </button>
+            <button *ngIf="!isShowScaling" class="processButtons" (click)="toggleShowScaling()">
+                Demand/Scaling
+            </button>
             <button *ngIf="input" class="processButtons viewButton" (click)="showManualInputMatrix()">
                 Input Matrix
             </button>
@@ -51,7 +57,7 @@
                 <p class="title">
                     Generated results
                 </p>
-                <p class="subtitle">
+                <p class="matrix-title">
                     Technical Matrix
                 </p>
                 <div id="primaryContainer" *ngIf="isShowPrimary">
@@ -115,7 +121,7 @@
                     <p class="subtitle">
                         Final Matrix
                     </p>
-                    <form [formGroup]="demandVectorForm" id="demandVectorForm">
+                    <form [formGroup]="demandVectorForm" id="demandVectorForm2">
                         <table formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
                             <thead>
                                 <tr>
@@ -123,13 +129,13 @@
                                     <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == j}">
                                         {{name}}
                                     </th>
-                                    <th (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
+                                    <th *ngIf="isShowScaling" (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
                                         Demand vector
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let row of result; let value of demandVector.controls; let i = index;">
+                                <tr *ngFor="let row of result; let val of demandVector.value; let i = index;">
                                     <th style="font-weight:300" (mouseenter)="onMouseOver(3, i, null)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredRow == i}">
                                         {{economicflow[i]}}
                                     </th>
@@ -138,13 +144,50 @@
                                                     highlightedDblClick: hoveredTable == 3 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                         {{col}}
                                     </td>
-                                    <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
-                                        <input type="number" autocomplete="off" formControlName="value" (change)="calculateScalingVector()"/>
+                                    <td *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()"/>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
+                </div>
+
+                <div id="demandScaling" *ngIf="isShowScaling">
+                    <p class="subtitle">
+                        Demand and Scaling vector
+                    </p>
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-6">
+                            <form [formGroup]="demandVectorForm" id="demandVectorForm">
+                                <table formArrayName="inputs">
+                                    <thead>
+                                        <tr>
+                                            <th>Entity</th>
+                                            <th>Demand vector</th>
+                                            <th>Scaling vector</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let val of demandVector.controls; let i = index;">
+                                            <th style="font-weight:300">
+                                                {{economicflow[i]}}
+                                            </th>
+                                            <td [formGroupName]="i">
+                                                <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
+                                            </td>
+                                            <td>
+                                                <input type="number" disabled value="{{scalingVector[i]}}" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        <div class="col-md-3"></div>
+                    </div>
+                    
                 </div>
 
                 <div id="manualInputContainer" class="placeholder defaultCursor">
@@ -218,7 +261,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div id="environmentalContainer" class="placeholder defaultCursor">
-                    <p class="subtitle">
+                    <p class="matrix-title">
                         Environmental Matrix
                     </p>
                     <table (mouseleave)="onMouseOver(0, null, null)">
@@ -226,21 +269,22 @@
                             <tr>
                                 <th>Entity</th>
                                 <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredCol == j}">{{name}}</th>
+                                <th *ngIf="isShowScaling">Cumulative</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let row of resultEnvironmental; let i = index">
                                 <th style="font-weight:300" (mouseenter)="onMouseOver(5, i, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == i}">{{environmentalflow[i]}}</th>
-                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)" 
+                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)"
                                     [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == j || hoveredRow == i),
                                                 highlightedDblClick: hoveredTable == 5 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
                                     {{col}}
                                 </td>
+                                <td *ngIf="isShowScaling">{{cumulativeEnvironmental[i]}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
             </div>
             <!-- Show last saved timing at the bottom right hand corner-->
         </div>

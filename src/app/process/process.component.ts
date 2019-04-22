@@ -1091,6 +1091,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (tab) {
             case this.inputMenuBar[0]:
                 let fromControls = this.materialList.controls[index]['controls']['from'];
+                console.log(fromControls);
                 fromControls.push(this.fb.control(''));
                 break;
             case this.outputMenuBar[0]:
@@ -1145,21 +1146,23 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param newValue value of the new select
      */
     updateConnection(tab: string, index: number, newValue) {
-        var headName, headId, headIndex;
-        var tailName, tailId, tailIndex;
+        var headName, headId, headIndex = null;
+        var tailName, tailId, tailIndex = null;
+        let previousNodeName, previousNodeId, previousNodeIndex = null;
         //Decide head/tail based on currently selected tab
         switch (tab) {
             case this.inputMenuBar[0]:
                 headName = newValue;
-                tailName = this.previousSelect;
+                previousNodeName = this.previousSelect;
                 break;
             case this.outputMenuBar[0]:
-                headName = this.previousSelect;
+                previousNodeName = this.previousSelect;
                 tailName = newValue;
                 break;
             default:
                 return;
         }
+
         //Find the id of the head and the tail
         for (var i = 0; i < this.project.processNodes.length; i++) {
             var proc = this.project.processNodes[i];
@@ -1169,10 +1172,76 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             } else if (proc.processName == tailName) {
                 tailId = proc.id;
                 tailIndex = i;
-            } 
+            } else if (proc.processName == previousNodeName) {
+                previousNodeId = proc.id;
+                previousNodeIndex = i;
+                console.log(i);
+            }
         }
-        console.log(headName, "(" + headId + ")", "is changed to", tailName, "(" + tailId + ")")
+
+        //means currentlyselectednode is a tail
+        let headObj;
+        let connIndex;
+        console.log(previousNodeName);
+        if (previousNodeName == "") {
+            //means adding a connection
+            let headSVG = this.svgNode[headIndex];
+            let conn2 = headSVG.connectable({
+                type: 'angled',
+                targetAttach: 'perifery',
+                sourceAttach: 'perifery',
+                marker: 'default',
+            }, this.currentlySelectedNode);
+        } else {
+            if (tailName == null) {
+                //means uer changed the inputs of the currently selectedNode
+                headObj = this.project.processNodes[headIndex];
+                tailId = this.project.processNodes[this.currentlySelectedNode.data('key')].id;
+                for (let i = 0; i < headObj.nextId.length; i++) {
+                    if (headObj.nextId[i] == tailId) {
+                        //form the connection
+                        connIndex = i;
+                        let headSVG = this.svgNode[headIndex];
+
+                        /////
+                        // MODULARISE CREATION OF CONNECTORS
+                        /////
+                        let conn2 = headSVG.connectable({
+                            type: 'angled',
+                            targetAttach: 'perifery',
+                            sourceAttach: 'perifery',
+                            marker: 'default',
+                        }, this.currentlySelectedNode);
+                        break;
+                    }
+                }
+                let previousRectObj = this.project.processNodes[previousNodeIndex];
+                for (let i = 0; i < previousRectObj.nextId.length; i++) {
+                    if (previousRectObj.nextId[i] == tailId) {
+                        this.removeConnector([headIndex, i]);
+                        break;
+                    }
+                }
+            } else {
+                //the currentlyselectedNode is a head 
+
+                headObj = this.project.processNodes[headIndex];
+                for (let i = 0; i < headObj.nextId.length; i++) {
+                    if (headObj.nextId[i] == tailId) {
+                        connIndex = i;
+                        break;
+                    }
+                }
+            }
+
+        }
+        console.log(tailName, "(" + tailId + ")", "is changed to", headName, "(" + headId + ")")
+        //update connectors 
+
+
     }
+
+
 
     /**
      * Set the currently selected process as a source
