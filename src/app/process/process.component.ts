@@ -1037,7 +1037,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //Loop through all nodes to assign their inputs
         for (let fromNode of this.project.processNodes) {
             for (let output of fromNode.outputs) {
-                output.to = [''];
+                output.to = [];
                 //Auto-assign to-process
                 for (let next of fromNode.nextId) {
                     var toNode = this.project.processNodes[this.processIdMap[next]['index']];
@@ -1067,6 +1067,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             break;
                         }
                     }
+                }
+                if (output.to.length == 0) {
+                    output.to = [''];
                 }
             }
         }
