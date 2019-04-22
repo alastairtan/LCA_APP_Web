@@ -466,7 +466,7 @@ export class ResultComponent implements OnInit {
             scalingVec = this.invertedMatrix.mmul(demandVec);
         }
         //Calculate the cumulative environmental matrix
-        if (this.resultEnvironmental != 0) {
+        if (this.resultEnvironmental.length != 0) {
             this.cumulativeEnvironmental = new Matrix(this.resultEnvironmental).mmul(scalingVec).to1DArray();
             //Transform scalingVec (Matrix) to scalingVector (Array)
             this.scalingVector = scalingVec.to1DArray();
