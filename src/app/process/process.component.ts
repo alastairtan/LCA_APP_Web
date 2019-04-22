@@ -701,7 +701,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             this.creatingPromptRect(rectObj, this.currentlySelectedNode.data('key'));
         }
         //check for input and output
-
     }
 
     creatingPromptRect(rectObj: Rect, index: Number) {
@@ -727,17 +726,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
 
                 let xPrompt, yPrompt;
-                if (x < 100) {
+                if (x > this.processContainerWidth) {
                     xPrompt = x;
                 } else {
                     xPrompt = x - 120
                 }
-
-                if (y - 100 < this.svgOffsetLeft) {
-                    yPrompt = y + 100;
-                } else {
-                    yPrompt = y - 100 + 80 * (i);
+                console.log(y, this.svgOffsetTop);
+                yPrompt = y - 100 + 80 * (i);
+                if (yPrompt < 10) {
+                    yPrompt = 15;
                 }
+                console.log(yPrompt)
                 let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'input', promptRectNextid, [], false, rectObj.categories, name, [], promptRectOutput, [], [], [], [])
                 console.log(r.id);
                 if (this.isPromptRectCreated(r.id)) {
@@ -870,10 +869,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     xPrompt = x + 120
                 }
 
-                if (y > this.processContainerHeight) {
-                    yPrompt = y;
-                } else {
-                    yPrompt = y + 100 + 80 * (i);
+                yPrompt = y - 100 + 80 * (i);
+                if (yPrompt < 10) {
+                    yPrompt = 15;
                 }
 
                 let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'output', [], [], false, rectObj.categories, name, promptRectInput, [], [], [], [], [])
@@ -885,7 +883,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 let text = this.draw.text('Click to add handle output of "' + name + '"');
 
                 rect.node.id = r.id;
-                console.log(rect.node.id);
+                //console.log(rect.node.id);
                 rect.attr({
                     x: r.getX(),
                     y: r.getY(),
@@ -918,7 +916,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.svgPrompt.push(rect);
                 this.svgPromptConn.push(conn2.connector);
                 this.svgText.push(text);
-                console.log(this.currentlySelectedNode);
+                //console.log(this.currentlySelectedNode);
                 this.prevSVG.push(this.currentlySelectedNode);
                 rect.data({
                     key: this.idPrompt.length - 1,
@@ -1045,8 +1043,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     for (let input of toNode.materialInput) {
                         //Push into from/to array if matched
                         if (input.materialName.toLowerCase() == output.outputName.toLowerCase()) {
-                            console.log(input);
-                            console.log(output)
                             this.addProcessToRelation(input.from, fromNode.processName);
                             this.addProcessToRelation(output.to, toNode.processName);
                             //Update currently selected node, since it will be overwritten later if this is not done
@@ -1069,6 +1065,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             break;
                         }
                     }
+                }
+                if (output.to.length == 0) {
+                    output.to = [''];
                 }
             }
         }
@@ -1247,7 +1246,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         console.log(rectObj.materialInput);
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
-                this.removePromptRect(index, rectObj, 'input');
+                var materialInput = new MaterialInput();
+                materialInput.parseData(this.materialList.at(index).value);
+                if (!materialInput.equals(new MaterialInput())) {
+                    this.removePromptRect(index, rectObj, 'input');
+                }
                 this.materialList.removeAt(index);
                 rectObj.materialInput = this.materialList.value;
                 break;
@@ -1261,7 +1264,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 rectObj.transportations = this.transportList.value;
                 break;
             case this.outputMenuBar[0]:   //Output
-                this.removePromptRect(index, rectObj, 'output');
+                var output = new Output();
+                output.parseData(this.outputList.at(index).value);
+                if (!output.equals(new Output())) {
+                    this.removePromptRect(index, rectObj, 'output');
+                }
+
+
                 this.outputList.removeAt(index);
                 rectObj.outputs = this.outputList.value;
                 break;
@@ -1471,7 +1480,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.materialList.value[0]['from']);
+                console.log(this.outputList.value[0]['to']);
                 break;
             case 'End':
                 console.log(this.outputList.value);
@@ -2534,5 +2543,19 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.project = this.dataService.getProject();
         this.getDetails();
         this.cd.detectChanges();
+    }
+
+    debugClone(obj) {
+        if (obj instanceof Array) {
+            var result = [];
+            for (let item of obj) {
+                result.push(this.debugClone(item));
+            }
+            return result;
+        } else if (obj instanceof Object) {
+            return JSON.parse(JSON.stringify(obj));
+        } else {
+            return obj;
+        }
     }
 }

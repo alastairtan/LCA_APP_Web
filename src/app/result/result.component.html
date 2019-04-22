@@ -15,22 +15,22 @@
             <button class="processButtons" (click)="navPrev()">
                 Previous
             </button>
-            <button *ngIf="isShowPrimary" class="processButtons viewButton" (click)="isPrimary()">
+            <button *ngIf="isShowPrimary" class="processButtons viewButton" (click)="isShowPrimary = false">
                 Primary Matrix
             </button>
-            <button *ngIf="!isShowPrimary" class="processButtons" (click)="isPrimary()">
+            <button *ngIf="!isShowPrimary" class="processButtons" (click)="isShowPrimary = true">
                 Primary Matrix
             </button>
-            <button *ngIf="isShowExpanded" class="processButtons viewButton" (click)="isExpanded()">
+            <button *ngIf="isShowExpanded" class="processButtons viewButton" (click)="isShowExpanded = false">
                 Expanded Matrix
             </button>
-            <button *ngIf="!isShowExpanded" class="processButtons" (click)="isExpanded()">
+            <button *ngIf="!isShowExpanded" class="processButtons" (click)="isShowExpanded = true">
                 Expanded Matrix
             </button>
-            <button *ngIf="isShowFinal" class="processButtons viewButton" (click)="isFinal()">
+            <button *ngIf="isShowFinal" class="processButtons viewButton" (click)="isShowFinal = false">
                 Final Matrix
             </button>
-            <button *ngIf="!isShowFinal" class="processButtons" (click)="isFinal()">
+            <button *ngIf="!isShowFinal" class="processButtons" (click)="isShowFinal = true">
                 Final Matrix
             </button>
             <button *ngIf="input" class="processButtons viewButton" (click)="showManualInputMatrix()">
@@ -54,7 +54,7 @@
                 <p class="subtitle">
                     Technical Matrix
                 </p>
-                <div id="primaryContainer">
+                <div id="primaryContainer" *ngIf="isShowPrimary">
 
                     <p class="subtitle">
                         Primary Matrix
@@ -83,7 +83,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="expandedContainer">
+                <div id="expandedContainer" *ngIf="isShowExpanded">
                     <p class="subtitle">
                         Expanded Matrix
                     </p>
@@ -92,26 +92,26 @@
                         <thead>
                             <tr>
                                 <th>Entity</th>
-                                <th *ngFor="let name of expandedProcessName; let j = index" (mouseenter)="onMouseOver(1, null, j)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == j}">
+                                <th *ngFor="let name of expandedProcessName; let j = index" (mouseenter)="onMouseOver(2, null, j)" [ngClass]="{highlighted: hoveredTable == 2 && hoveredCol == j}">
                                     {{name}}
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let row of expanded; let value of demandVector.controls; let i = index;">
-                                <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
+                                <th style="font-weight:300" (mouseenter)="onMouseOver(2, i, null)" [ngClass]="{highlighted: hoveredTable == 2 && hoveredRow == i}">
                                     {{economicflow[i]}}
                                 </th>
-                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
-                                    [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
-                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(2, i, j)"
+                                    [ngClass]="{highlighted: hoveredTable == 2 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 2 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                     {{col}}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div id="finalContainer" class="placeholder defaultCursor">
+                <div id="finalContainer" class="placeholder defaultCursor" *ngIf="isShowFinal">
                     <p class="subtitle">
                         Final Matrix
                     </p>
@@ -120,26 +120,26 @@
                             <thead>
                                 <tr>
                                     <th>Entity</th>
-                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(1, null, j)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == j}">
+                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == j}">
                                         {{name}}
                                     </th>
-                                    <th (mouseenter)="onMouseOver(1, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == rowCount + 2}">
+                                    <th (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
                                         Demand vector
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let row of result; let value of demandVector.controls; let i = index;">
-                                    <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
+                                    <th style="font-weight:300" (mouseenter)="onMouseOver(3, i, null)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredRow == i}">
                                         {{economicflow[i]}}
                                     </th>
-                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
-                                        [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
-                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(3, i, j)"
+                                        [ngClass]="{highlighted: hoveredTable == 3 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 3 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                         {{col}}
                                     </td>
-                                    <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
-                                        <input type="number" autocomplete="off" formControlName="value" />
+                                    <td [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input type="number" autocomplete="off" formControlName="value" (change)="calculateScalingVector()"/>
                                     </td>
                                 </tr>
                             </tbody>
@@ -155,7 +155,7 @@
                             <thead>
                                 <tr>
                                     <th>Entity</th>
-                                    <th *ngFor="let name of processInputName; let j = index" (mouseenter)="onMouseOver(1, null, j)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == j}">
+                                    <th *ngFor="let name of processInputName; let j = index" (mouseenter)="onMouseOver(4, null, j)" [ngClass]="{highlighted: hoveredTable == 4 && hoveredCol == j}">
                                         {{name}}
                                     </th>
                                     <th (mouseenter)="onMouseOver(1, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == rowCount + 2}">
@@ -166,15 +166,16 @@
                             </thead>
                             <tbody>
                                 <tr *ngFor="let row of manualResult;let i = index;">
+
                                     <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
                                         {{economicInputName[i]}}
                                         <button>
                                             delete
                                         </button>
                                     </th>
-                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
-                                        [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
-                                                    highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(4, i, j)"
+                                        [ngClass]="{highlighted: hoveredTable == 4 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 4 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                         {{col}}
                                     </td>
                                 </tr>
@@ -224,15 +225,15 @@
                         <thead>
                             <tr>
                                 <th>Entity</th>
-                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(2, null, j)" [ngClass]="{highlighted: hoveredTable == 2 && hoveredCol == j}">{{name}}</th>
+                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredCol == j}">{{name}}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let row of resultEnvironmental; let i = index">
-                                <th style="font-weight:300" (mouseenter)="onMouseOver(2, i, null)" [ngClass]="{highlighted: hoveredTable == 2 && hoveredRow == i}">{{environmentalflow[i]}}</th>
-                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(2, i, j)" 
-                                    [ngClass]="{highlighted: hoveredTable == 2 && (hoveredCol == j || hoveredRow == i),
-                                                highlightedDblClick: hoveredTable == 2 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
+                                <th style="font-weight:300" (mouseenter)="onMouseOver(5, i, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == i}">{{environmentalflow[i]}}</th>
+                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)" 
+                                    [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == j || hoveredRow == i),
+                                                highlightedDblClick: hoveredTable == 5 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
                                     {{col}}
                                 </td>
                             </tr>
