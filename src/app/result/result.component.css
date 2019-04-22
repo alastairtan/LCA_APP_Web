@@ -18,6 +18,7 @@ table {
     width: 100%;
     overflow: hidden;
     cursor: default;
+    border: 2px solid #666;
 }
 
 td, th {
@@ -32,6 +33,22 @@ tr:nth-child(even) {
     background-color: #dddddd;
 }
 
+.primaryProcess {
+    background: #84ffa3;
+}
+
+.expandedProcess {
+    background: #84e0ff;
+}
+
+.allocatedProcess {
+    background: #ff84e0;
+}
+.lastColumn {
+    background: #ffe184;
+}
+
+
 input[type=number] {
     margin: auto;
     width: 100%;
@@ -39,12 +56,24 @@ input[type=number] {
     text-align: center;
 }
 
+.leftBorder, .lastColumn {
+    border-left: 2px solid #666;
+}
+
+tbody th, .rightBorder {
+    border-right: 2px solid #666;
+}
+
+thead th {
+    border-bottom: 2px solid #666;
+}
+
 .highlighted {
-    background-color: #ffc9b7;
+    background: #ffb69e;
 }
 
 .highlightedDblClick {
-    background-color: #ffdcd1;
+    background-color: #ffa384;
     cursor: pointer;
 }
 

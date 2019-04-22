@@ -83,7 +83,9 @@ export class ResultComponent implements OnInit {
         this.expanded = this.clone(this.result, false);
         this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
-        this.invertedMatrix = inverse(new Matrix(this.result));
+        if (this.result.length == this.result[0].length) {
+            this.invertedMatrix = inverse(new Matrix(this.result));
+        }
         this.calculateScalingVector();
         //this.checkMatrixForMultipleSources();
         let inputContainer = document.getElementById('manualInputContainer');
@@ -611,5 +613,9 @@ export class ResultComponent implements OnInit {
 
     generatingModel() {
 
+    }
+
+    debugLog(x) {
+        console.log(x);
     }
 }
