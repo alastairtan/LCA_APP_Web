@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ChartsModule } from 'ng2-charts';
+import { MatFormFieldModule, MatOptionModule, MatInputModule } from '@angular/material';
+import { MatAutocompleteModule } from '@angular/material/autocomplete'
 
 import { AppRoutingModule }     from './app-routing.module';
 import { AppComponent }         from './app.component';
@@ -26,6 +28,10 @@ import { DialogComponent } from './dialog/dialog.component'
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
+    MatAutocompleteModule,
+    MatFormFieldModule,
+    MatOptionModule,
+    MatInputModule,
     AppRoutingModule,
     HttpClientModule,
     DragDropModule,
@@ -34,6 +40,12 @@ import { DialogComponent } from './dialog/dialog.component'
     MatToolbarModule,
     MatDialogModule,
     ChartsModule
+    ],
+  exports: [
+    MatAutocompleteModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatOptionModule
   ],
   declarations: [
     AppComponent,

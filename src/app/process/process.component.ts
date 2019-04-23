@@ -8,6 +8,8 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { ActivatedRoute } from "@angular/router";
 
 import { MaterialInput } from './MaterialInput';
@@ -114,6 +116,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     navFromResult = {};
     previousSelect = "";
+    materialOptions: string[] = [];
+    filteredOptions: string[] = [];
 
     isOpen = false;
 
@@ -165,6 +169,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             };
         }
         this.updateRelations();
+        this.updateMaterialOptions();
     }
 
     ngAfterViewInit() {
@@ -544,7 +549,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.clearFormArray(this.materialList);
                 //Add data to the list
                 for (let j = 0; j < rectObj.materialInput.length; j++) {
-                    this.materialList.push(this.fb.group(this.transformForFormBuilder(rectObj.materialInput[j])));
+                    var formGroup = this.fb.group(this.transformForFormBuilder(rectObj.materialInput[j]));
+                    formGroup.controls.materialName.valueChanges.subscribe(
+                        value => {
+                            var filterValue = value.toLowerCase();
+                            this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(filterValue));
+                        });
+                    this.materialList.push(formGroup);
                 }
                 break;
             case this.inputMenuBar[1]:       //Energy Input
@@ -568,7 +579,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.clearFormArray(this.outputList);
                 //Add data to the list
                 for (let j = 0; j < rectObj.outputs.length; j++) {
-                    this.outputList.push(this.fb.group(this.transformForFormBuilder(rectObj.outputs[j])));
+                    var formGroup = this.fb.group(this.transformForFormBuilder(rectObj.outputs[j]));
+                    formGroup.controls.outputName.valueChanges.subscribe(
+                        value => {
+                            var filterValue = value.toLowerCase();
+                            this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(filterValue));
+                        });
+                    this.outputList.push(formGroup);
                 }
                 break;
             case this.outputMenuBar[1]:       //Byproduct
@@ -704,6 +721,28 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         //check for input and output
     }
 
+    /**
+     * Update the array of material name for autocomplete
+     */
+    updateMaterialOptions() {
+        this.materialOptions = [];
+        for (let proc of this.project.processNodes) {
+            for (let input of proc.materialInput) {
+                var material = input.materialName.toLowerCase();
+                if (!this.materialOptions.includes(material)) {
+                    this.materialOptions.push(material);
+                }
+            }
+            for (let output of proc.outputs) {
+                var material = output.outputName.toLowerCase();
+                if (!this.materialOptions.includes(material)) {
+                    this.materialOptions.push(material);
+                }
+            }
+        }
+        //console.log('New material options:', this.materialOptions);
+    }
+
     creatingPromptRect(rectObj: Rect, index: Number) {
         this.removeAllPromptRect();
         let materialInputArr = rectObj.materialInput;
@@ -723,7 +762,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 outputObj.quantity = input.quantity;
                 promptRectOutput.push(outputObj)
                 promptRectNextid.push(rectObj.id);
-                console.log(x, y);
+                //console.log(x, y);
 
 
                 let xPrompt, yPrompt;
@@ -739,7 +778,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     yPrompt = y - 100 + 80 * (i);
                 }
                 let r = new Rect(xPrompt, yPrompt, rectObj.id + i + 'input', promptRectNextid, [], false, rectObj.categories, name, [], promptRectOutput, [], [], [], [])
-                console.log(r.id);
+                //console.log(r.id);
                 if (this.isPromptRectCreated(r.id)) {
                     continue;
                 }
@@ -1057,13 +1096,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             var toNodeIndex = this.project.processNodes.indexOf(toNode);
                             if (this.currentlySelectedNode != undefined && this.currentlySelectedNode.data('key') == toNodeIndex && this.selectedTab == this.inputMenuBar[0]) {
                                 var inputIndex = toNode.materialInput.indexOf(input);
-                                console.log(this.materialList.at(inputIndex).value.from)
+                                //console.log(this.materialList.at(inputIndex).value.from)
                                 this.addProcessToRelation(this.materialList.at(inputIndex).value.from, fromNode.processName);
                                 
                                 //this.addProcessToRelation(input.from, fromNode.processName);
                             }
                             this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex,outputIndex, inputIndex, input.materialName);
-                            console.log(fromNode, next);
+                            //console.log(fromNode, next);
                             break;
                         }
                     }
@@ -1082,6 +1121,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     if (backwardRelation != undefined && !backwardRelation.includes(input.from[i])) {
                         input.from.splice(i, 1);
                     }
+                }
+                if (input.from.length == 0) {
+                    input.from = [''];
                 }
             }
         }
@@ -1244,7 +1286,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         }
         this.prepareForUndoableAction();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
-        console.log(rectObj.materialInput);
+        //console.log(rectObj.materialInput);
         switch (tab) {
             case this.inputMenuBar[0]:   //Material Input
                 this.removePromptRect(index, rectObj, 'input');
@@ -2155,11 +2197,11 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     checkUnnecesaryPrompt(indexOut: Number, indexIn: Number, materialOutIndex, materialInIndex, name: string) {
         let removedPrompt = [];
-        console.log(indexOut, indexIn);
+        //console.log(indexOut, indexIn);
         for (let i = 0; i < this.idPrompt.length; i++) {
             if (this.idPrompt[i][1] == indexOut || this.idPrompt[i][1] == indexIn) {
 
-                console.log(name);
+                //console.log(name);
                 let output = this.idPrompt[i][0].outputs[materialOutIndex];
                 let input = this.idPrompt[i][0].materialInput[materialInIndex];
                 if (output != undefined && input != undefined) {
@@ -2193,8 +2235,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         break;
                     }
                 } else {
-                    console.log("bug occured");
-                    console.log(this.idPrompt);
+                    //console.log("bug occured");
+                    //console.log(this.idPrompt);
                 }
             }
         }
@@ -2535,5 +2577,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         } else {
             return obj;
         }
+    }
+
+    debugLog(obj) {
+        console.log(obj);
     }
 }

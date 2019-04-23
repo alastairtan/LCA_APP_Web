@@ -172,7 +172,15 @@
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
                                                     <strong>Material Name</strong>
-                                                    <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
+                                                    <mat-form-field class="mat-autocomplete">
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="materialName" aria-label="Name"
+                                                               matInput [matAutocomplete]="auto" (change)="saveAndClearDetails(); updateRelations(); getDetails(); updateMaterialOptions()" />
+                                                        <mat-autocomplete #auto="matAutocomplete">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option">
+                                                                {{option}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
                                                 </div>
                                                 <div formArrayName="from">
                                                     <div *ngFor="let choice of input.controls.from.controls; let j = index" class="container even-color">
@@ -555,8 +563,16 @@
                                         <div [formGroupName]="i">
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
-                                                    <strong>Output Name</strong>
-                                                    <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
+                                                    <strong>Material Name</strong>
+                                                    <mat-form-field class="mat-autocomplete">
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="outputName" aria-label="Name"
+                                                               matInput [matAutocomplete]="auto" (change)="saveAndClearDetails(); updateRelations(); getDetails(); updateMaterialOptions()" />
+                                                        <mat-autocomplete #auto="matAutocomplete">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option">
+                                                                {{option}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
                                                 </div>
                                                 <div formArrayName="to">
                                                     <div *ngFor="let choice of input.controls.to.controls; let j = index" class="container even-color">
