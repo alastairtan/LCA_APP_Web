@@ -39,6 +39,12 @@
             <button *ngIf="!isShowScaling" class="processButtons" (click)="toggleShowScaling()">
                 Demand/Scaling
             </button>
+            <button *ngIf="isShowChart" class="processButtons viewButton" (click)="toggleShowChart()">
+                Environmental Chart
+            </button>
+            <button *ngIf="!isShowChart" class="processButtons" (click)="toggleShowChart()">
+                Environmental Chart
+            </button>
             <button *ngIf="input" class="processButtons viewButton" (click)="showManualInputMatrix()">
                 Input Matrix
             </button>
@@ -52,7 +58,7 @@
     </mat-toolbar>
 
     <div class="container">
-        <div class="row">
+        <div class="row" *ngIf="!isShowChart">
             <div class="col-md-12">
                 <p class="title">
                     Generated results
@@ -193,7 +199,7 @@
                     
                 </div>
 
-                <div id="manualInputContainer" class="placeholder defaultCursor">
+                <div id="manualInputContainer" class="placeholder defaultCursor" *ngIf="input">
                     <p class="subtitle">
                         Final Matrix
                     </p>
@@ -244,6 +250,18 @@
         </div>
         <div class="row">
             <div class="col-md-12">
+                <div class="chart" *ngIf="isShowChart">
+                    <div>
+                        <canvas baseChart
+                                [datasets]="barChartData"
+                                [labels]="barChartLabels"
+                                [options]="barChartOptions"
+                                [plugins]="barChartPlugins"
+                                [legend]="barChartLegend"
+                                [chartType]="barChartType" (mouseleave)="onMouseOver(0, null, null)"></canvas>
+                    </div>
+                    <button mat-button mat-raised-button color="primary" (click)="randomize()">Update</button>
+                </div>
                 <div id="environmentalContainer" class="placeholder defaultCursor">
                     <p class="matrix-title">
                         Environmental Matrix
@@ -252,9 +270,9 @@
                         <thead>
                             <tr>
                                 <th class="rightBorder">Entity</th>
-                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)" 
+                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)"
                                     [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
-                                        primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
+                                    primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
                                     {{name}}
                                 </th>
                                 <th *ngIf="isShowScaling" class="lastColumn">Cumulative</th>

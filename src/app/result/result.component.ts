@@ -4,6 +4,9 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Matrix, inverse } from 'ml-matrix';
+import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
+import * as pluginDataLabels from 'chartjs-plugin-datalabels';
+import { Label } from 'ng2-charts';
 
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
@@ -41,6 +44,7 @@ export class ResultComponent implements OnInit {
     scalingVector: any[];
 
     //boolean check for showing containers
+    isShowChart: Boolean = false;
     isShowPrimary: Boolean = true;
     isShowExpanded: Boolean = true;
     isShowFinal: Boolean = true;
@@ -57,6 +61,32 @@ export class ResultComponent implements OnInit {
     hoveredRow = null;
     hoveredCol = null;
     rowCount = 0;
+
+    //Variables for bar chart drawing
+    barChartOptions: ChartOptions = {
+        responsive: true,
+        // We use these empty structures as placeholders for dynamic theming.
+        scales: { xAxes: [{}], yAxes: [{}] },
+        plugins: {
+            datalabels: {
+                anchor: 'end',
+                align: 'end',
+            }
+        },
+        onClick: (event: MouseEvent, active: {}[]) => {
+            console.log(active);
+        },
+        onHover: (event: MouseEvent, active: {}[]) => {
+            if (active.length > 0) {
+                this.onMouseOver(5, null, active[0]['_index']);
+            }
+        }
+    };
+    barChartType: ChartType = 'bar';
+    barChartLegend = true;
+    barChartPlugins = [pluginDataLabels];
+    barChartLabels: Label[] = [];
+    barChartData: ChartDataSets[] = [];
 
     constructor(private dataService: DataService,
                 private router: Router,
@@ -88,8 +118,7 @@ export class ResultComponent implements OnInit {
         }
         this.calculateScalingVector();
         //this.checkMatrixForMultipleSources();
-        let inputContainer = document.getElementById('manualInputContainer');
-        inputContainer.style.display = 'none';
+        this.generateChart();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -97,7 +126,7 @@ export class ResultComponent implements OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':
-                this.demandVector.controls[0].setValue({ value: 1000 });
+                console.log(this.hoveredTable);
                 break;
             case 'End':
                 console.log(this.invertedMatrix);
@@ -498,6 +527,42 @@ export class ResultComponent implements OnInit {
         console.log(scaling1);
     }
 
+    /**
+     * Calculate the data sets for the environmental chart
+     */
+    generateChart() {
+        //Push all X-axis labels (from the allocated processes' name)
+        this.barChartLabels = [];
+        for (let name of this.processName) {
+            this.barChartLabels.push(name.toString());
+        }
+        //Push all data value (from this.resultEnvironmental)
+        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+            var data = [];
+            var label = this.environmentalflow[i];
+            for (let val of this.resultEnvironmental[i]) {
+                data.push(parseFloat(val));
+            }
+            var dataSet : ChartDataSets = { data: data, label: label.toString() }
+            this.barChartData.push(dataSet);
+        }
+    }
+
+    /**
+     * Event for clicking on the chart
+     */
+    chartClicked(event: MouseEvent, active: {}[] ): any {
+        console.log(event, active);
+    }
+
+    /**
+     * Event for hovering over the chart
+     */
+    chartHovered(event: MouseEvent, active: {}[]): any {
+        //console.log(event, active);
+        console.log(this);
+    }
+
     //check the matrix of multiple sources
     checkMatrixForMultipleSources() {
         for (let i = 0; i < this.result.length; i++) {
@@ -589,24 +654,30 @@ export class ResultComponent implements OnInit {
         this.isShowExpanded = this.isShowScaling;
         this.isShowFinal = this.isShowScaling;
         this.isShowScaling = !this.isShowScaling;
+        this.isShowChart = false;
+    }
+
+    toggleShowChart() {
+        this.input = false;
+        this.isShowPrimary = this.isShowChart;
+        this.isShowExpanded = this.isShowChart;
+        this.isShowFinal = this.isShowChart;
+        this.isShowScaling = false;
+        this.isShowChart = !this.isShowChart;
     }
 
     showManualInputMatrix() {
-        let manualInputContainer = document.getElementById('manualInputContainer');
         if (this.input) {
             //switch everything back on
             this.input = false;
             this.isShowFinal = true;
             this.isShowPrimary = true;
             this.isShowExpanded = true;
-            //turn of manual input
-            manualInputContainer.style.display = 'none';
         } else {
             this.input = true;
             this.isShowFinal = false;
             this.isShowPrimary = false;
             this.isShowExpanded = false;
-            manualInputContainer.style.display = 'block';
         }
         //if there is something in the result matrix prompt the user to clear current data or not
     }

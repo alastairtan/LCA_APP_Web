@@ -73,7 +73,7 @@ thead th {
 }
 
 .highlightedDblClick {
-    background-color: #ffa384;
+    background-color: #ffdcd1;
     cursor: pointer;
 }
 
@@ -87,6 +87,10 @@ thead th {
     font-family: sans-serif;
     font-size: 1.75vw;
     font-weight: bold;
+}
+
+.chart {
+    display: block;
 }
 
 .processButtons {

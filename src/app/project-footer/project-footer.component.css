@@ -4,3 +4,9 @@ td {
 .highlighted {
     background-color: #ffc9b7;
 }
+
+.chart {
+    display: block;
+    height: 80vh;
+    width: 80vw;
+}
