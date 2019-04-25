@@ -139,7 +139,6 @@ body {
 }
 
     .buttonsContainer button {
-        background-color: #ffa384;
         border-radius: 4px;
         margin-left: 1vw;
         margin-right: 1vw;
@@ -147,10 +146,20 @@ body {
         height: 4vh;
     }
 
-.buttonsContainer button:hover {
-    background-color: #f98761;
+.normal-button {
+    background-color: #ffa384;
+    cursor: pointer;
 }
 
+    .normal-button:hover {
+        background-color: #f98761;
+    }
+
+.disabled-button {
+    background-color: #aaa;
+    color: white;
+    cursor: not-allowed;
+}
 
 .title {
     margin: 1vh auto;

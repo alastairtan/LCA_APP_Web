@@ -52,7 +52,10 @@
                                 <button *ngIf="isDisplayPrompt" class="processButtons viewButton" (click)="displayPromptNode()">
                                     Display Prompt
                                 </button>
-                                <button class="processButtons doneButton" (click)="navNext()">
+                                <button *ngIf="project.processNodes.length > 0" class="processButtons doneButton" (click)="navNext()">
+                                    Done
+                                </button>
+                                <button *ngIf="project.processNodes.length <= 0" class="processButtons disabledDoneButton">
                                     Done
                                 </button>
                             </mat-toolbar-row>  
