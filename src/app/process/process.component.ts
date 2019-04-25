@@ -1057,7 +1057,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                                 
                                 //this.addProcessToRelation(input.from, fromNode.processName);
                             }
-                            this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex,outputIndex, inputIndex, input.materialName);
+                            if (this.isDisplayPrompt){
+                                this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex, outputIndex, inputIndex, input.materialName);
+                            }
                             console.log(fromNode, next);
                             break;
                         }
@@ -2258,6 +2260,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         } else {
         }
     }
+
 
     /**
      * 

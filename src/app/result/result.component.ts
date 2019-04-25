@@ -328,14 +328,15 @@ export class ResultComponent implements OnInit {
                 vector[index] = 1;
                 this.pushVectorIntoMAtrix(vector);
                 this.processName.push(this.economicflow[index]);
+
+                //default environmental vector
+                let enviVector = [];
+                for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                    enviVector.push((0.1).toFixed(3));
+                }
+                this.pushVectorIntoEnviMatrix(enviVector);
             }
         }
-        //default environmental vector
-        let enviVector = [];
-        for (let i = 0; i < this.resultEnvironmental.length; i++) {
-            enviVector.push((0.1).toFixed(3));
-        }
-        this.pushVectorIntoEnviMatrix(enviVector);
     }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
