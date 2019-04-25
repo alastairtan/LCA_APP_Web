@@ -118,6 +118,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     previousSelect = "";
     materialOptions: string[] = [];
     filteredOptions: string[] = [];
+    emissionOptions: string[] = [];
+    filteredEmissions: string[] = [];
     isHoverOverOptions: false;
 
     isOpen = false;
@@ -536,11 +538,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Add data to the list
                 for (let j = 0; j < rectObj.materialInput.length; j++) {
                     var formGroup = this.fb.group(this.transformForFormBuilder(rectObj.materialInput[j]));
-                    formGroup.controls.materialName.valueChanges.subscribe(
-                        value => {
-                            var filterValue = value.toLowerCase();
-                            this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(filterValue));
-                        });
+                    formGroup.controls.materialName.valueChanges.subscribe(value => { this.getSuggestions(value); });
                     this.materialList.push(formGroup);
                 }
                 break;
@@ -566,11 +564,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Add data to the list
                 for (let j = 0; j < rectObj.outputs.length; j++) {
                     var formGroup = this.fb.group(this.transformForFormBuilder(rectObj.outputs[j]));
-                    formGroup.controls.outputName.valueChanges.subscribe(
-                        value => {
-                            var filterValue = value.toLowerCase();
-                            this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(filterValue));
-                        });
+                    formGroup.controls.outputName.valueChanges.subscribe(value => { this.getSuggestions(value); });
                     this.outputList.push(formGroup);
                 }
                 break;
@@ -587,16 +581,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.clearFormArray(this.emissionList);
                 //Add data to the list
                 for (let j = 0; j < rectObj.directEmissions.length; j++) {
-                    this.emissionList.push(this.fb.group(rectObj.directEmissions[j]));
+                    var formGroup = this.fb.group(rectObj.directEmissions[j]);
+                    formGroup.controls.emissionType.valueChanges.subscribe(value => { this.getSuggestions(value); });
+                    this.emissionList.push(formGroup);
                 }
-                break;
-            case this.inputMenuBar[6]:
-                let inputDiv = document.getElementById('name');
-                let HTMLInput = <HTMLInputElement>inputDiv;
-                this.currentlySelectedNodeName = rectObj.processName;
                 break;
         }
         this.cd.detectChanges();                    //Detect change and update the DOM
+        this.updateMaterialOptions();
+        this.getSuggestions("");
     }
 
     /**
@@ -706,36 +699,55 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
 
     /**
-     * Update the array of material name for autocomplete
+     * Update the array of material name and emissions for autocomplete
      */
     updateMaterialOptions() {
         this.materialOptions = [];
         for (let proc of this.project.processNodes) {
             for (let input of proc.materialInput) {
                 var material = input.materialName.toLowerCase();
-                if (!this.materialOptions.includes(material)) {
+                if (!this.materialOptions.includes(material) && material != "") {
                     this.materialOptions.push(material);
                 }
             }
             for (let output of proc.outputs) {
                 var material = output.outputName.toLowerCase();
-                if (!this.materialOptions.includes(material)) {
+                if (!this.materialOptions.includes(material) && material != "") {
                     this.materialOptions.push(material);
+                }
+            }
+        }
+        this.emissionOptions = [];
+        for (let proc of this.project.processNodes) {
+            for (let emission of proc.directEmissions) {
+                var type = emission.emissionType.toLowerCase();
+                if (!this.emissionOptions.includes(type) && type != "") {
+                    this.emissionOptions.push(type);
                 }
             }
         }
         //console.log('New material options:', this.materialOptions);
     }
 
+    /**
+     * Function called when a material name is updated in MaterialInput or in Output
+     * */
     materialNameChange() {
         if (!this.isHoverOverOptions) {
             this.saveAndClearDetails();
             this.updateRelations();
             this.getDetails();
-            this.updateMaterialOptions()
-        } else {
-            console.log('Not saved yet :(');
         }
+        this.updateMaterialOptions()
+    }
+
+    /**
+     * Get suggestions based on the string given
+     * @param str the string given
+     */
+    getSuggestions(str) {
+        this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(str.toLowerCase()));
+        this.filteredEmissions = this.emissionOptions.filter(option => option.toLowerCase().includes(str.toLowerCase()));
     }
 
     creatingPromptRect(rectObj: Rect, index: Number) {
@@ -1495,7 +1507,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.project.processNodes[0]);
+                console.log(this.filteredOptions);
                 break;
             case 'End':
                 console.log(this.outputList.value);
@@ -1538,6 +1550,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.mouseY = event.clientY;
         if (this.isAbandonedNodesSelected) {
         }
+    }
+
+    //Hide suggestions when scroll
+    @HostListener('mousewheel') scrolling() {
+        this.filteredOptions = [];
+        this.filteredEmissions = [];
     }
 
     /**

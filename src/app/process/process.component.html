@@ -159,8 +159,8 @@
                                                 <div class="odd-color">
                                                     <strong>Material Name</strong>
                                                     <mat-form-field class="mat-autocomplete">
-                                                        <input autocomplete="off" class="material-input" type="text" formControlName="materialName" aria-label="Name"
-                                                               matInput [matAutocomplete]="auto" (change)="materialNameChange()" />
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="materialName"
+                                                               matInput [matAutocomplete]="auto" (click)="getSuggestions($event.target.value)" (change)="materialNameChange()" />
                                                         <mat-autocomplete #auto="matAutocomplete">
                                                             <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option" 
                                                                         (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">
@@ -552,12 +552,11 @@
                                                 <div class="odd-color">
                                                     <strong>Material Name</strong>
                                                     <mat-form-field class="mat-autocomplete">
-                                                        <input autocomplete="off" class="material-input" type="text" formControlName="outputName" aria-label="Name"
-                                                               matInput [matAutocomplete]="auto" (change)="materialNameChange()" />
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="outputName"
+                                                               matInput [matAutocomplete]="auto" (click)="getSuggestions($event.target.value)" (change)="materialNameChange()" />
                                                         <mat-autocomplete #auto="matAutocomplete">
                                                             <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option"
                                                                         (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">
-                                                                >
                                                                 {{option}}
                                                             </mat-option>
                                                         </mat-autocomplete>
@@ -837,7 +836,16 @@
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
                                                     <strong>Emission Type</strong>
-                                                    <input autocomplete="off" type="text" formControlName="emissionType" class="material-input" (change)="saveAndClearDetails()" />
+                                                    <mat-form-field class="mat-autocomplete">
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="emissionType"
+                                                               matInput [matAutocomplete]="auto" (click)="getSuggestions($event.target.value)" (change)="materialNameChange()" />
+                                                        <mat-autocomplete #auto="matAutocomplete">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredEmissions" [value]="option"
+                                                                        (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">
+                                                                {{option}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
                                                 </div>
                                                 <div class="container even-color">
                                                     <div class="row">
