@@ -353,14 +353,17 @@ export class ResultComponent implements OnInit {
                 vector[index] = 1;
                 this.pushVectorIntoMAtrix(vector);
                 this.processName.push(this.economicflow[index]);
+                //default environmental vector
+                let enviVector = [];
+                for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                    enviVector.push((0.1).toFixed(3));
+                }
+                this.pushVectorIntoEnviMatrix(enviVector);
+                var clone = this.debugClone(this.resultEnvironmental);
+                console.log('After expansion:', clone);
             }
         }
-        //default environmental vector
-        let enviVector = [];
-        for (let i = 0; i < this.resultEnvironmental.length; i++) {
-            enviVector.push((0.1).toFixed(3));
-        }
-        this.pushVectorIntoEnviMatrix(enviVector);
+        
     }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
@@ -491,7 +494,8 @@ export class ResultComponent implements OnInit {
             scalingVec = this.invertedMatrix.mmul(demandVec);
         }
         //Calculate the cumulative environmental matrix
-        this.cumulativeEnvironmental = new Matrix(this.resultEnvironmental).mmul(scalingVec).to1DArray();
+        var environmentalMatrix = new Matrix(this.resultEnvironmental);
+        this.cumulativeEnvironmental = environmentalMatrix.mmul(scalingVec).to1DArray();
         //Transform scalingVec (Matrix) to scalingVector (Array)
         this.scalingVector = scalingVec.to1DArray();
         //Set the values to 3dp, if they are not integer
@@ -688,5 +692,19 @@ export class ResultComponent implements OnInit {
 
     debugLog(x) {
         console.log(x);
+    }
+
+    debugClone(obj) {
+        if (obj instanceof Array) {
+            var result = [];
+            for (let item of obj) {
+                result.push(this.debugClone(item));
+            }
+            return result;
+        } else if (obj instanceof Object) {
+            return JSON.parse(JSON.stringify(obj));
+        } else {
+            return obj;
+        }
     }
 }
