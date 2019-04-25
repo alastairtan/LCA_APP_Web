@@ -10,7 +10,7 @@
         </button>
     </div>
     <mat-toolbar>
-        <mat-toolbar-row>
+        <mat-toolbar-row (click)="setTableWidth()">
 
             <button class="processButtons" (click)="navPrev()">
                 Previous
@@ -57,7 +57,7 @@
         </mat-toolbar-row>
     </mat-toolbar>
 
-    <div class="container">
+    <div class="container main-container">
         <div class="row" *ngIf="!isShowChart">
             <div class="col-md-12">
                 <p class="title">
@@ -72,7 +72,7 @@
                         Primary Matrix
                     </p>
 
-                    <table  (mouseleave)="onMouseOver(0, null, null)">
+                    <table id="primaryTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
                                 <th class="rightBorder">Entity</th>
@@ -100,7 +100,7 @@
                         Expanded Matrix
                     </p>
 
-                    <table (mouseleave)="onMouseOver(0, null, null)">
+                    <table id="expandedTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
                                 <th class="rightBorder">Entity</th>
@@ -129,7 +129,7 @@
                         Final Matrix
                     </p>
                     <form [formGroup]="demandVectorForm" id="demandVectorForm2">
-                        <table formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
+                        <table id="finalTable" formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
                             <thead>
                                 <tr>
                                     <th class="rightBorder">Entity</th>
@@ -203,7 +203,7 @@
                     <p class="subtitle">
                         Final Matrix
                     </p>
-                    <table (mouseleave)="onMouseOver(0, null, null)">
+                    <table id="finalTable2" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
                                 <th class="rightBorder">Entity</th>
@@ -266,7 +266,7 @@
                     <p class="matrix-title">
                         Environmental Matrix
                     </p>
-                    <table (mouseleave)="onMouseOver(0, null, null)">
+                    <table id="environmentTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
                                 <th class="rightBorder">Entity</th>

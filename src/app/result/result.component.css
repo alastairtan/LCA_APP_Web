@@ -1,3 +1,12 @@
+:root {
+    --primary-width: 70%;
+    --expanded-width: 85%;
+}
+
+.main-container {
+    max-width: 80%;
+}
+
 .processButtons {
     display: flex;
     flex-direction: column;
@@ -15,10 +24,22 @@
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
-    width: 100%;
     overflow: hidden;
     cursor: default;
     border: 2px solid #666;
+    table-layout: fixed;
+}
+
+#primaryTable {
+    width: var(--primary-width);
+}
+
+#expandedTable {
+    width: var(--expanded-width);
+}
+
+#finalTable, #finalTable2, #environmentTable {
+    width: 100%;
 }
 
 td, th {

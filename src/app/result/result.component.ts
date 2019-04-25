@@ -113,12 +113,18 @@ export class ResultComponent implements OnInit {
         this.expanded = this.clone(this.result, false);
         this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
+        //Hide unnecessary matrices
+        if (this.expandedProcessName.length == this.primaryProcessName.length || this.expandedProcessName.length == this.processName.length)
+            this.isShowExpanded = false;
+        if (this.processName.length == this.primaryProcessName.length)
+            this.isShowFinal = false;
         if (this.result.length == this.result[0].length) {
             this.invertedMatrix = inverse(new Matrix(this.result));
         }
         this.calculateScalingVector();
         //this.checkMatrixForMultipleSources();
         this.generateChart();
+        this.setTableWidth();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -589,6 +595,22 @@ export class ResultComponent implements OnInit {
             var dataSet : ChartDataSets = { data: data, label: label.toString() }
             this.barChartData.push(dataSet);
         }
+    }
+
+    /**
+     * Set the width for all tables so that the columns align
+     * */
+    setTableWidth() {
+        //Calculate width for each table
+        let primaryNumCol = this.primaryProcessName.length + 1;
+        let expandedNumCol = this.expandedProcessName.length + 1;
+        let finalNumCol = this.processName.length + 1;
+        let primaryPercent = (primaryNumCol / finalNumCol * 100).toFixed(2);
+        let expandedPercent = (expandedNumCol / finalNumCol * 100).toFixed(2);
+        //Set the CSS variable for the widths
+        let root = document.documentElement;
+        root.style.setProperty('--primary-width', primaryPercent.toString() + "%");
+        root.style.setProperty('--expanded-width', expandedPercent.toString() + "%");
     }
 
     /**
