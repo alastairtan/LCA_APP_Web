@@ -174,9 +174,10 @@
                                                     <strong>Material Name</strong>
                                                     <mat-form-field class="mat-autocomplete">
                                                         <input autocomplete="off" class="material-input" type="text" formControlName="materialName" aria-label="Name"
-                                                               matInput [matAutocomplete]="auto" (change)="saveAndClearDetails(); updateRelations(); getDetails(); updateMaterialOptions()" />
+                                                               matInput [matAutocomplete]="auto" (change)="materialNameChange()" />
                                                         <mat-autocomplete #auto="matAutocomplete">
-                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option" 
+                                                                        (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">
                                                                 {{option}}
                                                             </mat-option>
                                                         </mat-autocomplete>
@@ -566,9 +567,10 @@
                                                     <strong>Material Name</strong>
                                                     <mat-form-field class="mat-autocomplete">
                                                         <input autocomplete="off" class="material-input" type="text" formControlName="outputName" aria-label="Name"
-                                                               matInput [matAutocomplete]="auto" (change)="saveAndClearDetails(); updateRelations(); getDetails(); updateMaterialOptions()" />
+                                                               matInput [matAutocomplete]="auto" (change)="materialNameChange()" />
                                                         <mat-autocomplete #auto="matAutocomplete">
-                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option"
+                                                                        (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">>
                                                                 {{option}}
                                                             </mat-option>
                                                         </mat-autocomplete>

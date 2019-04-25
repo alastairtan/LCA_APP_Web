@@ -105,7 +105,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     private prevSVG: any[] = [];
 
-    private isDisplayPrompt: Boolean = true;
+    private isDisplayPrompt: Boolean = false;
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
@@ -118,6 +118,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     previousSelect = "";
     materialOptions: string[] = [];
     filteredOptions: string[] = [];
+    isHoverOverOptions: false;
 
     isOpen = false;
 
@@ -741,6 +742,17 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
         }
         //console.log('New material options:', this.materialOptions);
+    }
+
+    materialNameChange() {
+        if (!this.isHoverOverOptions) {
+            this.saveAndClearDetails();
+            this.updateRelations();
+            this.getDetails();
+            this.updateMaterialOptions()
+        } else {
+            console.log('Not saved yet :(');
+        }
     }
 
     creatingPromptRect(rectObj: Rect, index: Number) {
@@ -1513,7 +1525,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.outputList.value[0]['to']);
+                this.project.processNodes[2].isSource = true;
+
                 break;
             case 'End':
                 console.log(this.outputList.value);
