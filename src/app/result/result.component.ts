@@ -337,12 +337,18 @@ export class ResultComponent implements OnInit {
 
     //resource expansion 
     resourceExpansion() {
+        let defaultEmissionValue = 0.1;
         for (let i = 0; i < this.result.length; i++) {
             let hasOutput: Boolean = false;
+            let hasInput: Boolean = false;
+            let outputProcessIDs = [];
             let index = i;
             for (let j = 0; j < this.result[i].length; j++) {
                 if (this.result[i][j] > 0) {
                     hasOutput = true;
+                    outputProcessIDs.push(j);
+                } else if (this.result[i][j] < 0) {
+                    hasInput = true;
                 }
             }
             if (!hasOutput) {
@@ -354,11 +360,33 @@ export class ResultComponent implements OnInit {
                 //default environmental vector
                 let enviVector = [];
                 for (let i = 0; i < this.resultEnvironmental.length; i++) {
-                    enviVector.push((0.1).toFixed(3));
+                    enviVector.push((defaultEmissionValue).toFixed(3));
                 }
                 this.pushVectorIntoEnviMatrix(enviVector);
-                var clone = this.debugClone(this.resultEnvironmental);
-                console.log('After expansion:', clone);
+            } else if (!hasInput) {
+                //If entity is an output to no process (has no input)
+                for (let id of outputProcessIDs) {
+                    let process = this.project.processNodes[id];
+                    for (let output of process.outputs) {
+                        if (output.outputName == this.economicflow[index] && !output.isValuable) {
+                            //Only expand the matrix if the output is NOT valuable
+                            let vector = new Array<any>(this.economicflow.length);
+                            vector.fill(0);
+                            vector[index] = -1;
+                            this.pushVectorIntoMAtrix(vector);
+                            this.processName.push(this.economicflow[index]);
+                            //default environmental vector
+                            let enviVector = [];
+                            for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                                enviVector.push((defaultEmissionValue).toFixed(3));
+                            }
+                            this.pushVectorIntoEnviMatrix(enviVector);
+                            break;
+                        }
+                    }
+                }
+                
+                /* */
             }
         }
         
@@ -399,14 +427,27 @@ export class ResultComponent implements OnInit {
     allocationOfOutputs() {
         let colLength = this.result[0].length;
         for (let j = 0; j < colLength; j++) {
+            
             let outputIndexArr: number[] = [];
             let totalMassSum: number = 0;
             let inputIndexArr: number[] = [];
             let vector: any[] = [];
             for (let i = 0; i < this.result.length; i++) {
                 if (this.result[i][j] > 0) {
-                    outputIndexArr.push(i);
-                    totalMassSum += this.result[i][j];
+                    //Check if this output is valuable or not
+                    if (j < this.project.processNodes.length) {
+                        let process = this.project.processNodes[j];
+                        for (let output of process.outputs) {
+                            if (output.outputName == this.economicflow[i] && output.isValuable) {
+                                //Only allocate the output if it's valuable
+                                outputIndexArr.push(i);
+                                totalMassSum += this.result[i][j];
+                            }
+                        }
+                    } else {
+                        outputIndexArr.push(i);
+                        totalMassSum += this.result[i][j];
+                    }
                 }
                 if (this.result[i][j] < 0) {
                     inputIndexArr.push(i);

@@ -1495,11 +1495,10 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-
+                console.log(this.project.processNodes[0]);
                 break;
             case 'End':
                 console.log(this.outputList.value);
-                console.log(this.materialList.value);
                 break;
             case 'ArrowLeft':
                 if (document.activeElement.nodeName != 'BODY') {
