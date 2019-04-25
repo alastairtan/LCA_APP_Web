@@ -12,7 +12,7 @@ export class Rect {
     id;
     nextId: string[] = [];
     connectors: Connector[] = [];
-    isSource: boolean;
+    //isSource: boolean;
     categories;
     processName: string;
     materialInput: MaterialInput[] = [];
@@ -23,12 +23,12 @@ export class Rect {
     directEmissions: DirectEmission[] = [];
     isTarget: Boolean;
 
-    constructor(x, y, id, nextId, connectors, isSource, categories, processName, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
+    constructor(x, y, id, nextId, connectors, categories, processName, materialInput, outputs, byproducts, energyInputs, transportations, directEmissions ) {
         this.x = x;
         this.y = y
         this.id = id;
         this.nextId = nextId;
-        this.isSource = isSource;
+        //this.isSource = isSource;
         this.categories = categories;
         this.connectors = connectors;
         this.processName = processName;

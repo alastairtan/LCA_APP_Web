@@ -141,7 +141,6 @@ export class ResultComponent implements OnInit {
             let processNode = this.project.processNodes[i];
             let processUnit: Number[] = [];
             //if the process Node is not a source, we just push a row in the matrix
-            if (!processNode.isSource) {
                 this.processName.push(processNode.processName);
                 let materialInputArr = processNode.materialInput;
                 let materialOutputArr = processNode.outputs;
@@ -168,24 +167,25 @@ export class ResultComponent implements OnInit {
 
                     this.insertUnit(index, +output.quantity, processUnit);
                 }
-                this.process.push(processUnit);
-            } else {
-                let materialOutputArr = processNode.outputs;
-                for (let k = 0; k < materialOutputArr.length; k++) {
-                    processUnit = [];
-                    let output = materialOutputArr[k];
-                    let outputName = output.outputName;
-                    let index = this.economicVarExist(outputName)
-                    this.processName.push(outputName)
-                    if (index == null) {
-                        this.economicflow.push(outputName);
-                        index = this.economicflow.length - 1;
-                    } 
+            this.process.push(processUnit);
+            //This chunk of code is run when the process is a sourceProcess (deprecated)
+            /*
+            let materialOutputArr = processNode.outputs;
+            for (let k = 0; k < materialOutputArr.length; k++) {
+                processUnit = [];
+                let output = materialOutputArr[k];
+                let outputName = output.outputName;
+                let index = this.economicVarExist(outputName)
+                this.processName.push(outputName)
+                if (index == null) {
+                    this.economicflow.push(outputName);
+                    index = this.economicflow.length - 1;
+                } 
 
-                    this.insertUnit(index, +output.quantity, processUnit);
-                    this.process.push(processUnit);
-                }
+                this.insertUnit(index, +output.quantity, processUnit);
+                this.process.push(processUnit);
             }
+            */
         }
     }
 
@@ -330,8 +330,6 @@ export class ResultComponent implements OnInit {
                         this.processName.push(name);
                     }
                     
-                } else {
-                    this.project.processNodes[i].isSource = true;
                 }
             }
         }

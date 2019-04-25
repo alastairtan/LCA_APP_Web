@@ -94,25 +94,15 @@
                     
                     <div class="tab-content">
                         <div class="buttonContainer">
-                            <div class="containerHeader" *ngIf="!isCurrentProcessSource()">
+                            <div class="containerHeader">
                                 <div class="menuHeader">
                                     Input
                                 </div>
                             </div>
-                            <div class="containerHeader" *ngIf="!isCurrentProcessSource()" role="tablist">
+                            <div class="containerHeader" role="tablist">
                                 <div class="menuTabs" *ngFor="let tab of inputMenuBar; let first = first;" [ngClass]="{firstItem: first}" role="presentation" [class.active]="selectedwallet===wallet">
                                     <button *ngIf="tab == selectedTab" class="menuButtons selectedMenuButton" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
                                     <button *ngIf="tab != selectedTab" class="menuButtons" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
-                                </div>
-                            </div>
-                            <div class="containerHeader" *ngIf="isCurrentProcessSource()">
-                                <div class="menuHeader disabledMenuHeader">
-                                    Input
-                                </div>
-                            </div>
-                            <div class="containerHeader" *ngIf="isCurrentProcessSource()" role="tablist">
-                                <div class="menuTabs" *ngFor="let tab of inputMenuBar">
-                                    <button class="menuButtons disabledMenuButtons" >{{tab}}</button>
                                 </div>
                             </div>
                             <div class="containerHeader">
@@ -127,13 +117,6 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="row source-container">
-                                    <div class="col-md-8">Is source process?</div>
-                                    <div class="col-md-2">
-                                        <input id="sourceCheck" type="checkbox" value="isSource" (change)="setSourceProcess()" />
-                                    </div>
-                                    <div class="col-md-2"></div>
-                                </div>
                                 <div class="add-container">
                                     <div class="row">
                                         <div class="col-md-5 update-relations-container">
