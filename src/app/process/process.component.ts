@@ -8,8 +8,6 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { ActivatedRoute } from "@angular/router";
 
 import { MaterialInput } from './MaterialInput';
@@ -109,25 +107,26 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
-    processIdMap = {};
-    inputMenuBar = ['Material', 'Energy', 'Transport'];
-    outputMenuBar = [' Material ', 'Byproduct', 'Emission'];
-    selectedTab = this.inputMenuBar[0];
+    
+    processIdMap = {};                                                  /*Map a process' id to its index in the file*/
+    inputMenuBar = ['Material', 'Energy', 'Transport'];                 //Names of the input tabs
+    outputMenuBar = [' Material ', 'Byproduct', 'Emission'];            //Names of the output tabs
+    selectedTab = this.inputMenuBar[0];                                 //Name of the currently selected tab
 
-    navFromResult = {};
-    previousSelect = "";
-    materialOptions: string[] = [];
-    filteredOptions: string[] = [];
-    emissionOptions: string[] = [];
-    filteredEmissions: string[] = [];
-    isHoverOverOptions: false;
+    navFromResult = {};                                                 //Object storing the process and the tab double clicked from result component
+    previousSelect = "";                                                //Save the value of the previous selected option, in order to update connecting arrows
+    materialOptions: string[] = [];                                     //Array of all material name to suggest
+    filteredOptions: string[] = [];                                     //Filtered material name suggestions to display
+    emissionOptions: string[] = [];                                     //Array of all emission type to suggest
+    filteredEmissions: string[] = [];                                   //Filtered emission type suggestions to display
+    isHoverOverOptions: false;                                          //Boolean to check if a suggested option was chosen by clicking or keyboard Enter
 
     isOpen = false;
 
     //currently selected Node
 
-    project: Project = this.dataService.getProject();            //Object to contain all data of the current project
-    lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
+    project: Project = this.dataService.getProject();                   //Object to contain all data of the current project
+    lastSaved = '';                                                     //Placeholder to notify users of the time of the last saved project
 
     //================================================================
     //                    STARTING FUNCTIONS
