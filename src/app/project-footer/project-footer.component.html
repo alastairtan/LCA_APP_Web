@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html>
 <body>
-    <input type="text" [(ngModel)]="processName" />
-    <br />
-    {{processName}}
-    <table>
-        <tr *ngFor="let row of array; let i = index">
-            <td *ngFor="let cell of row; let j = index" on-mouseover="mouseOverCell(i, j)" [ngClass]="{highlighted: (hoveredCol == j || hoveredRow == i)}">{{cell}}</td>
-        </tr>
-    </table>
+    <div class="chart">
+        <div>
+            <canvas baseChart
+                    [datasets]="barChartData"
+                    [labels]="barChartLabels"
+                    [options]="barChartOptions"
+                    [plugins]="barChartPlugins"
+                    [legend]="barChartLegend"
+                    [chartType]="barChartType"></canvas>
+        </div>
+        <button mat-button mat-raised-button color="primary" (click)="randomize()">Update</button>
+    </div>
 </body>
 </html>

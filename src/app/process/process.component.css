@@ -124,6 +124,24 @@
     color: black;
     font-family: 'Raleway', sans-serif;
     text-align: center;
+    background: white;
+}
+
+input[disabled] {
+    background: #ddd;
+    cursor: not-allowed;
+}
+
+.mat-autocomplete {
+    width: 100%;
+    border: none;
+    margin: -14px auto;
+}
+
+.mat-option {
+    font-size: 0.8vw;
+    height: 1.5em;
+    text-align: center;
 }
 
 .vcenter {
@@ -361,6 +379,16 @@ input[type=checkbox] {
         background: #ffa384;
     }
 
+.disabledDoneButton {
+    border: 2px solid #444;
+    background-color: #888;
+    color: white;
+    cursor: not-allowed;
+}
+
+    .disabledDoneButton:hover {
+        background-color: #888;
+    }
 
 #processNameContainer {
     display: none;
