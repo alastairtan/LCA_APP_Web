@@ -144,7 +144,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     
     ngOnInit() {
         this.project = this.dataService.getProject();
-        console.log(this.project);
         this.materialForm   = this.fb.group({ inputs: this.fb.array([]) });
         this.energyForm     = this.fb.group({ inputs: this.fb.array([]) });
         this.transportForm  = this.fb.group({ inputs: this.fb.array([]) });
@@ -1606,6 +1605,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 }
                 this.navNext();
                 break;
+            case 'Enter':
+                console.log(this.project);
             default:
                 //Other keyboard events for editing
                 if (event.ctrlKey && event.key == 'z') {
@@ -2080,7 +2081,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param connectorToBeRemoved: An array with [headIndex, indexOfConnector]
      * */
     removeConnector(connectorToBeRemoved) {
-        console.log(connectorToBeRemoved);
         var thisNode = this.project.processNodes[connectorToBeRemoved[0]];
         var thatNodeId = thisNode.getNext()[connectorToBeRemoved[1]];
         var thatNode = this.project.processNodes[this.processIdMap[thatNodeId]['index']];
@@ -2141,10 +2141,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         if (this.project.processNodes[i].getId() == rect.node.id) {
                             //remove processlinks
                             for (let j = 0; j < this.project.processNodes[i].getNext().length; j++) {
-                                console.log(this.project.processNodes[i].getConnectors()[j].id);
                                 //logic to be resolved
                                 if (SVG.get(this.project.processNodes[i].getConnectors()[j].id) != null) {
-                                    console.log(this.project.processNodes[i].getConnectors()[j].id);
                                     SVG.get(this.project.processNodes[i].getConnectors()[j].id).remove();
                                 }
                             }
@@ -2198,7 +2196,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 removedIndex.push(i);
             }
         }
-        console.log(this.idPrompt);
         for (let i = 0; i < removedIndex.length; i++) {
             this.idPrompt.splice(removedIndex[i], 1);
             this.svgPrompt.splice(i, 1);
@@ -2231,22 +2228,18 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     //removing prompt rect if deleted from the details section
     //for removing of promptRect by deleting a detail in the detail section
     removePromptRect(index: number, rectObj: Rect, option: string) {
-        console.log(index);
         if (this.isDisplayPrompt) {
             let indexToRemove = null;
             let j = index + 1;
-            console.log(this.idPrompt);
             for (let i = 0; i < this.idPrompt.length; i++) {
                 switch (option) {
                     case 'input':
 
                         if (this.idPrompt[i][0].id == rectObj.id + index + 'input') {
                             indexToRemove = i;
-                            console.log(indexToRemove, index);
                         } else if (indexToRemove != null && this.idPrompt[i][0].id == rectObj.id + j + 'input') {
                             let newIndex = j - 1;
                             SVG.get(rectObj.id + j + 'input').node.id = rectObj.id + newIndex + 'input';
-                            console.log(SVG.get(rectObj.id + newIndex + 'input'));
                             this.idPrompt[i][0].id = rectObj.id + newIndex + 'input';
                             j++;
                         }
@@ -2285,7 +2278,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
 
             this.idPrompt.splice(indexToRemove, 1);
-            console.log(this.svgText)
             this.svgText.splice(indexToRemove, 1);
             this.svgPromptConn.splice(indexToRemove, 1);
 
@@ -2307,17 +2299,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      */
     checkUnnecesaryPrompt(indexOut: Number, indexIn: Number, materialOutIndex, materialInIndex, name: string) {
         let removedPrompt = [];
-        //console.log(indexOut, indexIn);
         for (let i = 0; i < this.idPrompt.length; i++) {
             if (this.idPrompt[i][1] == indexOut || this.idPrompt[i][1] == indexIn) {
-
-                //console.log(name);
+                
                 let output = this.idPrompt[i][0].outputs[materialOutIndex];
                 let input = this.idPrompt[i][0].materialInput[materialInIndex];
                 if (output != undefined && input != undefined) {
                     if (output.outputName == name || input.materialName == name) {
-                        console.log(this.idPrompt[i][1], name);
-                        console.log(name);
                         SVG.get(this.svgPrompt[i].node.id).remove();
                         SVG.get(this.svgPromptConn[i].node.id).remove();
                         SVG.get(this.svgText[i].node.id).remove();
@@ -2326,8 +2314,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     }
                 } else if (input != undefined) {
                     if (input.materialName == name) {
-                        console.log(this.idPrompt[i][1], name);
-                        console.log(name);
                         SVG.get(this.svgPrompt[i].node.id).remove();
                         SVG.get(this.svgPromptConn[i].node.id).remove();
                         SVG.get(this.svgText[i].node.id).remove();
@@ -2336,8 +2322,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     }
                 } else if (output != undefined) {
                     if (output.outputName == name) {
-                        console.log(this.idPrompt[i][1], name);
-                        console.log(name);
                         SVG.get(this.svgPrompt[i].node.id).remove();
                         SVG.get(this.svgPromptConn[i].node.id).remove();
                         SVG.get(this.svgText[i].node.id).remove();
@@ -2345,8 +2329,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         break;
                     }
                 } else {
-                    //console.log("bug occured");
-                    //console.log(this.idPrompt);
                 }
             }
         }
