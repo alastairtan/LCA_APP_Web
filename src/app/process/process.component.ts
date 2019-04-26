@@ -1199,6 +1199,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         var tailName, tailId, tailIndex = null;
         let previousNodeName, previousNodeId, previousNodeIndex = null;
         //Decide head/tail based on currently selected tab
+        console.log(newValue);
         switch (tab) {
             case this.inputMenuBar[0]:
                 headName = newValue;
@@ -1206,12 +1207,14 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 break;
             case this.outputMenuBar[0]:
                 previousNodeName = this.previousSelect;
+                console.log(newValue);
                 tailName = newValue;
                 break;
             default:
                 return;
         }
-
+        console.log(previousNodeName, this.previousSelect)
+        console.log(tailName);
         //Find the id of the head and the tail
         for (var i = 0; i < this.project.processNodes.length; i++) {
             var proc = this.project.processNodes[i];
@@ -1221,6 +1224,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             } else if (proc.processName == tailName) {
                 tailId = proc.id;
                 tailIndex = i;
+                console.log("i am hereeee");
             } else if (proc.processName == previousNodeName) {
                 previousNodeId = proc.id;
                 previousNodeIndex = i;
@@ -1234,16 +1238,19 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         console.log(previousNodeName);
         if (previousNodeName == "") {
             //means adding a connection
-            let headSVG = this.svgNode[headIndex];
-            let conn2 = headSVG.connectable({
-                type: 'angled',
-                targetAttach: 'perifery',
-                sourceAttach: 'perifery',
-                marker: 'default',
-            }, this.currentlySelectedNode);
+
+            if (tab == this.inputMenuBar[0]) {
+                tailIndex = this.currentlySelectedNode.data('key');
+                console.log([tailIndex, headIndex])
+                this.createConnection(headIndex, tailIndex);
+            } else {
+                headIndex = this.currentlySelectedNode.data('key');
+                console.log([tailIndex, headIndex])
+                this.createConnection(headIndex, tailIndex);
+            }
         } else {
             if (tailName == null) {
-                //means uer changed the inputs of the currently selectedNode
+                //means user changed the inputs of the currently selectedNode
                 headObj = this.project.processNodes[headIndex];
                 tailId = this.project.processNodes[this.currentlySelectedNode.data('key')].id;
                 for (let i = 0; i < headObj.nextId.length; i++) {
@@ -1251,16 +1258,26 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         //form the connection
                         connIndex = i;
                         let headSVG = this.svgNode[headIndex];
+                        let tailIndex = this.currentlySelectedNode.data('key');
+                        let prevHeadObj = this.project.processNodes[previousNodeIndex];
+                        let indexOfPrevConn;
 
-                        /////
-                        // MODULARISE CREATION OF CONNECTORS
-                        /////
-                        let conn2 = headSVG.connectable({
-                            type: 'angled',
-                            targetAttach: 'perifery',
-                            sourceAttach: 'perifery',
-                            marker: 'default',
-                        }, this.currentlySelectedNode);
+                        
+
+                        console.log(prevHeadObj);
+                        //creation of connection
+                        this.createConnection(headIndex, tailIndex);
+                        //deletion of connection 
+
+                        for (let i = 0; i < prevHeadObj.nextId.length; i++) {
+                            if (prevHeadObj.nextId[i] == tailId) {
+                                console.log('i am here');
+                                indexOfPrevConn = i;
+                                break;
+                            }
+                        }
+                        console.log(indexOfPrevConn);
+                        this.removeConnector([previousNodeIndex, indexOfPrevConn]);
                         break;
                     }
                 }
@@ -1290,6 +1307,26 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     }
 
+    createConnection(indexHead, indexTail) {
+        let headSVG = this.svgNode[indexHead];
+        let tailSVG = this.svgNode[indexTail];
+        let headObj = this.project.processNodes[indexHead];
+        let tailObj = this.project.processNodes[indexTail];
+
+        let conn2 = headSVG.connectable({
+            type: 'angled',
+            targetAttach: 'perifery',
+            sourceAttach: 'perifery',
+            marker: 'default',
+        }, tailSVG);
+
+        conn2.setConnectorColor("#ffa384");
+        conn2.connector.style('stroke-width', "3px");
+
+        headObj.nextId.push(tailObj.id);
+        headObj.connectors.push(new Connector(conn2.connector.node.id, indexHead, headObj.connectors.length));
+        
+    }
 
 
     /**
@@ -2082,7 +2119,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * */
     removeConnector(connectorToBeRemoved) {
         var thisNode = this.project.processNodes[connectorToBeRemoved[0]];
+        console.log(thisNode);
         var thatNodeId = thisNode.getNext()[connectorToBeRemoved[1]];
+        console.log(thatNodeId);
         var thatNode = this.project.processNodes[this.processIdMap[thatNodeId]['index']];
         thisNode.getConnectors().splice(connectorToBeRemoved[1], 1);
         thisNode.getNext().splice(connectorToBeRemoved[1], 1);
