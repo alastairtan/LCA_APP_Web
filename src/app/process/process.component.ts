@@ -1714,6 +1714,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         text.move(rect.x() + 25, rect.y() + 12.5);
 
         rect.on('dragmove', (event) => {
+            text.remove();
             let rectObj = this.project.processNodes[rect.data('key')];
             if (rect.x() > this.svgabandoned.nativeElement.offsetWidth && this.transferedRect == null) {
                 let r = new Rect(this.mouseX - this.svgOffsetLeft - this.svgabandoned.nativeElement.offsetWidth, this.mouseY - this.svgOffsetTop,
