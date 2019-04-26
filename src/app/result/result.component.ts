@@ -4,6 +4,9 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Matrix, inverse } from 'ml-matrix';
+import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
+import * as pluginDataLabels from 'chartjs-plugin-datalabels';
+import { Label } from 'ng2-charts';
 
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
@@ -43,6 +46,7 @@ export class ResultComponent implements OnInit {
     scalingVector: any[];
 
     //boolean check for showing containers
+    isShowChart: Boolean = false;
     isShowPrimary: Boolean = true;
     isShowExpanded: Boolean = true;
     isShowFinal: Boolean = true;
@@ -63,6 +67,32 @@ export class ResultComponent implements OnInit {
     hoveredRow = null;
     hoveredCol = null;
     rowCount = 0;
+
+    //Variables for bar chart drawing
+    barChartOptions: ChartOptions = {
+        responsive: true,
+        // We use these empty structures as placeholders for dynamic theming.
+        scales: { xAxes: [{}], yAxes: [{}] },
+        plugins: {
+            datalabels: {
+                anchor: 'end',
+                align: 'end',
+            }
+        },
+        onClick: (event: MouseEvent, active: {}[]) => {
+            console.log(active);
+        },
+        onHover: (event: MouseEvent, active: {}[]) => {
+            if (active.length > 0) {
+                this.onMouseOver(5, null, active[0]['_index']);
+            }
+        }
+    };
+    barChartType: ChartType = 'bar';
+    barChartLegend = true;
+    barChartPlugins = [pluginDataLabels];
+    barChartLabels: Label[] = [];
+    barChartData: ChartDataSets[] = [];
 
     constructor(private dataService: DataService,
                 private router: Router,
@@ -89,11 +119,18 @@ export class ResultComponent implements OnInit {
         this.expanded = this.clone(this.result, false);
         this.expandedProcessName = this.clone(this.processName, true);
         this.allocationOfOutputs();
-        this.invertedMatrix = inverse(new Matrix(this.result));
+        //Hide unnecessary matrices
+        if (this.expandedProcessName.length == this.primaryProcessName.length || this.expandedProcessName.length == this.processName.length)
+            this.isShowExpanded = false;
+        if (this.processName.length == this.primaryProcessName.length)
+            this.isShowFinal = false;
+        if (this.result.length == this.result[0].length) {
+            this.invertedMatrix = inverse(new Matrix(this.result));
+        }
         this.calculateScalingVector();
         //this.checkMatrixForMultipleSources();
-        let inputContainer = document.getElementById('manualInputContainer');
-        inputContainer.style.display = 'none';
+        this.generateChart();
+        this.setTableWidth();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -101,7 +138,7 @@ export class ResultComponent implements OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':
-                this.demandVector.controls[0].setValue({ value: 1000 });
+                console.log(this.hoveredTable);
                 break;
             case 'End':
                 console.log(this.invertedMatrix);
@@ -116,7 +153,6 @@ export class ResultComponent implements OnInit {
             let processNode = this.project.processNodes[i];
             let processUnit: Number[] = [];
             //if the process Node is not a source, we just push a row in the matrix
-            if (!processNode.isSource) {
                 this.processName.push(processNode.processName);
                 let materialInputArr = processNode.materialInput;
                 let materialOutputArr = processNode.outputs;
@@ -143,24 +179,25 @@ export class ResultComponent implements OnInit {
 
                     this.insertUnit(index, +output.quantity, processUnit);
                 }
-                this.process.push(processUnit);
-            } else {
-                let materialOutputArr = processNode.outputs;
-                for (let k = 0; k < materialOutputArr.length; k++) {
-                    processUnit = [];
-                    let output = materialOutputArr[k];
-                    let outputName = output.outputName;
-                    let index = this.economicVarExist(outputName)
-                    this.processName.push(outputName)
-                    if (index == null) {
-                        this.economicflow.push(outputName);
-                        index = this.economicflow.length - 1;
-                    } 
+            this.process.push(processUnit);
+            //This chunk of code is run when the process is a sourceProcess (deprecated)
+            /*
+            let materialOutputArr = processNode.outputs;
+            for (let k = 0; k < materialOutputArr.length; k++) {
+                processUnit = [];
+                let output = materialOutputArr[k];
+                let outputName = output.outputName;
+                let index = this.economicVarExist(outputName)
+                this.processName.push(outputName)
+                if (index == null) {
+                    this.economicflow.push(outputName);
+                    index = this.economicflow.length - 1;
+                } 
 
-                    this.insertUnit(index, +output.quantity, processUnit);
-                    this.process.push(processUnit);
-                }
+                this.insertUnit(index, +output.quantity, processUnit);
+                this.process.push(processUnit);
             }
+            */
         }
     }
 
@@ -305,8 +342,6 @@ export class ResultComponent implements OnInit {
                         this.processName.push(name);
                     }
                     
-                } else {
-                    this.project.processNodes[i].isSource = true;
                 }
             }
         }
@@ -314,12 +349,18 @@ export class ResultComponent implements OnInit {
 
     //resource expansion 
     resourceExpansion() {
+        let defaultEmissionValue = 0.1;
         for (let i = 0; i < this.result.length; i++) {
             let hasOutput: Boolean = false;
+            let hasInput: Boolean = false;
+            let outputProcessIDs = [];
             let index = i;
             for (let j = 0; j < this.result[i].length; j++) {
                 if (this.result[i][j] > 0) {
                     hasOutput = true;
+                    outputProcessIDs.push(j);
+                } else if (this.result[i][j] < 0) {
+                    hasInput = true;
                 }
             }
             if (!hasOutput) {
@@ -328,15 +369,39 @@ export class ResultComponent implements OnInit {
                 vector[index] = 1;
                 this.pushVectorIntoMAtrix(vector);
                 this.processName.push(this.economicflow[index]);
-
                 //default environmental vector
                 let enviVector = [];
                 for (let i = 0; i < this.resultEnvironmental.length; i++) {
-                    enviVector.push((0.1).toFixed(3));
+                    enviVector.push((defaultEmissionValue).toFixed(3));
                 }
                 this.pushVectorIntoEnviMatrix(enviVector);
+            } else if (!hasInput) {
+                //If entity is an output to no process (has no input)
+                for (let id of outputProcessIDs) {
+                    let process = this.project.processNodes[id];
+                    for (let output of process.outputs) {
+                        if (output.outputName == this.economicflow[index] && !output.isValuable) {
+                            //Only expand the matrix if the output is NOT valuable
+                            let vector = new Array<any>(this.economicflow.length);
+                            vector.fill(0);
+                            vector[index] = -1;
+                            this.pushVectorIntoMAtrix(vector);
+                            this.processName.push(this.economicflow[index]);
+                            //default environmental vector
+                            let enviVector = [];
+                            for (let i = 0; i < this.resultEnvironmental.length; i++) {
+                                enviVector.push((defaultEmissionValue).toFixed(3));
+                            }
+                            this.pushVectorIntoEnviMatrix(enviVector);
+                            break;
+                        }
+                    }
+                }
+                
+                /* */
             }
         }
+        
     }
     checkDoubleOutputThatAreNotUsed() {
         for (let i = 0; i < this.result.length; i++) {
@@ -374,14 +439,27 @@ export class ResultComponent implements OnInit {
     allocationOfOutputs() {
         let colLength = this.result[0].length;
         for (let j = 0; j < colLength; j++) {
+            
             let outputIndexArr: number[] = [];
             let totalMassSum: number = 0;
             let inputIndexArr: number[] = [];
             let vector: any[] = [];
             for (let i = 0; i < this.result.length; i++) {
                 if (this.result[i][j] > 0) {
-                    outputIndexArr.push(i);
-                    totalMassSum += this.result[i][j];
+                    //Check if this output is valuable or not
+                    if (j < this.project.processNodes.length) {
+                        let process = this.project.processNodes[j];
+                        for (let output of process.outputs) {
+                            if (output.outputName == this.economicflow[i] && output.isValuable) {
+                                //Only allocate the output if it's valuable
+                                outputIndexArr.push(i);
+                                totalMassSum += this.result[i][j];
+                            }
+                        }
+                    } else {
+                        outputIndexArr.push(i);
+                        totalMassSum += this.result[i][j];
+                    }
                 }
                 if (this.result[i][j] < 0) {
                     inputIndexArr.push(i);
@@ -506,6 +584,58 @@ export class ResultComponent implements OnInit {
         console.log(scaling1);
     }
 
+    /**
+     * Calculate the data sets for the environmental chart
+     */
+    generateChart() {
+        //Push all X-axis labels (from the allocated processes' name)
+        this.barChartLabels = [];
+        for (let name of this.processName) {
+            this.barChartLabels.push(name.toString());
+        }
+        //Push all data value (from this.resultEnvironmental)
+        for (let i = 0; i < this.resultEnvironmental.length; i++) {
+            var data = [];
+            var label = this.environmentalflow[i];
+            for (let val of this.resultEnvironmental[i]) {
+                data.push(parseFloat(val));
+            }
+            var dataSet : ChartDataSets = { data: data, label: label.toString() }
+            this.barChartData.push(dataSet);
+        }
+    }
+
+    /**
+     * Set the width for all tables so that the columns align
+     * */
+    setTableWidth() {
+        //Calculate width for each table
+        let primaryNumCol = this.primaryProcessName.length + 1;
+        let expandedNumCol = this.expandedProcessName.length + 1;
+        let finalNumCol = this.processName.length + 1;
+        let primaryPercent = (primaryNumCol / finalNumCol * 100).toFixed(2);
+        let expandedPercent = (expandedNumCol / finalNumCol * 100).toFixed(2);
+        //Set the CSS variable for the widths
+        let root = document.documentElement;
+        root.style.setProperty('--primary-width', primaryPercent.toString() + "%");
+        root.style.setProperty('--expanded-width', expandedPercent.toString() + "%");
+    }
+
+    /**
+     * Event for clicking on the chart
+     */
+    chartClicked(event: MouseEvent, active: {}[] ): any {
+        console.log(event, active);
+    }
+
+    /**
+     * Event for hovering over the chart
+     */
+    chartHovered(event: MouseEvent, active: {}[]): any {
+        //console.log(event, active);
+        console.log(this);
+    }
+
     //check the matrix of multiple sources
     checkMatrixForMultipleSources() {
         for (let i = 0; i < this.result.length; i++) {
@@ -597,39 +727,35 @@ export class ResultComponent implements OnInit {
         this.isShowExpanded = this.isShowScaling;
         this.isShowFinal = this.isShowScaling;
         this.isShowScaling = !this.isShowScaling;
+        this.isShowChart = false;
+    }
+
+    toggleShowChart() {
+        this.input = false;
+        this.isShowPrimary = this.isShowChart;
+        this.isShowExpanded = this.isShowChart;
+        this.isShowFinal = this.isShowChart;
+        this.isShowScaling = false;
+        this.isShowChart = !this.isShowChart;
     }
 
     showManualInputMatrix() {
-        let primaryContainer = document.getElementById('primaryContainer');
-        let expandedContainer = document.getElementById('expandedContainer');
-        let finalContainer = document.getElementById('finalContainer');
-        let manualInputContainer = document.getElementById('manualInputContainer');
-        let environmentalMatrix = document.getElementById('environmentalContainer');
-
         if (this.input) {
             //switch everything back on
             this.input = false;
             this.isShowFinal = true;
             this.isShowPrimary = true;
             this.isShowExpanded = true;
-            //turn of manual input
-            manualInputContainer.style.display = 'none';
         } else {
             this.input = true;
             this.isShowFinal = false;
             this.isShowPrimary = false;
             this.isShowExpanded = false;
-            primaryContainer.style.display = 'none';
-            expandedContainer.style.display = 'none';
-            finalContainer.style.display = 'none';
-            environmentalMatrix.style.display = 'none';
-            manualInputContainer.style.display = 'block';
         }
         //if there is something in the result matrix prompt the user to clear current data or not
     }
 
     addrow(column) {
-        console.log('i am here');
         let resourceNameInput = <HTMLInputElement>document.getElementById('resourceNameInput');
         let valueInput;
         if (column != undefined) {
@@ -686,7 +812,7 @@ export class ResultComponent implements OnInit {
         //in each process add in all the details
         //find source not and link them up together 
         for (let i = 0; i < this.processInputName.length; i++) {
-            let rectObj: Rect = new Rect(null, null, 'manualInputRect' + i, [], [], false, this.stagesInputName[i], this.processInputName[i], [], [], [], [], [], []);
+            let rectObj: Rect = new Rect(null, null, 'manualInputRect' + i, [], [], this.stagesInputName[i], this.processInputName[i], [], [], [], [], [], []);
             for (let j = 0; j < this.manualResult.length; j++) {
                 let value = this.manualResult[j][i];
                 //input
@@ -804,6 +930,24 @@ export class ResultComponent implements OnInit {
             if (r.id = rectId) {
                 return { r, i };
             }
+        }
+    }
+
+    debugLog(x) {
+        console.log(x);
+    }
+
+    debugClone(obj) {
+        if (obj instanceof Array) {
+            var result = [];
+            for (let item of obj) {
+                result.push(this.debugClone(item));
+            }
+            return result;
+        } else if (obj instanceof Object) {
+            return JSON.parse(JSON.stringify(obj));
+        } else {
+            return obj;
         }
     }
 }

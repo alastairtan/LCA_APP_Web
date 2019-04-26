@@ -83,13 +83,13 @@
         </form>
         <div class="row">
             <div class="buttonsContainer">
-                <button (click)="saveElsewhere()">
+                <button class="normal-button" (click)="saveElsewhere()">
                     Save
                 </button>
-                <button *ngIf="this.currentProject.projectName != ''" (click)="navNext()"><span>Next</span></button>
-
-                <button *ngIf="this.currentProject.projectName == ''" class="disabled-button" (click)="showEmptyNameWarning()"><span>Next</span></button>
-
+                <button *ngIf="this.currentProject.projectName != '' && this.currentProject.lifeCycleStages.length > 0" 
+                        class="normal-button" (click)="navNext()"><span>Next</span></button>
+                <button *ngIf="this.currentProject.projectName == '' || this.currentProject.lifeCycleStages.length <= 0" 
+                        disabled class="disabled-button" (click)="showEmptyNameWarning()"><span>Next</span></button>
             </div>
         </div>
     </div>

@@ -1,3 +1,12 @@
+:root {
+    --primary-width: 70%;
+    --expanded-width: 85%;
+}
+
+.main-container {
+    max-width: 80%;
+}
+
 .processButtons {
     display: flex;
     flex-direction: column;
@@ -15,9 +24,22 @@
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
-    width: 100%;
     overflow: hidden;
     cursor: default;
+    border: 2px solid #666;
+    table-layout: fixed;
+}
+
+#primaryTable {
+    width: var(--primary-width);
+}
+
+#expandedTable {
+    width: var(--expanded-width);
+}
+
+#finalTable, #finalTable2, #environmentTable {
+    width: 100%;
 }
 
 td, th {
@@ -32,6 +54,22 @@ tr:nth-child(even) {
     background-color: #dddddd;
 }
 
+.primaryProcess {
+    background: #84ffa3;
+}
+
+.expandedProcess {
+    background: #84e0ff;
+}
+
+.allocatedProcess {
+    background: #ff84e0;
+}
+.lastColumn {
+    background: #ffe184;
+}
+
+
 input[type=number] {
     margin: auto;
     width: 100%;
@@ -39,8 +77,20 @@ input[type=number] {
     text-align: center;
 }
 
+.leftBorder, .lastColumn {
+    border-left: 2px solid #666;
+}
+
+tbody th, .rightBorder {
+    border-right: 2px solid #666;
+}
+
+thead th {
+    border-bottom: 2px solid #666;
+}
+
 .highlighted {
-    background-color: #ffc9b7;
+    background: #ffb69e;
 }
 
 .highlightedDblClick {
@@ -58,6 +108,10 @@ input[type=number] {
     font-family: sans-serif;
     font-size: 1.75vw;
     font-weight: bold;
+}
+
+.chart {
+    display: block;
 }
 
 .processButtons {

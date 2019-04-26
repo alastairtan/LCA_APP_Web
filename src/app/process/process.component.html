@@ -52,7 +52,10 @@
                                 <button *ngIf="isDisplayPrompt" class="processButtons viewButton" (click)="displayPromptNode()">
                                     Display Prompt
                                 </button>
-                                <button class="processButtons doneButton" (click)="navNext()">
+                                <button *ngIf="project.processNodes.length > 0" class="processButtons doneButton" (click)="navNext()">
+                                    Done
+                                </button>
+                                <button *ngIf="project.processNodes.length <= 0" class="processButtons disabledDoneButton">
                                     Done
                                 </button>
                             </mat-toolbar-row>  
@@ -94,25 +97,15 @@
                     
                     <div class="tab-content">
                         <div class="buttonContainer">
-                            <div class="containerHeader" *ngIf="!isCurrentProcessSource()">
+                            <div class="containerHeader">
                                 <div class="menuHeader">
                                     Input
                                 </div>
                             </div>
-                            <div class="containerHeader" *ngIf="!isCurrentProcessSource()" role="tablist">
+                            <div class="containerHeader" role="tablist">
                                 <div class="menuTabs" *ngFor="let tab of inputMenuBar; let first = first;" [ngClass]="{firstItem: first}" role="presentation" [class.active]="selectedwallet===wallet">
                                     <button *ngIf="tab == selectedTab" class="menuButtons selectedMenuButton" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
                                     <button *ngIf="tab != selectedTab" class="menuButtons" (click)="changeTab(tab)" aria-controls="materialInputContainer" role="tab" data-toggle="tab">{{tab}}</button>
-                                </div>
-                            </div>
-                            <div class="containerHeader" *ngIf="isCurrentProcessSource()">
-                                <div class="menuHeader disabledMenuHeader">
-                                    Input
-                                </div>
-                            </div>
-                            <div class="containerHeader" *ngIf="isCurrentProcessSource()" role="tablist">
-                                <div class="menuTabs" *ngFor="let tab of inputMenuBar">
-                                    <button class="menuButtons disabledMenuButtons" >{{tab}}</button>
                                 </div>
                             </div>
                             <div class="containerHeader">
@@ -127,13 +120,6 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="row source-container">
-                                    <div class="col-md-8">Is source process?</div>
-                                    <div class="col-md-2">
-                                        <input id="sourceCheck" type="checkbox" value="isSource" (change)="setSourceProcess()" />
-                                    </div>
-                                    <div class="col-md-2"></div>
-                                </div>
                                 <div class="add-container">
                                     <div class="row">
                                         <div class="col-md-5 update-relations-container">
@@ -172,7 +158,16 @@
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
                                                     <strong>Material Name</strong>
-                                                    <input autocomplete="off" type="text" formControlName="materialName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
+                                                    <mat-form-field class="mat-autocomplete">
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="materialName" aria-label="Name"
+                                                               matInput [matAutocomplete]="auto" (change)="materialNameChange()" />
+                                                        <mat-autocomplete #auto="matAutocomplete">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option" 
+                                                                        (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">
+                                                                {{option}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
                                                 </div>
                                                 <div formArrayName="from">
                                                     <div *ngFor="let choice of input.controls.from.controls; let j = index" class="container even-color">
@@ -236,7 +231,7 @@
                                                             Carbon Storage
                                                         </div>
                                                         <div class="col-md-6 vcenter">
-                                                            <input autocomplete="off" type="text" formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails()" />
+                                                            <input autocomplete="off" type="text" placeholder="Enter here..." formControlName="carbonStorage" class="material-input smaller-input" (change)="saveAndClearDetails()" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -555,8 +550,18 @@
                                         <div [formGroupName]="i">
                                             <div *ngIf="!input.value.isCollapsed">
                                                 <div class="odd-color">
-                                                    <strong>Output Name</strong>
-                                                    <input autocomplete="off" type="text" formControlName="outputName" class="material-input" (change)="saveAndClearDetails(); updateRelations(); getDetails()" />
+                                                    <strong>Material Name</strong>
+                                                    <mat-form-field class="mat-autocomplete">
+                                                        <input autocomplete="off" class="material-input" type="text" formControlName="outputName" aria-label="Name"
+                                                               matInput [matAutocomplete]="auto" (change)="materialNameChange()" />
+                                                        <mat-autocomplete #auto="matAutocomplete">
+                                                            <mat-option class="mat-option" *ngFor="let option of filteredOptions" [value]="option"
+                                                                        (mouseenter)="isHoverOverOptions = true" (mouseleave)="isHoverOverOptions = false">
+                                                                >
+                                                                {{option}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
                                                 </div>
                                                 <div formArrayName="to">
                                                     <div *ngFor="let choice of input.controls.to.controls; let j = index" class="container even-color">
@@ -591,14 +596,21 @@
                                                             Functional Unit
                                                         </div>
                                                         <div class="col-md-6 vcenter">
-                                                            <select formControlName="functionalUnit" class="material-input smaller-input" (change)="saveAndClearDetails()">
-                                                                <option value="true">true</option>
-                                                                <option value="false">false</option>
-                                                            </select>
+                                                            <input type="checkbox" formControlName="functionalUnit" (change)="saveAndClearDetails()">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="container even-color">
+                                                    <div class="row">
+                                                        <div class="col-md-6 input-field">
+                                                            Valuable?
+                                                        </div>
+                                                        <div class="col-md-6 vcenter">
+                                                            <input type="checkbox" formControlName="isValuable" (change)="saveAndClearDetails()">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="container odd-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Quantity
@@ -608,7 +620,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container odd-color">
+                                                <div class="container even-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Unit
@@ -627,7 +639,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="container even-color">
+                                                <div class="container odd-color">
                                                     <div class="row">
                                                         <div class="col-md-6 input-field">
                                                             Activity Data Origin
@@ -637,7 +649,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="odd-color">
+                                                <div class="even-color">
                                                     <div>
                                                         Remarks
                                                         <input autocomplete="off" type="text" formControlName="remarks" class="material-input" (change)="saveAndClearDetails()" />

@@ -3,6 +3,7 @@ import { isEmbeddedView } from "@angular/core/src/view/util";
 export class Output {
     functionalUnit: boolean;
     outputName: string;
+    isValuable: boolean;
     to: string[];
     quantity: string;
     unit: string;
@@ -13,6 +14,7 @@ export class Output {
     constructor() {
         this.functionalUnit = false;
         this.outputName = '';
+        this.isValuable = true;
         this.to = [''];
         this.quantity = '0';
         this.unit = 'm3';
@@ -24,6 +26,7 @@ export class Output {
     parseData(jsonObj) {
         this.functionalUnit = jsonObj.functionalUnit;
         this.outputName = jsonObj.outputName;
+        this.isValuable = jsonObj.isValuable;
         this.to = jsonObj.to;
         this.quantity = jsonObj.quantity;
         this.unit = jsonObj.unit;
@@ -36,6 +39,7 @@ export class Output {
         var isEqual = true;
         isEqual = isEqual && (this.functionalUnit == other.functionalUnit);
         isEqual = isEqual && (this.outputName == other.outputName);
+        isEqual = isEqual && (this.isValuable == other.isValuable);
         if (other.to.length != this.to.length) {
             return false;
         }
@@ -55,6 +59,7 @@ export class Output {
         var isEqual = true;
         isEqual = isEqual && (thisInput.functionalUnit == thatInput.functionalUnit);
         isEqual = isEqual && (thisInput.outputName == thatInput.outputName);
+        isEqual = isEqual && (thisInput.isValuable == thatInput.isValuable);
         isEqual = isEqual && (thisInput.to == thatInput.to);
         isEqual = isEqual && (thisInput.quantity == thatInput.quantity);
         isEqual = isEqual && (thisInput.unit == thatInput.unit);
