@@ -444,6 +444,9 @@ export class ResultComponent implements OnInit {
             let totalMassSum: number = 0;
             let inputIndexArr: number[] = [];
             let vector: any[] = [];
+            let vectorToPush: any[] = [];
+            let enviVectorToPush: any[] = [];
+            let processNameToPush: any[] = [];
             for (let i = 0; i < this.result.length; i++) {
                 if (this.result[i][j] > 0) {
                     //Check if this output is valuable or not
@@ -497,14 +500,17 @@ export class ResultComponent implements OnInit {
                                 //console.log(outputAmt)
                             }
                         }
-                        this.pushVectorIntoMAtrix(vector);
+                        vectorToPush.unshift(this.debugClone(vector));
+                        //this.pushVectorIntoMAtrix(vector);
                         for (let i = 0; i < this.resultEnvironmental.length; i++) {
                             enviVector[i] = (this.resultEnvironmental[i][j] * outputAmt / totalMassSum).toFixed(3);
                         }
-                        this.pushVectorIntoEnviMatrix(enviVector);
+                        enviVectorToPush.unshift(this.debugClone(enviVector));
+                        //this.pushVectorIntoEnviMatrix(enviVector);
                         let name = this.processName[j];
                         name = name.concat(k.toString());
-                        this.processName.push(name);
+                        processNameToPush.unshift(this.debugClone(name));
+                        //this.processName.push(name);
                     } else {
                         let outputRow = outputIndexArr[k];
                         let outputAmt = this.result[outputRow][j];
@@ -518,6 +524,16 @@ export class ResultComponent implements OnInit {
                         }
                     }
                     k--;
+                }
+                //Push vectors to array
+                for (let vec of vectorToPush) {
+                    this.pushVectorIntoMAtrix(vec);
+                }
+                for (let vec of enviVectorToPush) {
+                    this.pushVectorIntoEnviMatrix(vec);
+                }
+                for (let name of processNameToPush) {
+                    this.processName.push(name);
                 }
             }
         }
@@ -545,8 +561,9 @@ export class ResultComponent implements OnInit {
             scalingVec = this.invertedMatrix.mmul(demandVec);
         }
         //Calculate the cumulative environmental matrix
-        if (this.resultEnvironmental.length != 0) {
-            this.cumulativeEnvironmental = new Matrix(this.resultEnvironmental).mmul(scalingVec).to1DArray();
+        if (this.resultEnvironmental.length > 0) {
+            var environmentalMatrix = new Matrix(this.resultEnvironmental);
+            this.cumulativeEnvironmental = environmentalMatrix.mmul(scalingVec).to1DArray();
             //Transform scalingVec (Matrix) to scalingVector (Array)
             this.scalingVector = scalingVec.to1DArray();
             //Set the values to 3dp, if they are not integer
@@ -613,8 +630,8 @@ export class ResultComponent implements OnInit {
         let primaryNumCol = this.primaryProcessName.length + 1;
         let expandedNumCol = this.expandedProcessName.length + 1;
         let finalNumCol = this.processName.length + 1;
-        let primaryPercent = (primaryNumCol / finalNumCol * 100).toFixed(2);
-        let expandedPercent = (expandedNumCol / finalNumCol * 100).toFixed(2);
+        let primaryPercent = (primaryNumCol / finalNumCol * 100).toFixed(3);
+        let expandedPercent = (expandedNumCol / finalNumCol * 100).toFixed(3);
         //Set the CSS variable for the widths
         let root = document.documentElement;
         root.style.setProperty('--primary-width', primaryPercent.toString() + "%");
@@ -697,7 +714,19 @@ export class ResultComponent implements OnInit {
         if (parseFloat(cellValue) == 0) {
             return;
         }
-        var processId = this.project.processNodes[processIndex].id;
+
+        var processId: string;
+        if (processIndex >= this.project.processNodes.length) {
+            var procName = this.processName[processIndex].slice(0, -1);
+            for (let i = 0; i < this.processName.length; i++) {
+                if (procName == this.processName[i]) {
+                    processId = this.project.processNodes[i].id;
+                    break;
+                }
+            }
+        } else {
+            processId = this.project.processNodes[processIndex].id;
+        }
         var tab = 1;
         if (table == 2) {
             tab = 6

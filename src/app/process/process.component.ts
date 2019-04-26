@@ -8,8 +8,6 @@ import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { Project } from '../project';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { ActivatedRoute } from "@angular/router";
 
 import { MaterialInput } from './MaterialInput';
@@ -110,21 +108,26 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     currentProcessName = '';
     materialForm: FormGroup; energyForm: FormGroup; transportForm: FormGroup; outputForm: FormGroup; byproductForm: FormGroup; emissionForm: FormGroup;
     materialList: FormArray; energyList: FormArray; transportList: FormArray; outputList: FormArray; byproductList: FormArray; emissionList: FormArray;
-    processIdMap = {};
-    inputMenuBar = ['Material', 'Energy', 'Transport'];
-    outputMenuBar = [' Material ', 'Byproduct', 'Emission'];
-    selectedTab = this.inputMenuBar[0];
+    
+    processIdMap = {};                                                  /*Map a process' id to its index in the file*/
+    inputMenuBar = ['Material', 'Energy', 'Transport'];                 //Names of the input tabs
+    outputMenuBar = [' Material ', 'Byproduct', 'Emission'];            //Names of the output tabs
+    selectedTab = this.inputMenuBar[0];                                 //Name of the currently selected tab
 
-    navFromResult = {};
-    previousSelect = "";
-    materialOptions: string[] = [];
-    filteredOptions: string[] = [];
-    isHoverOverOptions: false;
+    navFromResult = {};                                                 //Object storing the process and the tab double clicked from result component
+    previousSelect = "";                                                //Save the value of the previous selected option, in order to update connecting arrows
+    materialOptions: string[] = [];                                     //Array of all material name to suggest
+    filteredOptions: string[] = [];                                     //Filtered material name suggestions to display
+    emissionOptions: string[] = [];                                     //Array of all emission type to suggest
+    filteredEmissions: string[] = [];                                   //Filtered emission type suggestions to display
+    isHoverOverOptions: false;                                          //Boolean to check if a suggested option was chosen by clicking or keyboard Enter
 
     isOpen = false;
-    
-    project: Project = this.dataService.getProject();            //Object to contain all data of the current project
-    lastSaved = '';                     //Placeholder to notify users of the time of the last saved project
+
+    //currently selected Node
+
+    project: Project = this.dataService.getProject();                   //Object to contain all data of the current project
+    lastSaved = '';        
 
 
     //================================================================
@@ -536,11 +539,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Add data to the list
                 for (let j = 0; j < rectObj.materialInput.length; j++) {
                     var formGroup = this.fb.group(this.transformForFormBuilder(rectObj.materialInput[j]));
-                    formGroup.controls.materialName.valueChanges.subscribe(
-                        value => {
-                            var filterValue = value.toLowerCase();
-                            this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(filterValue));
-                        });
+                    formGroup.controls.materialName.valueChanges.subscribe(value => { this.getSuggestions(value); });
                     this.materialList.push(formGroup);
                 }
                 break;
@@ -566,11 +565,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 //Add data to the list
                 for (let j = 0; j < rectObj.outputs.length; j++) {
                     var formGroup = this.fb.group(this.transformForFormBuilder(rectObj.outputs[j]));
-                    formGroup.controls.outputName.valueChanges.subscribe(
-                        value => {
-                            var filterValue = value.toLowerCase();
-                            this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(filterValue));
-                        });
+                    formGroup.controls.outputName.valueChanges.subscribe(value => { this.getSuggestions(value); });
                     this.outputList.push(formGroup);
                 }
                 break;
@@ -587,16 +582,15 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.clearFormArray(this.emissionList);
                 //Add data to the list
                 for (let j = 0; j < rectObj.directEmissions.length; j++) {
-                    this.emissionList.push(this.fb.group(rectObj.directEmissions[j]));
+                    var formGroup = this.fb.group(rectObj.directEmissions[j]);
+                    formGroup.controls.emissionType.valueChanges.subscribe(value => { this.getSuggestions(value); });
+                    this.emissionList.push(formGroup);
                 }
-                break;
-            case this.inputMenuBar[6]:
-                let inputDiv = document.getElementById('name');
-                let HTMLInput = <HTMLInputElement>inputDiv;
-                this.currentlySelectedNodeName = rectObj.processName;
                 break;
         }
         this.cd.detectChanges();                    //Detect change and update the DOM
+        this.updateMaterialOptions();
+        this.getSuggestions("");
     }
 
     /**
@@ -706,36 +700,55 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     }
     
     /**
-     * Update the array of material name for autocomplete
+     * Update the array of material name and emissions for autocomplete
      */
     updateMaterialOptions() {
         this.materialOptions = [];
         for (let proc of this.project.processNodes) {
             for (let input of proc.materialInput) {
                 var material = input.materialName.toLowerCase();
-                if (!this.materialOptions.includes(material)) {
+                if (!this.materialOptions.includes(material) && material != "") {
                     this.materialOptions.push(material);
                 }
             }
             for (let output of proc.outputs) {
                 var material = output.outputName.toLowerCase();
-                if (!this.materialOptions.includes(material)) {
+                if (!this.materialOptions.includes(material) && material != "") {
                     this.materialOptions.push(material);
+                }
+            }
+        }
+        this.emissionOptions = [];
+        for (let proc of this.project.processNodes) {
+            for (let emission of proc.directEmissions) {
+                var type = emission.emissionType.toLowerCase();
+                if (!this.emissionOptions.includes(type) && type != "") {
+                    this.emissionOptions.push(type);
                 }
             }
         }
         //console.log('New material options:', this.materialOptions);
     }
 
+    /**
+     * Function called when a material name is updated in MaterialInput or in Output
+     * */
     materialNameChange() {
         if (!this.isHoverOverOptions) {
             this.saveAndClearDetails();
             this.updateRelations();
             this.getDetails();
-            this.updateMaterialOptions()
-        } else {
-            console.log('Not saved yet :(');
         }
+        this.updateMaterialOptions()
+    }
+
+    /**
+     * Get suggestions based on the string given
+     * @param str the string given
+     */
+    getSuggestions(str) {
+        this.filteredOptions = this.materialOptions.filter(option => option.toLowerCase().includes(str.toLowerCase()));
+        this.filteredEmissions = this.emissionOptions.filter(option => option.toLowerCase().includes(str.toLowerCase()));
     }
 
     creatingPromptRect(rectObj: Rect, index, isToggle:boolean) {
@@ -1570,7 +1583,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':        //For debugging purposes
-                console.log(this.project.processNodes[0]);
+                console.log(this.filteredOptions);
                 break;
             case 'End':
                 console.log(this.outputList.value);
@@ -1613,6 +1626,12 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.mouseY = event.clientY;
         if (this.isAbandonedNodesSelected) {
         }
+    }
+
+    //Hide suggestions when scroll
+    @HostListener('mousewheel') scrolling() {
+        this.filteredOptions = [];
+        this.filteredEmissions = [];
     }
 
     /**
@@ -2232,9 +2251,9 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                         }
                         break;
                     case 'output':
-                        if (this.idPrompt[i].id == rectObj.id + index + 'output') {
+                        if (this.idPrompt[i][0].id == rectObj.id + index + 'output') {
                             indexToRemove = i;
-                        } else if (indexToRemove != null && this.idPrompt[i].id == rectObj.id + j + 'output') {
+                        } else if (indexToRemove != null && this.idPrompt[i][0].id == rectObj.id + j + 'output') {
                             let newIndex = j - 1;
                             SVG.get(rectObj.id + j + 'output').node.id = rectObj.id + newIndex + 'output';
                             this.idPrompt[i][0].id = rectObj.id + newIndex + 'output';
@@ -2246,6 +2265,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             switch (option) {
                 case 'input':
                     let svgRect = SVG.get(rectObj.id + index + 'input');
+                    if (svgRect == null)
+                        return;
                     let ind = svgRect.data('key');
                     SVG.get(rectObj.id + index + 'input').remove();
                     SVG.get(this.svgPromptConn[ind].node.id).remove();
@@ -2253,6 +2274,8 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                     break;
                 case 'output':
                     let svgRectOut = SVG.get(rectObj.id + index + 'output');
+                    if (svgRectOut == null)
+                        return;
                     let indOut = svgRectOut.data('key');
                     SVG.get(svgRectOut.data('arrow')).remove();
                     SVG.get(rectObj.id + index + 'output').remove();
