@@ -1,5 +1,4 @@
-
-import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef, Inject} from '@angular/core';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
@@ -7,11 +6,39 @@ import { Matrix, inverse } from 'ml-matrix';
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
 
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
 import { MaterialInput } from '../process/MaterialInput';
 import { Output } from '../process/Output';
+
+@Component({
+    selector: 'app-dialog',
+    templateUrl: '../dialog/dialog.component.html'
+})
+
+export class Dialog {
+    text: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+        this.text = data.text
+    }
+}
+
+@Component({
+    selector: 'app-confirmationDialog',
+    templateUrl: '../dialog/confirmationDialog.html'
+})
+
+export class confirmationDialog {
+    text: String;
+    action: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+        this.text = data.text;
+        this.action = data.action;
+    }
+
+}
 
 @Component({
     selector: 'app-result',
@@ -95,10 +122,9 @@ export class ResultComponent implements OnInit {
     barChartLabels: Label[] = [];
     barChartData: ChartDataSets[] = [];
 
-    constructor(private dataService: DataService,
-                private router: Router,
-                private cd: ChangeDetectorRef,
-                private fb: FormBuilder) { }
+    constructor(private dataService: DataService, private router: Router,
+                private cd: ChangeDetectorRef, private fb: FormBuilder,
+                public dialog: MatDialog) { }
 
     ngOnInit() {
         //do not show manual input 
@@ -125,10 +151,7 @@ export class ResultComponent implements OnInit {
             this.isShowExpanded = false;
         if (this.processName.length == this.primaryProcessName.length)
             this.isShowFinal = false;
-        if (this.result.length == this.result[0].length) {
-            this.invertedMatrix = inverse(new Matrix(this.result));
-        }
-        this.calculateScalingVector();
+        this.doMatrixCalculation();
         //this.checkMatrixForMultipleSources();
         this.generateChart();
         this.setTableWidth();
@@ -213,7 +236,7 @@ export class ResultComponent implements OnInit {
 
     environmentVarexist(name: String) {
         for (let i = 0; i < this.environmentalflow.length; i++) {
-            if (this.environmentalflow[i] == name) {
+            if (this.environmentalflow[i].toLowerCase() == name.toLowerCase()) {
                 return i;
             }
         }
@@ -438,6 +461,9 @@ export class ResultComponent implements OnInit {
 
     //allocation
     allocationOfOutputs() {
+        if (this.result == undefined || this.result.length <= 0) {
+            return;
+        }
         let colLength = this.result[0].length;
         for (let j = 0; j < colLength; j++) {
             
@@ -540,8 +566,51 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    /**
+     * Update demand vector from html elements
+     * @param index index of the row in the demand vector to be changed
+     * @param newValue new value of the row
+     */
     updateDemand(index, newValue) {
         this.demandVector.at(index).setValue({ value: parseFloat(newValue) });
+    }
+
+    /**
+     * Function for matrix calculation and catching errors
+     * */
+    doMatrixCalculation() {
+        //ERROR handling
+        var errors: string[] = [];
+        if (this.result == undefined || this.result.length <= 0) {
+            errors.push('ERROR: No data was entered for the matrix calculation');
+        } else if (this.result.length != this.result[0].length) {
+            errors.push('ERROR: Matrix is not square. There must be some errors in the data input step');
+        } else if (this.resultEnvironmental.length <= 0) {
+            errors.push('ERROR: No emission data found for the Environmental matrix. Add data for emission for every pro');
+        }
+        if (errors.length > 0) {
+            var errorText = '';
+            for (let text of errors) {
+                errorText = errorText + text + '\n';
+            }
+            //Show dialog, then navigate away
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = true;
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                id: 1,
+                text: 'what'
+            };
+            //const dialogRef = this.dialog.open(Dialog, dialogConfig);
+            /*dialogRef.afterClosed().subscribe(result => {
+                console.log(' Dialog was closed');
+                this.router.navigate(['/process']);
+            });*/
+            return;
+        }
+        //Matrix inversion and calculation
+        this.invertedMatrix = inverse(new Matrix(this.result));
+        this.calculateScalingVector();
     }
 
     /**
