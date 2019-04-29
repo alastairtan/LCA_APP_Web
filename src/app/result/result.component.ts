@@ -568,14 +568,16 @@ export class ResultComponent implements OnInit {
             this.scalingVector = scalingVec.to1DArray();
             //Set the values to 3dp, if they are not integer
             for (let i = 0; i < this.scalingVector.length; i++) {
-                let value = this.scalingVector[i];
+                this.scalingVector[i] = this.normalizeFloat(this.scalingVector[i]);
+                /*let value = this.scalingVector[i];
                 if (value - parseInt(value) != 0)
-                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);
+                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);*/
             }
             for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
-                let value = this.cumulativeEnvironmental[i];
+                this.cumulativeEnvironmental[i] = this.normalizeFloat(this.cumulativeEnvironmental[i]);
+                /*let value = this.cumulativeEnvironmental[i];
                 if (value - parseInt(value) != 0)
-                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);
+                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);*/
             }
         }
         
@@ -977,6 +979,26 @@ export class ResultComponent implements OnInit {
             return JSON.parse(JSON.stringify(obj));
         } else {
             return obj;
+        }
+    }
+
+    /**
+     * Make a number 3dp if it's float, or 0dp if it's int
+     */
+    normalizeFloat(num) {
+        var difference = 0;
+        var value = 0;
+        if (typeof num === "number") {
+            difference = num - Math.floor(num);
+            value = num;
+        } else if (typeof num === "string") {
+            difference = parseFloat(num) - parseInt(num);
+            value = parseFloat(num);
+        }
+        if (difference != 0) {
+            return value.toFixed(3);
+        } else {
+            return value.toString();
         }
     }
 }

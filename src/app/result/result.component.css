@@ -39,7 +39,7 @@ table {
     width: var(--expanded-width);
 }
 
-#finalTable, #finalTable2, #environmentTable {
+#finalTable, #finalTable2, #invertedTable, #environmentTable {
     width: 100%;
 }
 
