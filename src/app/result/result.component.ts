@@ -51,6 +51,7 @@ export class ResultComponent implements OnInit {
     isShowExpanded: Boolean = true;
     isShowFinal: Boolean = true;
     isShowScaling: Boolean = false;
+    isHideZero: Boolean = false;
     input: Boolean = false;
 
     //manual input of matrix
