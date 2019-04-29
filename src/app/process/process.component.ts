@@ -1643,7 +1643,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 this.navNext();
                 break;
             case 'Enter':
-                console.log(this.project);
+                console.log(this.idPrompt, this.svgPrompt);
             default:
                 //Other keyboard events for editing
                 if (event.ctrlKey && event.key == 'z') {
@@ -2317,6 +2317,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             }
 
             this.idPrompt.splice(indexToRemove, 1);
+            this.svgPrompt.splice(indexToRemove, 1);
             this.svgText.splice(indexToRemove, 1);
             this.svgPromptConn.splice(indexToRemove, 1);
 
