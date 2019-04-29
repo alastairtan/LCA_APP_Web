@@ -10,6 +10,8 @@ import { Label } from 'ng2-charts';
 
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
+import { MaterialInput } from '../process/MaterialInput';
+import { Output } from '../process/Output';
 
 @Component({
     selector: 'app-result',
@@ -53,8 +55,12 @@ export class ResultComponent implements OnInit {
 
     //manual input of matrix
     processInputName: string[] = [];
-    manualResult: string[] = [];
-    
+    stagesInputName: string[] = [];
+    economicInputName: string[] = [];
+    manualResult: any[] = [];
+    isDone: Boolean = true;
+    //means the manual input has no vectors
+    arrayIndex: any[] = [];
 
     //Variable for highlighting the table
     hoveredTable = null;
@@ -572,6 +578,7 @@ export class ResultComponent implements OnInit {
                     this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);
             }
         }
+        
     }
 
     scenario1Example() {
@@ -777,8 +784,182 @@ export class ResultComponent implements OnInit {
         //if there is something in the result matrix prompt the user to clear current data or not
     }
 
-    generatingModel() {
+    addrow(column) {
+        let resourceNameInput = <HTMLInputElement>document.getElementById('resourceNameInput');
+        let valueInput;
+        if (column != undefined) {
+            valueInput = <HTMLInputElement>document.getElementById('input' + column);
+        } else {
+           valueInput = <HTMLInputElement>document.getElementById('valueInput');
+        }
 
+        let resourceNameText = resourceNameInput.value;
+        let value = +valueInput.value;
+        let vector = [];
+        column++;
+        console.log(column);
+        if (column == -1 || this.arrayIndex[column] == undefined) {
+            this.economicInputName.push(resourceNameText);
+            vector.push(value);
+            this.manualResult.push(vector);
+            console.log(this.processInputName);
+            //push tracking index into array
+            this.arrayIndex.push(0);
+        } else {
+            let row = this.arrayIndex[column + 1];
+            this.manualResult[row].push(value);
+            this.arrayIndex[column]++;
+
+        }
+            resourceNameInput.value = "";
+            valueInput.value = "";
+    }
+    
+    done() {
+        let processNameInput = <HTMLInputElement>document.getElementById('processNameInput');
+        let processNameText = processNameInput.value;
+        let stageNameInput = <HTMLInputElement>document.getElementById('stagesInput');
+        let stageNameText = stageNameInput.value;
+        let resourceNameInput = <HTMLInputElement>document.getElementById('resourceNameInput');
+        let valueInput = <HTMLInputElement>document.getElementById('valueInput');
+        let resourceNameText = resourceNameInput.value;
+        let value = +valueInput.value;
+        let vector = [];
+
+        this.economicInputName.push(resourceNameText);
+        vector.push(value);
+        this.manualResult.push(vector);
+        this.processInputName.push(processNameText);
+        this.stagesInputName.push(stageNameText);
+        resourceNameInput.value = "";
+        valueInput.value = "";
+        processNameInput.value = "";
+    }
+
+    generatingModel() {
+        //for all process name generate a node
+        //in each process add in all the details
+        //find source not and link them up together 
+        for (let i = 0; i < this.processInputName.length; i++) {
+            let rectObj: Rect = new Rect(null, null, 'manualInputRect' + i, [], [], this.stagesInputName[i], this.processInputName[i], [], [], [], [], [], []);
+            for (let j = 0; j < this.manualResult.length; j++) {
+                let value = this.manualResult[j][i];
+                //input
+                if (value < 0) {
+                    let name = this.economicInputName[j];
+                    let materialInput: MaterialInput = new MaterialInput();
+                    materialInput.materialName = name;
+                    materialInput.quantity = value;
+                    rectObj.materialInput.push(materialInput);
+                } else if (value > 0) {
+                    //output
+                    let name = this.economicInputName[j];
+                    let output: Output = new Output();
+                    output.outputName = name;
+                    output.quantity = value;
+                }
+            }
+            this.addRect(rectObj);
+        }
+        //proceed with matrix expansion
+        //matrix allocation 
+    }
+
+    addRect(r: Rect) {
+        this.project.processNodes.push(r);
+    }
+
+    connectObj() {
+        for (let i = 0; i < this.manualResult.length; i++) {
+            let arrayOfInputIndex: any[] = [];
+            let outputIndex = -1;
+            for (let j = 0; j < this.manualResult[i].length; j++) {
+                let value = this.manualResult[i][j];
+                if (value > 0) {
+                    if (outputIndex != -1) {
+                        console.log('there is an error with the matrix')
+                    } else {
+                        outputIndex = j;
+                    }
+                } else if (value < 0) {
+                    arrayOfInputIndex.push(j);
+                }
+            }
+
+            //make the connection 
+            if (outputIndex != -1) {
+                let r = this.project.processNodes[outputIndex];
+                for (let j = 0; j < arrayOfInputIndex.length; j++) {
+                    let nextR = this.project.processNodes[arrayOfInputIndex[j]];
+                    r.nextId.push(nextR.id);
+                }
+            }
+        }
+    }
+
+    placement() {
+        //finding source and put it at the far left
+        //finding rect procedures and put them properly
+        //starting point
+        let sourceArray: any[] = [];
+        let linkedList = new Array(this.project.processNodes.length);
+        let visitedArray = new Array(this.project.processNodes.length);
+        visitedArray.fill(0);
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            let r = this.project.processNodes[i];
+            let arrayOfNextRect: any[] = [];
+            if (r.materialInput.length == 0) {
+                //it is a source 
+                sourceArray.push(i);
+            }
+        }
+        for (let i = 0; i < sourceArray.length; i++) {
+            let sourceRect = this.project.processNodes[sourceArray[i]];
+            sourceRect.x = 10;
+            sourceRect.y = 80 + 80* i;
+            let ans = [sourceRect, sourceArray[i]];
+            this.bfs(ans,i, visitedArray);
+        }
+    }
+
+    bfs(ans,index, visitedArray) {
+
+        let queue: any[] = [];
+        let layer = 0;
+        visitedArray[ans[1]] = 1;
+        queue.push([ans, [index, layer]]);
+
+        while (queue.length != 0) {
+            let answer = queue.pop();
+            //set coordinated 
+            let r: Rect = answer[0][0];
+            r.x = 10 + 110 * answer[1][1];
+            r.y = 10 + 60 * answer[0][1];
+
+            let position = answer[1][0];
+            this.project.processNodes[position] = r;
+
+            //check for next layer and push in adj nodes
+            for (let i = 0; i < r.nextId.length; i++) {
+                if (i == 0) {
+                    layer++;
+                }
+                let a = this.getRect(r.nextId[i]);
+                if (visitedArray[a[1]] == 0) {
+                    visitedArray[a[1]] = 1;
+                    queue.push([a, [i, layer]]);
+                }
+            }
+        }
+    }
+
+    getRect(rectId) {
+        for (let i = 0; i < this.project.processNodes.length; i++) {
+            let r:Rect = this.project.processNodes[i];
+            if (r.id = rectId) {
+                return { r, i };
+            }
+        }
     }
 
     debugLog(x) {

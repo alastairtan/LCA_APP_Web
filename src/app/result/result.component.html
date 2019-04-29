@@ -153,8 +153,43 @@
                                                     highlightedDblClick: hoveredTable == 3 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
                                         {{col}}
                                     </td>
-                                    <td class="leftBorder" *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
-                                        <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()"/>
+
+                                    <td *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+
+                <div id="invertedContainer" class="placeholder defaultCursor">
+                    <p class="subtitle">
+                        Inverted Matrix
+                    </p>
+                    <form [formGroup]="demandVectorForm" id="demandVectorForm2">
+                        <table formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
+                            <thead>
+                                <tr>
+                                    <th>Number</th>
+                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == j}">
+                                        {{j}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of invertedMatrix; let val of demandVector.value; let i = index;">
+                                    <th style="font-weight:300" (mouseenter)="onMouseOver(3, i, null)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredRow == i}">
+                                        {{i}}
+                                    </th>
+                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(3, i, j)"
+                                        [ngClass]="{highlighted: hoveredTable == 3 && (hoveredCol == j || hoveredRow == i),
+                                                    highlightedDblClick: hoveredTable == 3 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
+                                        {{col}}
+                                    </td>
+                                    <td *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                        <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
+
                                     </td>
                                 </tr>
                             </tbody>
@@ -196,13 +231,14 @@
                         </div>
                         <div class="col-md-3"></div>
                     </div>
-                    
+
                 </div>
 
                 <div id="manualInputContainer" class="placeholder defaultCursor" *ngIf="input">
                     <p class="subtitle">
-                        Final Matrix
+                        Manual Entry
                     </p>
+
                     <table id="finalTable2" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
@@ -211,15 +247,17 @@
                                     [ngClass]="{primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
                                     {{name}}
                                 </th>
-                                <th (mouseenter)="onMouseOver(4, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 4 && hoveredCol == rowCount + 2}">
-                                    <input />
+                                <th (mouseenter)="onMouseOver(1, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredCol == rowCount + 2}">
+                                    <input id="processNameInput" />
+                                    <input id="stagesInput" />
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let row of manualResult;let i = index;">
-                                <th style="font-weight:300" (mouseenter)="onMouseOver(4, i, null)" [ngClass]="{highlighted: hoveredTable == 4 && hoveredRow == i}">
-                                    {{economicflow[i]}}
+
+                                <th style="font-weight:300" (mouseenter)="onMouseOver(1, i, null)" [ngClass]="{highlighted: hoveredTable == 1 && hoveredRow == i}">
+                                    {{economicInputName[i]}}
                                     <button>
                                         delete
                                     </button>
@@ -232,17 +270,35 @@
                             </tr>
                             <tr>
                                 <th>
-                                    <input />
+                                    <input id="resourceNameInput" />
                                 </th>
-                                <td style="width:5vw" (mouseenter)="onMouseOver(4, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 4 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
-                                    <input autocomplete="off" />
-                                    <button>
-                                        add
+
+                                <td style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                    <input autocomplete="off" id="valueInput" />
+
+                                    <button (click)="addrow()">
+                                        add row
+                                    </button>
+                                    <button (click)="done(-1)">
+                                        done
+                                    </button>
+                                </td>
+                                <td *ngFor="let row of processInputName;let i = index;" style="width:5vw" (mouseenter)="onMouseOver(1, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 1 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                    <input autocomplete="off" id="{{'input' + i}}" />
+
+                                    <button (click)="addrow(i)">
+                                        add row
+                                    </button>
+                                    <button (click)="done()">
+                                        done
                                     </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <button (click)="generatingModel">
+                        generate model
+                    </button>
                 </div>
 
             </div>
