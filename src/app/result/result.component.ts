@@ -8,6 +8,9 @@ import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
 
+import * as jsPDF from 'jspdf';
+import * as html2canvas from 'html2canvas';
+
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
 import { MaterialInput } from '../process/MaterialInput';
@@ -78,6 +81,7 @@ export class ResultComponent implements OnInit {
     isShowExpanded: Boolean = true;
     isShowFinal: Boolean = true;
     isShowScaling: Boolean = false;
+    isShowInverted: Boolean = true;
     isHideZero: Boolean = false;
     input: Boolean = false;
 
@@ -827,6 +831,7 @@ export class ResultComponent implements OnInit {
         this.isShowPrimary = this.isShowScaling;
         this.isShowExpanded = this.isShowScaling;
         this.isShowFinal = this.isShowScaling;
+        this.isShowInverted = this.isShowScaling;
         this.isShowScaling = !this.isShowScaling;
         this.isShowChart = false;
     }
@@ -837,6 +842,7 @@ export class ResultComponent implements OnInit {
         this.isShowExpanded = this.isShowChart;
         this.isShowFinal = this.isShowChart;
         this.isShowScaling = false;
+        this.isShowInverted = true;
         this.isShowChart = !this.isShowChart;
     }
 
@@ -1070,5 +1076,67 @@ export class ResultComponent implements OnInit {
         } else {
             return value.toString();
         }
+    }
+
+    exportPDF() {
+        this.isShowPrimary = true;
+        this.isShowFinal = true;
+        this.isShowScaling = true;
+        this.isShowInverted = true;
+        this.cd.detectChanges();
+        var pdf = new jsPDF('p', 'mm');
+        let ratios = [];
+        const margin = {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10,
+            inBetween: 10
+        }
+        const promises = Array.from(document.querySelectorAll('.toExport')).map(function (value, index, element) {
+            return new Promise(function (resolve, reject) {
+                html2canvas(<HTMLElement>value, {
+                    allowTaint: true,
+                    logging: false
+                }).then(function (canvas) {
+                    ratios.push({
+                        h: canvas.height,
+                        w: canvas.width
+                    });
+                    resolve(canvas.toDataURL('image/jpeg', 1.0));
+                }).catch(function (error) {
+                    reject('error in Result PDF page: ' + index);
+                });
+            });
+        });
+        var yPositionToDraw = margin.top;
+        Promise.all(promises).then( dataURLS => {
+            //console.log(dataURLS);
+            for (const ind in dataURLS) {
+                if (dataURLS.hasOwnProperty(ind)) {
+                    //console.log(ratios[ind]);
+                    var width = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
+                    var height = ratios[ind].h / ratios[ind].w * width;
+                    if (yPositionToDraw + height >= pdf.internal.pageSize.getHeight()) {
+                        yPositionToDraw = margin.top;
+                        pdf.addPage();
+                    }
+                    pdf.addImage(dataURLS[ind], 'JPEG', margin.left, yPositionToDraw, width, height);
+                    yPositionToDraw += height + margin.inBetween;
+                }
+            }
+            //pdf.save(this.project.projectName + '.pdf');
+            this.dataService.parsePdf(pdf, yPositionToDraw);
+            this.router.navigate(['/process/export']);
+        }).finally(() => this.stopLoader());
+    }
+
+    startLoader() {
+        document.getElementById('modal').style.display = 'block';
+        document.getElementById('modal').style.overflow = 'hidden';
+    }
+
+    stopLoader() {
+        document.getElementById('modal').style.display = 'none';
     }
 }

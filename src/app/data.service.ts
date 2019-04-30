@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 
+import * as jsPDF from 'jspdf';
+
 import { Project } from "./project";
 
 @Injectable({
@@ -18,6 +20,8 @@ export class DataService {
     redoStack = [];                             //Stack saving the states of the project for redo-ing purposes
 
     private currentProject: Project = new Project();        //Object containing all data of the current project
+    pdf = new jsPDF('p', 'mm');
+    drawPosition = 0;
 
     constructor(/*@Inject(SESSION_STORAGE) private sessionSt: StorageService,
                 @Inject(LOCAL_STORAGE) private localSt: StorageService*/) { }
@@ -324,5 +328,10 @@ export class DataService {
             this.currentProject.parseData(JSON.parse(jsonContent));
         }
         return this.currentProject;
+    }
+
+    parsePdf(newPDF, yPositionToDraw) {
+        this.pdf = newPDF;
+        this.drawPosition = yPositionToDraw;
     }
 }

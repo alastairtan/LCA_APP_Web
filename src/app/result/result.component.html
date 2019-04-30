@@ -1,7 +1,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
+<body id="body">
     <div class="nav">
         <button (click)="navPrev()">
             <p class="navButtonFont">
@@ -56,8 +56,8 @@
             <button *ngIf="!isHideZero" class="processButtons" (click)="isHideZero = true">
                 Hide 0s
             </button>
-            <button class="processButtons" (click)="navNext()">
-                Done
+            <button class="processButtons exportButton" (click)="startLoader(); exportPDF()">
+                Export
             </button>
         </mat-toolbar-row>
     </mat-toolbar>
@@ -68,10 +68,10 @@
                 <p class="title">
                     Generated results
                 </p>
-                <p class="matrix-title">
+                <p class="matrix-title toExport">
                     Technical Matrix
                 </p>
-                <div id="primaryContainer" *ngIf="isShowPrimary">
+                <div id="primaryContainer" class="toExport" *ngIf="isShowPrimary">
 
                     <p class="subtitle">
                         Primary Matrix
@@ -129,7 +129,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="finalContainer" class="placeholder defaultCursor" *ngIf="isShowFinal">
+                <div id="finalContainer" class="placeholder defaultCursor toExport" *ngIf="isShowFinal">
                     <p class="subtitle">
                         Final Matrix
                     </p>
@@ -143,7 +143,7 @@
                                         primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
                                         {{name}}
                                     </th>
-                                    <th class="lastColumn" *ngIf="isShowScaling" (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
+                                    <th class="lastColumn" *ngIf="isShowScaling && !isShowInverted" (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
                                         Demand vector
                                     </th>
                                 </tr>
@@ -159,7 +159,7 @@
                                         {{isHideZero && col == 0 ? "" : col}}
                                     </td>
 
-                                    <td class="leftBorder" *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                    <td class="leftBorder" *ngIf="isShowScaling && !isShowInverted" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
                                         <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
                                     </td>
                                 </tr>
@@ -168,7 +168,7 @@
                     </form>
                 </div>
 
-                <div id="invertedContainer" class="placeholder defaultCursor" *ngIf="!isShowScaling">
+                <div id="invertedContainer" class="placeholder defaultCursor toExport" *ngIf="isShowInverted">
                     <p class="subtitle">
                         Inverted Matrix
                     </p>
@@ -196,7 +196,7 @@
                     </form>
                 </div>
 
-                <div id="demandScaling" *ngIf="isShowScaling">
+                <div id="demandScaling" class="toExport" *ngIf="isShowScaling">
                     <p class="subtitle">
                         Demand and Scaling vector
                     </p>
@@ -317,7 +317,7 @@
                     </div>
                     <button mat-button mat-raised-button color="primary" (click)="randomize()">Update</button>
                 </div>
-                <div id="environmentalContainer" class="placeholder defaultCursor">
+                <div id="environmentalContainer" class="placeholder defaultCursor toExport">
                     <p class="matrix-title">
                         Environmental Matrix
                     </p>
@@ -350,3 +350,4 @@
         </div>
     </div>
 </body>
+<div class="modal" id="modal"></div>

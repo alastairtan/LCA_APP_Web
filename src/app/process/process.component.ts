@@ -10,6 +10,9 @@ import { Project } from '../project';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 
+import * as jsPDF from 'jspdf';
+import * as html2canvas from 'html2canvas';
+
 import { MaterialInput } from './MaterialInput';
 import { Line } from './Line';
 import { Output } from './Output';
@@ -181,6 +184,13 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         this.generatingComponents();
         this.generatingProcessNodes();
         this.generatingAbandonedNodes();
+
+        this.route.url.subscribe(value => {
+            if (value.length >= 2 && value[1].path == "export") {
+                this.exportPDF();
+                this.router.navigate(['result']);
+            }
+        });
     }
 
     /**
@@ -1104,7 +1114,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                             if (this.isDisplayPrompt){
                                 this.checkUnnecesaryPrompt(fromNodeIndex, toNodeIndex, outputIndex, inputIndex, input.materialName);
                             }
-                            console.log(fromNode, next);
+                            //console.log(fromNode, next);
                             break;
                         }
                     }
@@ -2712,5 +2722,42 @@ export class ProcessComponent implements AfterViewInit, OnInit {
 
     debugLog(obj) {
         console.log(obj);
+    }
+
+    exportPDF() {
+        var pdf = this.dataService.pdf;
+        var yPositionToDraw = this.dataService.drawPosition;
+        let ratios = [];
+        const margin = {
+            left: 0,
+            right: 0,
+            top: 10,
+            bottom: 10,
+            inBetween: 10
+        }
+        const promise = new Promise(function (resolve, reject) {
+                html2canvas(document.getElementById('exportDiv'), {
+                    allowTaint: true,
+                    logging: false
+                }).then(function (canvas) {
+                    ratios.push({
+                        h: canvas.height,
+                        w: canvas.width
+                    });
+                    resolve(canvas.toDataURL('image/jpeg', 1.0));
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            });
+        promise.then(dataURLS => {
+            var width = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
+            var height = ratios[0].h / ratios[0].w * width;
+            if (yPositionToDraw + height >= pdf.internal.pageSize.getHeight()) {
+                yPositionToDraw = margin.top;
+                pdf.addPage();
+            }
+            pdf.addImage(dataURLS, 'JPEG', margin.left, yPositionToDraw, width, height);
+            pdf.save(this.project.projectName + '.pdf');
+        });
     }
 }
