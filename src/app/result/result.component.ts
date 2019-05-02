@@ -484,7 +484,7 @@ export class ResultComponent implements OnInit {
                     if (j < this.project.processNodes.length) {
                         let process = this.project.processNodes[j];
                         for (let output of process.outputs) {
-                            if (output.outputName == this.economicflow[i] && output.isValuable) {
+                            if (output.outputName.toLowerCase() == this.economicflow[i].toLowerCase() && output.isValuable) {
                                 //Only allocate the output if it's valuable
                                 outputIndexArr.push(i);
                                 totalMassSum += this.result[i][j];

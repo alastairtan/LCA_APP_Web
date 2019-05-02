@@ -201,7 +201,7 @@ export class SystemBoundaryComponent implements OnInit {
                 } else if (event.ctrlKey && event.key == 'y' && this.isEditing == false) {
                     this.redo();
                 } else if (event.ctrlKey && event.key == 's' && this.isEditing == false) {
-                    this.saveToFolder();
+                    this.saveElsewhere();
                 }
                 return;
         }
@@ -214,14 +214,7 @@ export class SystemBoundaryComponent implements OnInit {
     }
     /** Default function to call when form is submitted */
     onSubmit() { }
-
-    /** Save the project file to a predetermined folder */
-    saveToFolder() {
-        var jsonContent = this.currentProject.toString();
-        var filename = this.currentProject.projectName;
-        this.dataService.saveToFolder(filename, jsonContent);
-        this.fillLastSavedHTML();
-    }
+    
     /** Save the project file to a directory of the user's choice */
     saveElsewhere() {
         var jsonContent = this.currentProject.toString();
@@ -427,10 +420,6 @@ export class SystemBoundaryComponent implements OnInit {
             console.log(' Dialog was closed')
             console.log(result)
             if (result) {
-                var choseYes = this.dataService.showDeleteConfirmation();
-                if (!choseYes) {
-                    return;
-                }
                 this.prepareForUndoableAction();
                 moveItemInArray(this.currentProject.lifeCycleStages, index, this.currentProject.lifeCycleStages.length - 1);
                 this.currentProject.lifeCycleStages.pop();

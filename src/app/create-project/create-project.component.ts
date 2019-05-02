@@ -59,7 +59,7 @@ export class CreateProjectComponent implements OnInit {
                 } else if (event.ctrlKey && event.key == 'y') {
                     this.redo();
                 } else if (event.ctrlKey && event.key == 's') {
-                    this.saveToFolder();
+                    this.saveElsewhere();
                 }
                 return;
         }
@@ -111,14 +111,6 @@ export class CreateProjectComponent implements OnInit {
         picContent.style.display = "block";
         pic.style.display = "block";
         label.style.display = "none";
-    }
-
-    /** Save the project file to a predetermined folder */
-    saveToFolder() {
-        var jsonContent = this.currentProject.toString();
-        var filename = this.currentProject.projectName;
-        this.dataService.saveToFolder(filename, jsonContent);
-        this.fillLastSavedHTML();
     }
 
     /** Save the project file to a directory of the user's choice */

@@ -1386,10 +1386,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
      * @param index index of the input to delete
      */
     deleteDetail(tab: string, index: number) {
-        var choseYes = this.dataService.showDeleteConfirmation();
-        if (!choseYes) {
-            return;
-        }
         this.prepareForUndoableAction();
         let rectObj = this.project.processNodes[this.currentlySelectedNode.data('key')];
         //console.log(rectObj.materialInput);
@@ -1661,7 +1657,7 @@ export class ProcessComponent implements AfterViewInit, OnInit {
                 } else if (event.ctrlKey && event.key == 'y') {
                     this.redo();
                 } else if (event.ctrlKey && event.key == 's') {
-                    this.saveToFolder();
+                    this.saveElsewhere();
                 }
                 break;
         }
@@ -2166,10 +2162,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
             dialogRef.afterClosed().subscribe(result => {
                 console.log(' Dialog was closed')
                 if (result) {
-                    var choseYes = this.dataService.showDeleteConfirmation();
-                    if (!choseYes) {
-                        return;
-                    }
                     let index = rect.data('key');
                     this.prepareForUndoableAction();
 
@@ -2538,13 +2530,6 @@ export class ProcessComponent implements AfterViewInit, OnInit {
     /** Default function to call when form is submitted */
     onSubmit() { }
 
-    /** Save the project file to a predetermined folder */
-    saveToFolder() {
-        var jsonContent = this.getJsonData();
-        var filename = this.project.projectName;
-        this.dataService.saveToFolder(filename, jsonContent);
-        this.fillLastSavedHTML();
-    }
     /** Save the project file to a directory of the user's choice */
     saveElsewhere() {
         var jsonContent = this.getJsonData();
