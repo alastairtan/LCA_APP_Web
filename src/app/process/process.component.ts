@@ -9,8 +9,6 @@ import { Router } from '@angular/router';
 import { Project } from '../project';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
-
-import * as jsPDF from 'jspdf';
 import * as html2canvas from 'html2canvas';
 
 import { MaterialInput } from './MaterialInput';
@@ -2709,40 +2707,30 @@ export class ProcessComponent implements AfterViewInit, OnInit {
         console.log(obj);
     }
 
+    /**
+     * "Screen capture" the process flow,
+     * then pass it to the dataService, ready to be exported into pdf
+     */
     exportPDF() {
-        var pdf = this.dataService.pdf;
-        var yPositionToDraw = this.dataService.drawPosition;
-        let ratios = [];
-        const margin = {
-            left: 0,
-            right: 0,
-            top: 10,
-            bottom: 10,
-            inBetween: 10
-        }
+        //Find the element with id 'exporttDiv', screen capture it, then pass the image data to a promise
+        let imageHeight = 0;
+        let imageWidth = 0;
         const promise = new Promise(function (resolve, reject) {
                 html2canvas(document.getElementById('exportDiv'), {
                     allowTaint: true,
                     logging: false
                 }).then(function (canvas) {
-                    ratios.push({
-                        h: canvas.height,
-                        w: canvas.width
-                    });
+                    imageHeight = canvas.height;
+                    imageWidth = canvas.width;
                     resolve(canvas.toDataURL('image/jpeg', 1.0));
                 }).catch(function (error) {
                     console.log(error);
                 });
-            });
-        promise.then(dataURLS => {
-            var width = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
-            var height = ratios[0].h / ratios[0].w * width;
-            if (yPositionToDraw + height >= pdf.internal.pageSize.getHeight()) {
-                yPositionToDraw = margin.top;
-                pdf.addPage();
-            }
-            pdf.addImage(dataURLS, 'JPEG', margin.left, yPositionToDraw, width, height);
-            pdf.save(this.project.projectName + '.pdf');
+        });
+        //Pass the image data to dataService, then export it
+        promise.then(dataURL => {
+            this.dataService.addImage(dataURL, imageWidth, imageHeight, true);
+            this.dataService.exportPDF();
         });
     }
 }

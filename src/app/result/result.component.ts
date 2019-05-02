@@ -7,8 +7,6 @@ import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
-
-import * as jsPDF from 'jspdf';
 import * as html2canvas from 'html2canvas';
 
 import { Project } from '../project';
@@ -1078,21 +1076,19 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    /**
+     * "Screen capture" the elements of the toExport class, 
+     * then pass them into the dataService, ready to be exported into pdf
+     */
     exportPDF() {
+        //Show all relevant matrices to be exported
         this.isShowPrimary = true;
         this.isShowFinal = true;
         this.isShowScaling = true;
         this.isShowInverted = true;
         this.cd.detectChanges();
-        var pdf = new jsPDF('p', 'mm');
+        //Find all elements of the toExport class, screen capture them, then pass the image data to an array of promises
         let ratios = [];
-        const margin = {
-            left: 10,
-            right: 10,
-            top: 10,
-            bottom: 10,
-            inBetween: 10
-        }
         const promises = Array.from(document.querySelectorAll('.toExport')).map(function (value, index, element) {
             return new Promise(function (resolve, reject) {
                 html2canvas(<HTMLElement>value, {
@@ -1109,33 +1105,29 @@ export class ResultComponent implements OnInit {
                 });
             });
         });
-        var yPositionToDraw = margin.top;
+        //Pass the image data to dataService, then navigate to Process component
         Promise.all(promises).then( dataURLS => {
-            //console.log(dataURLS);
             for (const ind in dataURLS) {
                 if (dataURLS.hasOwnProperty(ind)) {
-                    //console.log(ratios[ind]);
-                    var width = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
-                    var height = ratios[ind].h / ratios[ind].w * width;
-                    if (yPositionToDraw + height >= pdf.internal.pageSize.getHeight()) {
-                        yPositionToDraw = margin.top;
-                        pdf.addPage();
-                    }
-                    pdf.addImage(dataURLS[ind], 'JPEG', margin.left, yPositionToDraw, width, height);
-                    yPositionToDraw += height + margin.inBetween;
+                    this.dataService.addImage(dataURLS[ind], ratios[ind].w, ratios[ind].h);
                 }
             }
-            //pdf.save(this.project.projectName + '.pdf');
-            this.dataService.parsePdf(pdf, yPositionToDraw);
             this.router.navigate(['/process/export']);
-        }).finally(() => this.stopLoader());
+        }).finally(() => {
+            //Hide the loader after compiling the pdf
+            setTimeout(() => {
+                this.stopLoader();
+            }, 1000);
+        });
     }
 
+    //Show the loader
     startLoader() {
         document.getElementById('modal').style.display = 'block';
         document.getElementById('modal').style.overflow = 'hidden';
     }
 
+    //Hide the loader
     stopLoader() {
         document.getElementById('modal').style.display = 'none';
     }

@@ -20,8 +20,7 @@ export class DataService {
     redoStack = [];                             //Stack saving the states of the project for redo-ing purposes
 
     private currentProject: Project = new Project();        //Object containing all data of the current project
-    pdf = new jsPDF('p', 'mm');
-    drawPosition = 0;
+    drawList: any[] = [];
 
     constructor() { }
 
@@ -280,8 +279,54 @@ export class DataService {
         return this.currentProject;
     }
 
-    parsePdf(newPDF, yPositionToDraw) {
-        this.pdf = newPDF;
-        this.drawPosition = yPositionToDraw;
+    /**
+     * Add an image to the list, ready to be exported to pdf
+     * @param imageData URL data of the image to be exported
+     * @param imageWidth original width of the image
+     * @param imageHeight original height of the image
+     * @param toFront whether to put the image to the front of the queue, or at the back. Default is false
+     */
+    addImage(imageData, imageWidth, imageHeight, toFront?: boolean) {
+        if (toFront == undefined)
+            toFront = false;
+        if (toFront) {
+            this.drawList.unshift({
+                data: imageData,
+                width: imageWidth,
+                height: imageHeight
+            });
+        } else {
+            this.drawList.push({
+                data: imageData,
+                width: imageWidth,
+                height: imageHeight
+            });
+        }
+    }
+
+    /**
+     * Export all images from the drawList to pdf
+     */
+    exportPDF() {
+        var pdf = new jsPDF('p', 'mm');
+        const margin = {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10,
+            inBetween: 10
+        }
+        var yPositionToDraw = margin.top;
+        for (let image of this.drawList) {
+            var rescaledWidth = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
+            var rescaledHeight = image.height / image.width * rescaledWidth;
+            if (yPositionToDraw + rescaledHeight >= pdf.internal.pageSize.getHeight()) {
+                yPositionToDraw = margin.top;
+                pdf.addPage();
+            }
+            pdf.addImage(image.data, 'JPEG', margin.left, yPositionToDraw, rescaledWidth, rescaledHeight);
+            yPositionToDraw += rescaledHeight + margin.inBetween;
+        }
+        pdf.save(this.currentProject.projectName + '.pdf');
     }
 }
