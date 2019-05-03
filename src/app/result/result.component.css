@@ -40,7 +40,7 @@ table {
     width: var(--expanded-width);
 }
 
-#finalTable, #finalTable2, #invertedTable, #environmentTable {
+#finalTable, #finalTable2, #demandTable, #invertedTable, #environmentTable {
     width: 100%;
 }
 
@@ -51,11 +51,6 @@ td, th {
     position: relative;
     outline: 0;
 }
-
-tr:nth-child(even) {
-    background-color: #dddddd;
-}
-
 .primaryProcess {
     background: #84ffa3;
 }
@@ -99,6 +94,14 @@ thead th, .bottomBorder {
 .highlightedDblClick {
     background-color: #ffdcd1;
     cursor: pointer;
+}
+
+.demandInput {
+    background-color: #9effe7;
+}
+
+.demandOutput {
+    background-color: #9eb7ff;
 }
 
 .subtitle {
@@ -150,6 +153,39 @@ thead th, .bottomBorder {
         background: #9effb6;
     }
 
+.demandButtonContainer {
+    width: 100%;
+    text-align: center;
+    margin: auto auto;
+}
+
+    .demandButtonContainer table {
+        margin: 0 auto;
+    }
+
+    .demandButtonContainer button {
+        border: 2px solid #a7a9ab;
+        background: #f5f5f5;
+        width: 60%;
+        border-radius: 5px;
+        padding: 4px;
+        margin: 4px auto;
+    }
+
+        .demandButtonContainer button:hover {
+            background: #e8e9e9;
+        }
+
+    .demandButtonContainer .selectedProcessButton {
+        border: 2px solid #ff6a38;
+        background: #ffa384;
+    }
+
+        .demandButtonContainer .selectedProcessButton:hover {
+            border: 2px solid #ff6a38;
+            background: #ffc9b7;
+        }
+
 .modal {
     display: none;
     position: fixed;
@@ -167,4 +203,8 @@ body.loading .modal {
 
 body.loading .modal {
     display: block;
+}
+
+tr:nth-child(even) {
+    background: #dddddd;
 }

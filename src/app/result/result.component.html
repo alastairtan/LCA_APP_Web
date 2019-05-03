@@ -175,6 +175,14 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <tr *ngIf="isShowScaling">
+                                    <th style="font-weight:300" class="bottomBorder" (mouseenter)="onMouseOver(5, -1, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == -1}">Scaling vector</th>
+                                    <td *ngFor="let val of scalingVector; let i = index" class="bottomBorder"
+                                        [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == i || hoveredRow == -1), rightBorder: i == primary[0].length - 1 || i == expanded[0].length - 1 || i == processName.length - 1}">
+                                        <input type="number" disabled value="{{scalingVector[i]}}" />
+                                    </td>
+                                    <td style="text-align:center" class="bottomBorder">-----</td>
+                                </tr>
                                 <tr *ngFor="let row of result; let val of demandVector.value; let i = index;">
                                     <th style="font-weight:300" (mouseenter)="onMouseOver(3, i, null)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredRow == i}">
                                         {{economicflow[i]}}
@@ -227,34 +235,71 @@
                         Demand and Scaling vector
                     </p>
                     <div class="row">
-                        <div class="col-md-3"></div>
-                        <div class="col-md-6">
+                        <div class="col-md-4 demandButtonContainer">
+                            <h6 *ngIf="demandInput.length != 0 || demandOutput.length != 0">Legends</h6>
+                            <table *ngIf="demandInput.length != 0 || demandOutput.length != 0">
+                                <thead>
+                                    <tr>
+                                        <th class="rightBorder">Color</th>
+                                        <th>Meaning</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="demandInput rightBorder"></td>
+                                        <td>Input</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="demandOutput rightBorder"></td>
+                                        <td>Output</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
                             <form [formGroup]="demandVectorForm" id="demandVectorForm">
-                                <table formArrayName="inputs">
+                                <table id="demandTable" formArrayName="inputs">
                                     <thead>
                                         <tr>
                                             <th class="rightBorder">Entity</th>
                                             <th>Demand vector</th>
-                                            <th>Scaling vector</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let val of demandVector.controls; let i = index;">
-                                            <th style="font-weight:300">
+                                            <th style="font-weight:300" [ngClass]="{demandInput: demandInput.includes(i), demandOutput: demandOutput.includes(i)}">
                                                 {{economicflow[i]}}
                                             </th>
-                                            <td [formGroupName]="i">
+                                            <!--When no process is chosen-->
+                                            <td *ngIf="demandInput.length == 0 && demandOutput.length == 0" [formGroupName]="i" [ngClass]="{demandInput: demandInput.includes(i), demandOutput: demandOutput.includes(i)}">
                                                 <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
                                             </td>
-                                            <td>
-                                                <input type="number" disabled value="{{scalingVector[i]}}" />
+                                            <!--When a process is chosen, but this entity is not included-->
+                                            <td *ngIf="(demandInput.length > 0 || demandOutput.length > 0) && !demandInput.includes(i) && !demandOutput.includes(i)" [formGroupName]="i" [ngClass]="{demandInput: demandInput.includes(i), demandOutput: demandOutput.includes(i)}">
+                                                <input type="number" autocomplete="off" disabled value="0" />
+                                            </td>
+                                            <!--When a process is chosen, and this entity is an input-->
+                                            <td *ngIf="demandInput.includes(i) && !demandOutput.includes(i) " [formGroupName]="i" [ngClass]="{demandInput: demandInput.includes(i), demandOutput: demandOutput.includes(i)}">
+                                                <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
+                                            </td>
+                                            <!--When a process is chosen, and this entity is an output-->
+                                            <td *ngIf="!demandInput.includes(i) && demandOutput.includes(i) " [formGroupName]="i" [ngClass]="{demandInput: demandInput.includes(i), demandOutput: demandOutput.includes(i)}">
+                                                <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </form>
                         </div>
-                        <div class="col-md-3"></div>
+                        <div class="col-md-4">
+                            <div class="demandButtonContainer">
+                                <h6>Click to highlight a process</h6>
+                                <button *ngFor="let name of primaryProcessName; let i = index" (click)="showDemand(i)"
+                                        [ngClass]="{selectedProcessButton: selectedProcess == i}">
+                                    {{name}}
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

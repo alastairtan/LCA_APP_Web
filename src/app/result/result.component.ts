@@ -97,6 +97,9 @@ export class ResultComponent implements OnInit {
     hoveredRow = null;
     hoveredCol = null;
     rowCount = 0;
+    demandInput: number[] = [];
+    demandOutput: number[] = [];
+    selectedProcess: number = -1;
 
     //Variables for bar chart drawing
     barChartOptions: ChartOptions = {
@@ -578,6 +581,57 @@ export class ResultComponent implements OnInit {
     }
 
     /**
+     * Highlight inputs and outputs of a process on the demandVector table,
+     * switch all other values to 0, then recalculate the scaling vector
+     * @param index index of the process to highlight
+     */
+    showDemand(index) {
+        this.demandInput = [];
+        this.demandOutput = [];
+        //Deselect
+        if (this.selectedProcess == index) {
+            this.selectedProcess = -1;
+            this.calculateScalingVector();
+            return;
+        }
+        this.selectedProcess = index;
+        //GLOBAL NETWORK case
+        if (index < 0) {
+            this.calculateScalingVector();
+            return;
+        }
+        //Include all inputs of the process
+        var proc = this.project.processNodes[index];
+        for (let input of proc.materialInput) {
+            for (let i = 0; i < this.economicflow.length; i++) {
+                if (input.materialName.toLowerCase() == this.economicflow[i].toLowerCase()) {
+                    this.demandInput.push(i);
+                    break;
+                }
+            }
+        }
+        //Include all outputs of the process
+        for (let output of proc.outputs) {
+            for (let i = 0; i < this.economicflow.length; i++) {
+                if (output.outputName.toLowerCase() == this.economicflow[i].toLowerCase()) {
+                    this.demandOutput.push(i);
+                    break;
+                }
+            }
+        }
+        //Extract the partial demand vector based on inputs and outputs, then recalculate the scaling vector
+        var partialDemandVector: number[] = [];
+        for (let i = 0; i < this.demandVector.value.length; i++) {
+            if (this.demandInput.includes(i) || this.demandOutput.includes(i)) {
+                partialDemandVector.push(this.demandVector.value[i]['value']);
+            } else {
+                partialDemandVector.push(0);
+            }
+        }
+        this.calculateScalingVector(true, partialDemandVector);
+    }
+
+    /**
      * Function for matrix calculation and catching errors
      * */
     doMatrixCalculation() {
@@ -588,7 +642,7 @@ export class ResultComponent implements OnInit {
         } else if (this.result.length != this.result[0].length) {
             errors.push('ERROR: Matrix is not square. There must be some errors in the data input step');
         } else if (this.resultEnvironmental.length <= 0) {
-            errors.push('ERROR: No emission data found for the Environmental matrix. Add data for emission for every pro');
+            errors.push('ERROR: No emission data found for the Environmental matrix. Add data for emission for every process');
         }
         if (errors.length > 0) {
             var errorText = '';
@@ -617,13 +671,21 @@ export class ResultComponent implements OnInit {
 
     /**
      * Invert the result matrix and calculate the scaling vector based on the demand vector
-     * */
-    calculateScalingVector() {
+     * @param partialDemand Whether to calculate from the partial demand vector or not. Default is false
+     * @param partialDemandVector the partial demand vector to calculate from
+     */
+    calculateScalingVector(partialDemand?: boolean, partialDemandVector?: number[]) {
+        if (partialDemand == undefined) {
+            partialDemand = false
+        }
         var scalingVec: Matrix;
         if (this.result.length <= 0 || this.result.length != this.result[0].length) {
             scalingVec = Matrix.ones(this.result.length, 1);
             this.cumulativeEnvironmental = Matrix.zeros(this.resultEnvironmental.length, 1).to1DArray();
             return;
+        } else if (partialDemand) {
+            var demandVec = Matrix.columnVector(partialDemandVector);
+            scalingVec = this.invertedMatrix.mmul(demandVec);
         } else {
             var demandVectorValue = [];
             for (let val of this.demandVector.value) {
@@ -641,15 +703,9 @@ export class ResultComponent implements OnInit {
             //Set the values to 3dp, if they are not integer
             for (let i = 0; i < this.scalingVector.length; i++) {
                 this.scalingVector[i] = this.normalizeFloat(this.scalingVector[i]);
-                /*let value = this.scalingVector[i];
-                if (value - parseInt(value) != 0)
-                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);*/
             }
             for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
                 this.cumulativeEnvironmental[i] = this.normalizeFloat(this.cumulativeEnvironmental[i]);
-                /*let value = this.cumulativeEnvironmental[i];
-                if (value - parseInt(value) != 0)
-                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);*/
             }
         }
         
