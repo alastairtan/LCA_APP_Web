@@ -157,7 +157,7 @@
                                     <th class="rightBorder">#</th>
                                     <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
                                         style="text-align: center"
-                                        [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
+                                        [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1 || j == processName.length - 1,
                                         primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
                                         {{j + 1}}
                                     </th>
@@ -262,7 +262,7 @@
                                     <thead>
                                         <tr>
                                             <th class="rightBorder">Entity</th>
-                                            <th>Demand vector</th>
+                                            <th class="lastColumn">Demand vector</th>
                                         </tr>
                                     </thead>
                                     <tbody>
