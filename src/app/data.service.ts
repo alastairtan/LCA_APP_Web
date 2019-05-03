@@ -22,6 +22,16 @@ export class DataService {
     private currentProject: Project = new Project();        //Object containing all data of the current project
     drawList: any[] = [];
 
+    pdf: jsPDF;
+    private margin = {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10,
+        inBetween: 10
+    }
+    private yPos = this.margin.top * 2;
+
     constructor() { }
 
     /**
@@ -308,25 +318,92 @@ export class DataService {
      * Export all images from the drawList to pdf
      */
     exportPDF() {
-        var pdf = new jsPDF('p', 'mm');
-        const margin = {
-            left: 10,
-            right: 10,
-            top: 10,
-            bottom: 10,
-            inBetween: 10
+        //Create a new pdf for each import
+        this.pdf = new jsPDF('p', 'mm');
+        this.pdf.setFont('Raleway', 'Medium')
+        //Write all the text data on the first page
+        this.writeText(this.currentProject.projectName, 'center', 40);
+        this.pdf.setFontStyle('bold');
+        this.writeText('Goals', 'left', 28);
+        this.pdf.setFontStyle('normal');
+        if (this.currentProject.objective != '') {
+            this.writeText('Objective', 'left', 20, 20);
+            this.writeText(this.currentProject.objective, 'left', 14, 30);
         }
-        var yPositionToDraw = margin.top;
+        if (this.currentProject.targetAudience != '') {
+            this.writeText('Target Audience', 'left', 20, 20);
+            this.writeText(this.currentProject.targetAudience, 'left', 14, 30);
+        }
+        this.yPos += 5;
+        this.pdf.setFontStyle('bold');
+        this.writeText('Scope', 'left', 28);
+        this.pdf.setFontStyle('normal');
+        if (this.currentProject.scopeName != '') {
+            this.writeText('Product/Service name', 'left', 20, 20);
+            this.writeText(this.currentProject.scopeName, 'left', 14, 30);
+        }
+        if (this.currentProject.scopeDescription != '') {
+            this.writeText('Product/Service description', 'left', 20, 20);
+            this.writeText(this.currentProject.scopeDescription, 'left', 14, 30);
+        }
+        this.yPos += 5;
+        this.pdf.setFontStyle('bold');
+        this.writeText('System Boundary', 'left', 28);
+        this.pdf.setFontStyle('normal');
+        if (this.currentProject.systemDescription != '') {
+            this.writeText('System Boundary description', 'left', 20, 20);
+            this.writeText(this.currentProject.systemDescription, 'left', 14, 30);
+        }
+        if (this.currentProject.systemExclusion != '') {
+            this.writeText('Exclusion', 'left', 20, 20);
+            this.writeText(this.currentProject.systemExclusion, 'left', 14, 30);
+        }
+        this.yPos += 5;
+        this.pdf.addPage();
+        //Draw all images from drawList
+        var yPositionToDraw = this.margin.top;
         for (let image of this.drawList) {
-            var rescaledWidth = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
+            var rescaledWidth = this.pdf.internal.pageSize.getWidth() - this.margin.left - this.margin.right;
             var rescaledHeight = image.height / image.width * rescaledWidth;
-            if (yPositionToDraw + rescaledHeight >= pdf.internal.pageSize.getHeight()) {
-                yPositionToDraw = margin.top;
-                pdf.addPage();
+            if (yPositionToDraw + rescaledHeight >= this.pdf.internal.pageSize.getHeight()) {
+                yPositionToDraw = this.margin.top;
+                this.pdf.addPage();
             }
-            pdf.addImage(image.data, 'JPEG', margin.left, yPositionToDraw, rescaledWidth, rescaledHeight);
-            yPositionToDraw += rescaledHeight + margin.inBetween;
+            this.pdf.addImage(image.data, 'JPEG', this.margin.left, yPositionToDraw, rescaledWidth, rescaledHeight);
+            yPositionToDraw += rescaledHeight + this.margin.inBetween;
         }
-        pdf.save(this.currentProject.projectName + '.pdf');
+        this.pdf.save(this.currentProject.projectName + '.pdf');
+    }
+
+    private writeText(text: string, align: string, fontSize?: number, x?: number, y?: number) {
+        
+        if (text == null || text == '') {
+            return;
+        }
+        if (x == undefined) {
+            x = this.margin.left;
+        }
+        if (y == undefined) {
+            y = this.yPos;
+        }
+        if (fontSize != undefined) {
+            this.pdf.setFontSize(fontSize);
+        }
+        console.log('print at', x, y)
+        switch (align) {
+            case 'center':
+                var xOffset = (this.pdf.internal.pageSize.getWidth() / 2) - (this.pdf.getStringUnitWidth(text) * this.pdf.internal.getFontSize() * 25.6 / 72 / 2);
+                this.pdf.text(text, xOffset, y);
+                break;
+            case 'left':
+                this.pdf.text(text, x, y);
+                break;
+            case 'right':
+                var xOffset = this.pdf.internal.pageSize.getWidth() - this.margin.right - (this.pdf.getStringUnitWidth(text) * this.pdf.internal.getFontSize() * 25.6 / 72);
+                this.pdf.text(text, xOffset, y);
+                break;
+        }
+        var yOffset = this.pdf.getLineHeight() * 1.15 * 25.6 / 72;
+        this.yPos += yOffset < 15 ? 15 : yOffset;
     }
 }
