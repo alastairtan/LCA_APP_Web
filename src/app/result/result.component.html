@@ -1,7 +1,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
+<body id="body">
     <div class="nav">
         <button (click)="navPrev()">
             <p class="navButtonFont">
@@ -11,7 +11,6 @@
     </div>
     <mat-toolbar>
         <mat-toolbar-row (click)="setTableWidth()">
-
             <button class="processButtons" (click)="navPrev()">
                 Previous
             </button>
@@ -51,8 +50,14 @@
             <button *ngIf="!input" class="processButtons" (click)="showManualInputMatrix()">
                 Input Matrix
             </button>
-            <button class="processButtons" (click)="navNext()">
-                Done
+            <button *ngIf="isHideZero" class="processButtons viewButton" (click)="isHideZero = false">
+                Hide 0s
+            </button>
+            <button *ngIf="!isHideZero" class="processButtons" (click)="isHideZero = true">
+                Hide 0s
+            </button>
+            <button class="processButtons exportButton" (click)="startLoader(); exportPDF()">
+                Export
             </button>
         </mat-toolbar-row>
     </mat-toolbar>
@@ -63,10 +68,10 @@
                 <p class="title">
                     Generated results
                 </p>
-                <p class="matrix-title">
+                <p class="matrix-title toExport">
                     Technical Matrix
                 </p>
-                <div id="primaryContainer" *ngIf="isShowPrimary">
+                <div id="primaryContainer" class="toExport" *ngIf="isShowPrimary">
 
                     <p class="subtitle">
                         Primary Matrix
@@ -89,7 +94,7 @@
                                 <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(1, i, j)"
                                     [ngClass]="{highlighted: hoveredTable == 1 && (hoveredCol == j || hoveredRow == i),
                                                     highlightedDblClick: hoveredTable == 1 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
-                                    {{col}}
+                                    {{isHideZero && col == 0 ? "" : col}}
                                 </td>
                             </tr>
                         </tbody>
@@ -116,15 +121,15 @@
                                     {{economicflow[i]}}
                                 </th>
                                 <td *ngFor="let col of row; let j = index; let l = count" (mouseenter)="onMouseOver(2, i, j)"
-                                    [ngClass]="{highlighted: hoveredTable == 2 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1, 
+                                    [ngClass]="{highlighted: hoveredTable == 2 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1,
                                                 highlightedDblClick: hoveredTable == 2 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
-                                    {{col}}
+                                    {{isHideZero && col == 0 ? "" : col}}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div id="finalContainer" class="placeholder defaultCursor" *ngIf="isShowFinal">
+                <div id="finalContainer" class="placeholder defaultCursor toExport" *ngIf="isShowFinal">
                     <p class="subtitle">
                         Final Matrix
                     </p>
@@ -138,7 +143,7 @@
                                         primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
                                         {{name}}
                                     </th>
-                                    <th class="lastColumn" *ngIf="isShowScaling" (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
+                                    <th class="lastColumn" *ngIf="isShowScaling && !isShowInverted" (mouseenter)="onMouseOver(3, null, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == rowCount + 2}">
                                         Demand vector
                                     </th>
                                 </tr>
@@ -149,12 +154,12 @@
                                         {{economicflow[i]}}
                                     </th>
                                     <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(3, i, j)"
-                                        [ngClass]="{highlighted: hoveredTable == 3 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1, 
+                                        [ngClass]="{highlighted: hoveredTable == 3 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
                                                     highlightedDblClick: hoveredTable == 3 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
-                                        {{col}}
+                                        {{isHideZero && col == 0 ? "" : col}}
                                     </td>
 
-                                    <td *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
+                                    <td class="leftBorder" *ngIf="isShowScaling && !isShowInverted" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
                                         <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
                                     </td>
                                 </tr>
@@ -163,33 +168,27 @@
                     </form>
                 </div>
 
-                <div id="invertedContainer" class="placeholder defaultCursor">
+                <div id="invertedContainer" class="placeholder defaultCursor toExport" *ngIf="isShowInverted">
                     <p class="subtitle">
                         Inverted Matrix
                     </p>
                     <form [formGroup]="demandVectorForm" id="demandVectorForm2">
-                        <table formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
+                        <table id="invertedTable" formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
                             <thead>
                                 <tr>
-                                    <th>Number</th>
-                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredCol == j}">
-                                        {{j}}
+                                    <th class="rightBorder">Number</th>
+                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(6, null, j)" [ngClass]="{highlighted: hoveredTable == 6 && hoveredCol == j}">
+                                        {{j + 1}}
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let row of invertedMatrix; let val of demandVector.value; let i = index;">
-                                    <th style="font-weight:300" (mouseenter)="onMouseOver(3, i, null)" [ngClass]="{highlighted: hoveredTable == 3 && hoveredRow == i}">
-                                        {{i}}
+                                    <th style="font-weight:300" (mouseenter)="onMouseOver(6, i, null)" [ngClass]="{highlighted: hoveredTable == 6 && hoveredRow == i}">
+                                        {{i + 1}}
                                     </th>
-                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(3, i, j)"
-                                        [ngClass]="{highlighted: hoveredTable == 3 && (hoveredCol == j || hoveredRow == i),
-                                                    highlightedDblClick: hoveredTable == 3 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
-                                        {{col}}
-                                    </td>
-                                    <td *ngIf="isShowScaling" [formGroupName]="i" style="width:5vw" (mouseenter)="onMouseOver(3, i, rowCount + 2)" [ngClass]="{highlighted: hoveredTable == 3 && (hoveredRow == i || hoveredCol == rowCount + 2)}">
-                                        <input type="number" autocomplete="off" formControlName="value" (change)="updateDemand(i, $event.target.value); calculateScalingVector()" />
-
+                                    <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(6, i, j)" [ngClass]="{highlighted: hoveredTable == 6 && (hoveredCol == j || hoveredRow == i)}">
+                                        {{isHideZero && col == 0 ? "" : normalizeFloat(col)}}
                                     </td>
                                 </tr>
                             </tbody>
@@ -197,7 +196,7 @@
                     </form>
                 </div>
 
-                <div id="demandScaling" *ngIf="isShowScaling">
+                <div id="demandScaling" class="toExport" *ngIf="isShowScaling">
                     <p class="subtitle">
                         Demand and Scaling vector
                     </p>
@@ -265,7 +264,7 @@
                                 <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(4, i, j)"
                                     [ngClass]="{highlighted: hoveredTable == 4 && (hoveredCol == j || hoveredRow == i),
                                                     highlightedDblClick: hoveredTable == 4 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 1, col, economicflow[i])">
-                                    {{col}}
+                                    {{isHideZero && col == 0 ? "" : col}}
                                 </td>
                             </tr>
                             <tr>
@@ -318,7 +317,7 @@
                     </div>
                     <button mat-button mat-raised-button color="primary" (click)="randomize()">Update</button>
                 </div>
-                <div id="environmentalContainer" class="placeholder defaultCursor">
+                <div id="environmentalContainer" class="placeholder defaultCursor toExport">
                     <p class="matrix-title">
                         Environmental Matrix
                     </p>
@@ -340,7 +339,7 @@
                                 <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)"
                                     [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
                                                 highlightedDblClick: hoveredTable == 5 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
-                                    {{col}}
+                                    {{isHideZero && col == 0 ? "" : col}}
                                 </td>
                                 <td *ngIf="isShowScaling" class="leftBorder">{{cumulativeEnvironmental[i]}}</td>
                             </tr>
@@ -348,7 +347,7 @@
                     </table>
                 </div>
             </div>
-            <!-- Show last saved timing at the bottom right hand corner-->
         </div>
     </div>
 </body>
+<div class="modal" id="modal"></div>

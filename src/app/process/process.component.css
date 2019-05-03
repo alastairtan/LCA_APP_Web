@@ -14,6 +14,14 @@
     background: white;
 }
 
+.heading, .heading p {
+    text-align: center;
+    font-size: 1.5vw;
+    font-weight: 500;
+    padding: 0;
+    margin: 0;
+}
+
 .processBoxContainer {
     display: block;
     height: 55vh;

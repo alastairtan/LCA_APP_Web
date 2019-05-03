@@ -15,7 +15,9 @@ const routes: Routes = [
     { path: 'systemBoundary', component: SystemBoundaryComponent },
     { path: 'process', component: ProcessComponent },
     { path: 'process/:processId/:tab/:name', component: ProcessComponent },
+    { path: 'process/export', component: ProcessComponent },
     { path: 'result', component: ResultComponent },
+    { path: 'result/export', component: ResultComponent },
     { path: 'projectFooter', component: ProjectFooterComponent }
 ];
 

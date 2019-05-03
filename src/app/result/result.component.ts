@@ -1,5 +1,4 @@
-
-import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef, Inject} from '@angular/core';
 import { DataService } from "../data.service";
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormControl } from '@angular/forms';
@@ -7,11 +6,42 @@ import { Matrix, inverse } from 'ml-matrix';
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
+
+import * as jsPDF from 'jspdf';
+import * as html2canvas from 'html2canvas';
 
 import { Project } from '../project';
 import { Rect } from '../process/Rect';
 import { MaterialInput } from '../process/MaterialInput';
 import { Output } from '../process/Output';
+
+@Component({
+    selector: 'app-dialog',
+    templateUrl: '../dialog/dialog.component.html'
+})
+
+export class Dialog {
+    text: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+        this.text = data.text
+    }
+}
+
+@Component({
+    selector: 'app-confirmationDialog',
+    templateUrl: '../dialog/confirmationDialog.html'
+})
+
+export class confirmationDialog {
+    text: String;
+    action: String;
+    constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+        this.text = data.text;
+        this.action = data.action;
+    }
+
+}
 
 @Component({
     selector: 'app-result',
@@ -51,6 +81,8 @@ export class ResultComponent implements OnInit {
     isShowExpanded: Boolean = true;
     isShowFinal: Boolean = true;
     isShowScaling: Boolean = false;
+    isShowInverted: Boolean = true;
+    isHideZero: Boolean = false;
     input: Boolean = false;
 
     //manual input of matrix
@@ -94,10 +126,9 @@ export class ResultComponent implements OnInit {
     barChartLabels: Label[] = [];
     barChartData: ChartDataSets[] = [];
 
-    constructor(private dataService: DataService,
-                private router: Router,
-                private cd: ChangeDetectorRef,
-                private fb: FormBuilder) { }
+    constructor(private dataService: DataService, private router: Router,
+                private cd: ChangeDetectorRef, private fb: FormBuilder,
+                public dialog: MatDialog) { }
 
     ngOnInit() {
         //do not show manual input 
@@ -124,10 +155,7 @@ export class ResultComponent implements OnInit {
             this.isShowExpanded = false;
         if (this.processName.length == this.primaryProcessName.length)
             this.isShowFinal = false;
-        if (this.result.length == this.result[0].length) {
-            this.invertedMatrix = inverse(new Matrix(this.result));
-        }
-        this.calculateScalingVector();
+        this.doMatrixCalculation();
         //this.checkMatrixForMultipleSources();
         this.generateChart();
         this.setTableWidth();
@@ -212,7 +240,7 @@ export class ResultComponent implements OnInit {
 
     environmentVarexist(name: String) {
         for (let i = 0; i < this.environmentalflow.length; i++) {
-            if (this.environmentalflow[i] == name) {
+            if (this.environmentalflow[i].toLowerCase() == name.toLowerCase()) {
                 return i;
             }
         }
@@ -437,6 +465,9 @@ export class ResultComponent implements OnInit {
 
     //allocation
     allocationOfOutputs() {
+        if (this.result == undefined || this.result.length <= 0) {
+            return;
+        }
         let colLength = this.result[0].length;
         for (let j = 0; j < colLength; j++) {
             
@@ -539,8 +570,51 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    /**
+     * Update demand vector from html elements
+     * @param index index of the row in the demand vector to be changed
+     * @param newValue new value of the row
+     */
     updateDemand(index, newValue) {
         this.demandVector.at(index).setValue({ value: parseFloat(newValue) });
+    }
+
+    /**
+     * Function for matrix calculation and catching errors
+     * */
+    doMatrixCalculation() {
+        //ERROR handling
+        var errors: string[] = [];
+        if (this.result == undefined || this.result.length <= 0) {
+            errors.push('ERROR: No data was entered for the matrix calculation');
+        } else if (this.result.length != this.result[0].length) {
+            errors.push('ERROR: Matrix is not square. There must be some errors in the data input step');
+        } else if (this.resultEnvironmental.length <= 0) {
+            errors.push('ERROR: No emission data found for the Environmental matrix. Add data for emission for every pro');
+        }
+        if (errors.length > 0) {
+            var errorText = '';
+            for (let text of errors) {
+                errorText = errorText + text + '\n';
+            }
+            //Show dialog, then navigate away
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = true;
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                id: 1,
+                text: 'what'
+            };
+            //const dialogRef = this.dialog.open(Dialog, dialogConfig);
+            /*dialogRef.afterClosed().subscribe(result => {
+                console.log(' Dialog was closed');
+                this.router.navigate(['/process']);
+            });*/
+            return;
+        }
+        //Matrix inversion and calculation
+        this.invertedMatrix = inverse(new Matrix(this.result));
+        this.calculateScalingVector();
     }
 
     /**
@@ -568,14 +642,16 @@ export class ResultComponent implements OnInit {
             this.scalingVector = scalingVec.to1DArray();
             //Set the values to 3dp, if they are not integer
             for (let i = 0; i < this.scalingVector.length; i++) {
-                let value = this.scalingVector[i];
+                this.scalingVector[i] = this.normalizeFloat(this.scalingVector[i]);
+                /*let value = this.scalingVector[i];
                 if (value - parseInt(value) != 0)
-                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);
+                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);*/
             }
             for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
-                let value = this.cumulativeEnvironmental[i];
+                this.cumulativeEnvironmental[i] = this.normalizeFloat(this.cumulativeEnvironmental[i]);
+                /*let value = this.cumulativeEnvironmental[i];
                 if (value - parseInt(value) != 0)
-                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);
+                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);*/
             }
         }
         
@@ -755,6 +831,7 @@ export class ResultComponent implements OnInit {
         this.isShowPrimary = this.isShowScaling;
         this.isShowExpanded = this.isShowScaling;
         this.isShowFinal = this.isShowScaling;
+        this.isShowInverted = this.isShowScaling;
         this.isShowScaling = !this.isShowScaling;
         this.isShowChart = false;
     }
@@ -765,6 +842,7 @@ export class ResultComponent implements OnInit {
         this.isShowExpanded = this.isShowChart;
         this.isShowFinal = this.isShowChart;
         this.isShowScaling = false;
+        this.isShowInverted = true;
         this.isShowChart = !this.isShowChart;
     }
 
@@ -978,5 +1056,87 @@ export class ResultComponent implements OnInit {
         } else {
             return obj;
         }
+    }
+
+    /**
+     * Make a number 3dp if it's float, or 0dp if it's int
+     */
+    normalizeFloat(num) {
+        var difference = 0;
+        var value = 0;
+        if (typeof num === "number") {
+            difference = num - Math.floor(num);
+            value = num;
+        } else if (typeof num === "string") {
+            difference = parseFloat(num) - parseInt(num);
+            value = parseFloat(num);
+        }
+        if (difference != 0) {
+            return value.toFixed(3);
+        } else {
+            return value.toString();
+        }
+    }
+
+    exportPDF() {
+        this.isShowPrimary = true;
+        this.isShowFinal = true;
+        this.isShowScaling = true;
+        this.isShowInverted = true;
+        this.cd.detectChanges();
+        var pdf = new jsPDF('p', 'mm');
+        let ratios = [];
+        const margin = {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10,
+            inBetween: 10
+        }
+        const promises = Array.from(document.querySelectorAll('.toExport')).map(function (value, index, element) {
+            return new Promise(function (resolve, reject) {
+                html2canvas(<HTMLElement>value, {
+                    allowTaint: true,
+                    logging: false
+                }).then(function (canvas) {
+                    ratios.push({
+                        h: canvas.height,
+                        w: canvas.width
+                    });
+                    resolve(canvas.toDataURL('image/jpeg', 1.0));
+                }).catch(function (error) {
+                    reject('error in Result PDF page: ' + index);
+                });
+            });
+        });
+        var yPositionToDraw = margin.top;
+        Promise.all(promises).then( dataURLS => {
+            //console.log(dataURLS);
+            for (const ind in dataURLS) {
+                if (dataURLS.hasOwnProperty(ind)) {
+                    //console.log(ratios[ind]);
+                    var width = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
+                    var height = ratios[ind].h / ratios[ind].w * width;
+                    if (yPositionToDraw + height >= pdf.internal.pageSize.getHeight()) {
+                        yPositionToDraw = margin.top;
+                        pdf.addPage();
+                    }
+                    pdf.addImage(dataURLS[ind], 'JPEG', margin.left, yPositionToDraw, width, height);
+                    yPositionToDraw += height + margin.inBetween;
+                }
+            }
+            //pdf.save(this.project.projectName + '.pdf');
+            this.dataService.parsePdf(pdf, yPositionToDraw);
+            this.router.navigate(['/process/export']);
+        }).finally(() => this.stopLoader());
+    }
+
+    startLoader() {
+        document.getElementById('modal').style.display = 'block';
+        document.getElementById('modal').style.overflow = 'hidden';
+    }
+
+    stopLoader() {
+        document.getElementById('modal').style.display = 'none';
     }
 }
