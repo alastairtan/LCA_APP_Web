@@ -11,6 +11,13 @@ html, body {
     height: 5vh;
 }
 
+.stickyNav {
+    position: fixed;
+    top: 0;
+    z-index: 1;
+    width: 100%;
+}
+
 .navTitle {
     font-family: sans-serif;
     font-size: 1vw;

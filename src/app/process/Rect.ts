@@ -136,5 +136,6 @@ export class Rect {
         for (var i = 0; i < this.connectors.length && isEqual; i++) {
             isEqual = isEqual && (other.connectors.includes(this.connectors[i]));
         }
+        return isEqual;
     }
 }   

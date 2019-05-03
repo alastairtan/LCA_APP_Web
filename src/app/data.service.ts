@@ -20,11 +20,19 @@ export class DataService {
     redoStack = [];                             //Stack saving the states of the project for redo-ing purposes
 
     private currentProject: Project = new Project();        //Object containing all data of the current project
-    pdf = new jsPDF('p', 'mm');
-    drawPosition = 0;
+    drawList: any[] = [];
 
-    constructor(/*@Inject(SESSION_STORAGE) private sessionSt: StorageService,
-                @Inject(LOCAL_STORAGE) private localSt: StorageService*/) { }
+    pdf: jsPDF;
+    private margin = {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10,
+        inBetween: 10
+    }
+    private yPos = this.margin.top * 2;
+
+    constructor() { }
 
     /**
     * Add the newly saved project to the list of recent projects
@@ -60,32 +68,6 @@ export class DataService {
         }
         //Save the list of recent projects to local storage
         this.setLocalStorage('recentProjs', JSON.stringify(recentProjects));*/
-    }
-
-    /**
-    * Save the project file to a predetermined folder
-    * @param filename name of the file to save to, without extension
-    * @param jsonContent details of the project, as a stringified JSON content
-    * @returns returns the path to the saved file
-    */
-  saveToFolder(filename: string, jsonContent: string) {
-      /*const fs = require('fs'); // Load the File System to execute our common tasks (CRUD)
-      //Make a new folder, if not already existed
-      fs.mkdir(this.DEFAULT_SAVE_PATH, { recursive: true }, (err) => {
-          if (err) {
-              console.log('Folder ' + this.DEFAULT_SAVE_PATH + ' already exists');
-          }
-      });
-      //Write the file
-      var filenameWithExtension = filename + '.json';
-      var wstream = fs.createWriteStream(this.DEFAULT_SAVE_PATH + '/' + filenameWithExtension);
-      wstream.write(jsonContent);
-      wstream.end();
-      var filepath = this.DEFAULT_SAVE_PATH + '/' + filenameWithExtension;
-      console.log('File saved to ' + filepath);
-      //Save to recent projects
-      this.addToRecentProjects(filepath, filename);
-      return filepath;*/
     }
 
     /**
@@ -126,29 +108,6 @@ export class DataService {
       document.body.appendChild(element);
 
       element.click();
-    }
-
-    /**
-     * Show a confirmation dialog when user wants to delete an item
-     * @return true if user chooses Yes, false if user chooses No
-     */
-    showDeleteConfirmation() {
-        /*const { dialog } = require("electron").remote;
-        //Call to the current window to make the dialog a modal
-        const { BrowserWindow } = require('electron').remote;
-        var WIN = BrowserWindow.getFocusedWindow();
-        const options = {
-            type: 'warning',
-            buttons: ['Yes, please', 'No, thanks'],
-            defaultId: 0,
-            cancelId: 1,
-            title: 'Warning',
-            message: 'Are you sure you want to delete?',
-            detail: 'You can still recover this item by pressing Ctrl+Z',
-        };
-        var choice = dialog.showMessageBox(WIN, options);
-        return choice == 0;*/
-        return true;
     }
 
     /**
@@ -330,8 +289,121 @@ export class DataService {
         return this.currentProject;
     }
 
-    parsePdf(newPDF, yPositionToDraw) {
-        this.pdf = newPDF;
-        this.drawPosition = yPositionToDraw;
+    /**
+     * Add an image to the list, ready to be exported to pdf
+     * @param imageData URL data of the image to be exported
+     * @param imageWidth original width of the image
+     * @param imageHeight original height of the image
+     * @param toFront whether to put the image to the front of the queue, or at the back. Default is false
+     */
+    addImage(imageData, imageWidth, imageHeight, toFront?: boolean) {
+        if (toFront == undefined)
+            toFront = false;
+        if (toFront) {
+            this.drawList.unshift({
+                data: imageData,
+                width: imageWidth,
+                height: imageHeight
+            });
+        } else {
+            this.drawList.push({
+                data: imageData,
+                width: imageWidth,
+                height: imageHeight
+            });
+        }
+    }
+
+    /**
+     * Export all images from the drawList to pdf
+     */
+    exportPDF() {
+        //Create a new pdf for each import
+        this.pdf = new jsPDF('p', 'mm');
+        this.pdf.setFont('Raleway', 'Medium')
+        //Write all the text data on the first page
+        this.writeText(this.currentProject.projectName, 'center', 40);
+        this.pdf.setFontStyle('bold');
+        this.writeText('Goals', 'left', 28);
+        this.pdf.setFontStyle('normal');
+        if (this.currentProject.objective != '') {
+            this.writeText('Objective', 'left', 20, 20);
+            this.writeText(this.currentProject.objective, 'left', 14, 30);
+        }
+        if (this.currentProject.targetAudience != '') {
+            this.writeText('Target Audience', 'left', 20, 20);
+            this.writeText(this.currentProject.targetAudience, 'left', 14, 30);
+        }
+        this.yPos += 5;
+        this.pdf.setFontStyle('bold');
+        this.writeText('Scope', 'left', 28);
+        this.pdf.setFontStyle('normal');
+        if (this.currentProject.scopeName != '') {
+            this.writeText('Product/Service name', 'left', 20, 20);
+            this.writeText(this.currentProject.scopeName, 'left', 14, 30);
+        }
+        if (this.currentProject.scopeDescription != '') {
+            this.writeText('Product/Service description', 'left', 20, 20);
+            this.writeText(this.currentProject.scopeDescription, 'left', 14, 30);
+        }
+        this.yPos += 5;
+        this.pdf.setFontStyle('bold');
+        this.writeText('System Boundary', 'left', 28);
+        this.pdf.setFontStyle('normal');
+        if (this.currentProject.systemDescription != '') {
+            this.writeText('System Boundary description', 'left', 20, 20);
+            this.writeText(this.currentProject.systemDescription, 'left', 14, 30);
+        }
+        if (this.currentProject.systemExclusion != '') {
+            this.writeText('Exclusion', 'left', 20, 20);
+            this.writeText(this.currentProject.systemExclusion, 'left', 14, 30);
+        }
+        this.yPos += 5;
+        this.pdf.addPage();
+        //Draw all images from drawList
+        var yPositionToDraw = this.margin.top;
+        for (let image of this.drawList) {
+            var rescaledWidth = this.pdf.internal.pageSize.getWidth() - this.margin.left - this.margin.right;
+            var rescaledHeight = image.height / image.width * rescaledWidth;
+            if (yPositionToDraw + rescaledHeight >= this.pdf.internal.pageSize.getHeight()) {
+                yPositionToDraw = this.margin.top;
+                this.pdf.addPage();
+            }
+            this.pdf.addImage(image.data, 'JPEG', this.margin.left, yPositionToDraw, rescaledWidth, rescaledHeight);
+            yPositionToDraw += rescaledHeight + this.margin.inBetween;
+        }
+        this.pdf.save(this.currentProject.projectName + '.pdf');
+    }
+
+    private writeText(text: string, align: string, fontSize?: number, x?: number, y?: number) {
+        
+        if (text == null || text == '') {
+            return;
+        }
+        if (x == undefined) {
+            x = this.margin.left;
+        }
+        if (y == undefined) {
+            y = this.yPos;
+        }
+        if (fontSize != undefined) {
+            this.pdf.setFontSize(fontSize);
+        }
+        console.log('print at', x, y)
+        switch (align) {
+            case 'center':
+                var xOffset = (this.pdf.internal.pageSize.getWidth() / 2) - (this.pdf.getStringUnitWidth(text) * this.pdf.internal.getFontSize() * 25.6 / 72 / 2);
+                this.pdf.text(text, xOffset, y);
+                break;
+            case 'left':
+                this.pdf.text(text, x, y);
+                break;
+            case 'right':
+                var xOffset = this.pdf.internal.pageSize.getWidth() - this.margin.right - (this.pdf.getStringUnitWidth(text) * this.pdf.internal.getFontSize() * 25.6 / 72);
+                this.pdf.text(text, xOffset, y);
+                break;
+        }
+        var yOffset = this.pdf.getLineHeight() * 1.15 * 25.6 / 72;
+        this.yPos += yOffset < 15 ? 15 : yOffset;
     }
 }

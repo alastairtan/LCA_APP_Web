@@ -7,8 +7,6 @@ import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material'
-
-import * as jsPDF from 'jspdf';
 import * as html2canvas from 'html2canvas';
 
 import { Project } from '../project';
@@ -99,6 +97,9 @@ export class ResultComponent implements OnInit {
     hoveredRow = null;
     hoveredCol = null;
     rowCount = 0;
+    demandInput: number[] = [];
+    demandOutput: number[] = [];
+    selectedProcess: number = -1;
 
     //Variables for bar chart drawing
     barChartOptions: ChartOptions = {
@@ -484,7 +485,7 @@ export class ResultComponent implements OnInit {
                     if (j < this.project.processNodes.length) {
                         let process = this.project.processNodes[j];
                         for (let output of process.outputs) {
-                            if (output.outputName == this.economicflow[i] && output.isValuable) {
+                            if (output.outputName.toLowerCase() == this.economicflow[i].toLowerCase() && output.isValuable) {
                                 //Only allocate the output if it's valuable
                                 outputIndexArr.push(i);
                                 totalMassSum += this.result[i][j];
@@ -580,6 +581,57 @@ export class ResultComponent implements OnInit {
     }
 
     /**
+     * Highlight inputs and outputs of a process on the demandVector table,
+     * switch all other values to 0, then recalculate the scaling vector
+     * @param index index of the process to highlight
+     */
+    showDemand(index) {
+        this.demandInput = [];
+        this.demandOutput = [];
+        //Deselect
+        if (this.selectedProcess == index) {
+            this.selectedProcess = -1;
+            this.calculateScalingVector();
+            return;
+        }
+        this.selectedProcess = index;
+        //GLOBAL NETWORK case
+        if (index < 0) {
+            this.calculateScalingVector();
+            return;
+        }
+        //Include all inputs of the process
+        var proc = this.project.processNodes[index];
+        for (let input of proc.materialInput) {
+            for (let i = 0; i < this.economicflow.length; i++) {
+                if (input.materialName.toLowerCase() == this.economicflow[i].toLowerCase()) {
+                    this.demandInput.push(i);
+                    break;
+                }
+            }
+        }
+        //Include all outputs of the process
+        for (let output of proc.outputs) {
+            for (let i = 0; i < this.economicflow.length; i++) {
+                if (output.outputName.toLowerCase() == this.economicflow[i].toLowerCase()) {
+                    this.demandOutput.push(i);
+                    break;
+                }
+            }
+        }
+        //Extract the partial demand vector based on inputs and outputs, then recalculate the scaling vector
+        var partialDemandVector: number[] = [];
+        for (let i = 0; i < this.demandVector.value.length; i++) {
+            if (this.demandInput.includes(i) || this.demandOutput.includes(i)) {
+                partialDemandVector.push(this.demandVector.value[i]['value']);
+            } else {
+                partialDemandVector.push(0);
+            }
+        }
+        this.calculateScalingVector(true, partialDemandVector);
+    }
+
+    /**
      * Function for matrix calculation and catching errors
      * */
     doMatrixCalculation() {
@@ -590,7 +642,7 @@ export class ResultComponent implements OnInit {
         } else if (this.result.length != this.result[0].length) {
             errors.push('ERROR: Matrix is not square. There must be some errors in the data input step');
         } else if (this.resultEnvironmental.length <= 0) {
-            errors.push('ERROR: No emission data found for the Environmental matrix. Add data for emission for every pro');
+            errors.push('ERROR: No emission data found for the Environmental matrix. Add data for emission for every process');
         }
         if (errors.length > 0) {
             var errorText = '';
@@ -619,13 +671,21 @@ export class ResultComponent implements OnInit {
 
     /**
      * Invert the result matrix and calculate the scaling vector based on the demand vector
-     * */
-    calculateScalingVector() {
+     * @param partialDemand Whether to calculate from the partial demand vector or not. Default is false
+     * @param partialDemandVector the partial demand vector to calculate from
+     */
+    calculateScalingVector(partialDemand?: boolean, partialDemandVector?: number[]) {
+        if (partialDemand == undefined) {
+            partialDemand = false
+        }
         var scalingVec: Matrix;
         if (this.result.length <= 0 || this.result.length != this.result[0].length) {
             scalingVec = Matrix.ones(this.result.length, 1);
             this.cumulativeEnvironmental = Matrix.zeros(this.resultEnvironmental.length, 1).to1DArray();
             return;
+        } else if (partialDemand) {
+            var demandVec = Matrix.columnVector(partialDemandVector);
+            scalingVec = this.invertedMatrix.mmul(demandVec);
         } else {
             var demandVectorValue = [];
             for (let val of this.demandVector.value) {
@@ -643,15 +703,9 @@ export class ResultComponent implements OnInit {
             //Set the values to 3dp, if they are not integer
             for (let i = 0; i < this.scalingVector.length; i++) {
                 this.scalingVector[i] = this.normalizeFloat(this.scalingVector[i]);
-                /*let value = this.scalingVector[i];
-                if (value - parseInt(value) != 0)
-                    this.scalingVector[i] = this.scalingVector[i].toFixed(3);*/
             }
             for (let i = 0; i < this.cumulativeEnvironmental.length; i++) {
                 this.cumulativeEnvironmental[i] = this.normalizeFloat(this.cumulativeEnvironmental[i]);
-                /*let value = this.cumulativeEnvironmental[i];
-                if (value - parseInt(value) != 0)
-                    this.cumulativeEnvironmental[i] = this.cumulativeEnvironmental[i].toFixed(3);*/
             }
         }
         
@@ -1078,21 +1132,19 @@ export class ResultComponent implements OnInit {
         }
     }
 
+    /**
+     * "Screen capture" the elements of the toExport class, 
+     * then pass them into the dataService, ready to be exported into pdf
+     */
     exportPDF() {
+        //Show all relevant matrices to be exported
         this.isShowPrimary = true;
         this.isShowFinal = true;
         this.isShowScaling = true;
         this.isShowInverted = true;
         this.cd.detectChanges();
-        var pdf = new jsPDF('p', 'mm');
+        //Find all elements of the toExport class, screen capture them, then pass the image data to an array of promises
         let ratios = [];
-        const margin = {
-            left: 10,
-            right: 10,
-            top: 10,
-            bottom: 10,
-            inBetween: 10
-        }
         const promises = Array.from(document.querySelectorAll('.toExport')).map(function (value, index, element) {
             return new Promise(function (resolve, reject) {
                 html2canvas(<HTMLElement>value, {
@@ -1109,33 +1161,29 @@ export class ResultComponent implements OnInit {
                 });
             });
         });
-        var yPositionToDraw = margin.top;
+        //Pass the image data to dataService, then navigate to Process component
         Promise.all(promises).then( dataURLS => {
-            //console.log(dataURLS);
             for (const ind in dataURLS) {
                 if (dataURLS.hasOwnProperty(ind)) {
-                    //console.log(ratios[ind]);
-                    var width = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
-                    var height = ratios[ind].h / ratios[ind].w * width;
-                    if (yPositionToDraw + height >= pdf.internal.pageSize.getHeight()) {
-                        yPositionToDraw = margin.top;
-                        pdf.addPage();
-                    }
-                    pdf.addImage(dataURLS[ind], 'JPEG', margin.left, yPositionToDraw, width, height);
-                    yPositionToDraw += height + margin.inBetween;
+                    this.dataService.addImage(dataURLS[ind], ratios[ind].w, ratios[ind].h);
                 }
             }
-            //pdf.save(this.project.projectName + '.pdf');
-            this.dataService.parsePdf(pdf, yPositionToDraw);
             this.router.navigate(['/process/export']);
-        }).finally(() => this.stopLoader());
+        }).finally(() => {
+            //Hide the loader after compiling the pdf
+            setTimeout(() => {
+                this.stopLoader();
+            }, 1000);
+        });
     }
 
+    //Show the loader
     startLoader() {
         document.getElementById('modal').style.display = 'block';
         document.getElementById('modal').style.overflow = 'hidden';
     }
 
+    //Hide the loader
     stopLoader() {
         document.getElementById('modal').style.display = 'none';
     }
