@@ -2,66 +2,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body id="body">
-    <div class="nav">
-        <button (click)="navPrev()">
-            <p class="navButtonFont">
-                <i class="fa fa-home"></i>
-            </p>
-        </button>
+    <div class="stickyNav">
+        <div class="nav">
+            <button (click)="navPrev()">
+                <p class="navButtonFont">
+                    <i class="fa fa-home"></i>
+                </p>
+            </button>
+        </div>
+        <mat-toolbar>
+            <mat-toolbar-row (click)="setTableWidth()">
+                <button class="processButtons" (click)="navPrev()">
+                    Previous
+                </button>
+                <button *ngIf="isShowPrimary" class="processButtons viewButton" (click)="isShowPrimary = false">
+                    Primary Matrix
+                </button>
+                <button *ngIf="!isShowPrimary" class="processButtons" (click)="isShowPrimary = true">
+                    Primary Matrix
+                </button>
+                <button *ngIf="isShowExpanded" class="processButtons viewButton" (click)="isShowExpanded = false">
+                    Expanded Matrix
+                </button>
+                <button *ngIf="!isShowExpanded" class="processButtons" (click)="isShowExpanded = true">
+                    Expanded Matrix
+                </button>
+                <button *ngIf="isShowFinal" class="processButtons viewButton" (click)="isShowFinal = false">
+                    Final Matrix
+                </button>
+                <button *ngIf="!isShowFinal" class="processButtons" (click)="isShowFinal = true">
+                    Final Matrix
+                </button>
+                <button *ngIf="isShowScaling" class="processButtons viewButton" (click)="toggleShowScaling()">
+                    Demand/Scaling
+                </button>
+                <button *ngIf="!isShowScaling" class="processButtons" (click)="toggleShowScaling()">
+                    Demand/Scaling
+                </button>
+                <button *ngIf="isShowChart" class="processButtons viewButton" (click)="toggleShowChart()">
+                    Environmental Chart
+                </button>
+                <button *ngIf="!isShowChart" class="processButtons" (click)="toggleShowChart()">
+                    Environmental Chart
+                </button>
+                <button *ngIf="input" class="processButtons viewButton" (click)="showManualInputMatrix()">
+                    Input Matrix
+                </button>
+                <button *ngIf="!input" class="processButtons" (click)="showManualInputMatrix()">
+                    Input Matrix
+                </button>
+                <button *ngIf="isHideZero" class="processButtons viewButton" (click)="isHideZero = false">
+                    Hide 0s
+                </button>
+                <button *ngIf="!isHideZero" class="processButtons" (click)="isHideZero = true">
+                    Hide 0s
+                </button>
+                <button class="processButtons exportButton" (click)="startLoader(); exportPDF()">
+                    Export
+                </button>
+            </mat-toolbar-row>
+        </mat-toolbar>
     </div>
-    <mat-toolbar>
-        <mat-toolbar-row (click)="setTableWidth()">
-            <button class="processButtons" (click)="navPrev()">
-                Previous
-            </button>
-            <button *ngIf="isShowPrimary" class="processButtons viewButton" (click)="isShowPrimary = false">
-                Primary Matrix
-            </button>
-            <button *ngIf="!isShowPrimary" class="processButtons" (click)="isShowPrimary = true">
-                Primary Matrix
-            </button>
-            <button *ngIf="isShowExpanded" class="processButtons viewButton" (click)="isShowExpanded = false">
-                Expanded Matrix
-            </button>
-            <button *ngIf="!isShowExpanded" class="processButtons" (click)="isShowExpanded = true">
-                Expanded Matrix
-            </button>
-            <button *ngIf="isShowFinal" class="processButtons viewButton" (click)="isShowFinal = false">
-                Final Matrix
-            </button>
-            <button *ngIf="!isShowFinal" class="processButtons" (click)="isShowFinal = true">
-                Final Matrix
-            </button>
-            <button *ngIf="isShowScaling" class="processButtons viewButton" (click)="toggleShowScaling()">
-                Demand/Scaling
-            </button>
-            <button *ngIf="!isShowScaling" class="processButtons" (click)="toggleShowScaling()">
-                Demand/Scaling
-            </button>
-            <button *ngIf="isShowChart" class="processButtons viewButton" (click)="toggleShowChart()">
-                Environmental Chart
-            </button>
-            <button *ngIf="!isShowChart" class="processButtons" (click)="toggleShowChart()">
-                Environmental Chart
-            </button>
-            <button *ngIf="input" class="processButtons viewButton" (click)="showManualInputMatrix()">
-                Input Matrix
-            </button>
-            <button *ngIf="!input" class="processButtons" (click)="showManualInputMatrix()">
-                Input Matrix
-            </button>
-            <button *ngIf="isHideZero" class="processButtons viewButton" (click)="isHideZero = false">
-                Hide 0s
-            </button>
-            <button *ngIf="!isHideZero" class="processButtons" (click)="isHideZero = true">
-                Hide 0s
-            </button>
-            <button class="processButtons exportButton" (click)="startLoader(); exportPDF()">
-                Export
-            </button>
-        </mat-toolbar-row>
-    </mat-toolbar>
-
     <div class="container main-container">
         <div class="row" *ngIf="!isShowChart">
             <div class="col-md-12">
@@ -79,6 +80,13 @@
 
                     <table id="primaryTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
+                            <tr>
+                                <th class="rightBorder">#</th>
+                                <th *ngFor="let name of primaryProcessName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
+                                    style="text-align: center" class="primaryProcess">
+                                        {{j + 1}}
+                                    </th>
+                            </tr>
                             <tr>
                                 <th class="rightBorder">Entity</th>
                                 <th *ngFor="let name of primaryProcessName; let j = index" class="primaryProcess" (mouseenter)="onMouseOver(1, null, j)">
@@ -108,8 +116,17 @@
                     <table id="expandedTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
+                                <th class="rightBorder">#</th>
+                                <th *ngFor="let name of expandedProcessName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
+                                    style="text-align: center"
+                                    [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
+                                    primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length}">
+                                        {{j + 1}}
+                                    </th>
+                            </tr>
+                            <tr>
                                 <th class="rightBorder">Entity</th>
-                                <th *ngFor="let name of expandedProcessName; let j = index" (mouseenter)="onMouseOver(2, null, j)" 
+                                <th *ngFor="let name of expandedProcessName; let j = index" (mouseenter)="onMouseOver(2, null, j)"
                                     [ngClass]="{rightBorder: j == primary[0].length - 1, primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length}">
                                     {{name}}
                                 </th>
@@ -136,6 +153,15 @@
                     <form [formGroup]="demandVectorForm" id="demandVectorForm2">
                         <table id="finalTable" formArrayName="inputs" (mouseleave)="onMouseOver(0, null, null)">
                             <thead>
+                                <tr>
+                                    <th class="rightBorder">#</th>
+                                    <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
+                                        style="text-align: center"
+                                        [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
+                                        primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
+                                        {{j + 1}}
+                                    </th>
+                                </tr>
                                 <tr>
                                     <th class="rightBorder">Entity</th>
                                     <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
@@ -324,6 +350,15 @@
                     <table id="environmentTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
+                                <th class="rightBorder">#</th>
+                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
+                                    style="text-align: center"
+                                    [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1 || j == processName.length - 1,
+                                    primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
+                                        {{j + 1}}
+                                    </th>
+                            </tr>
+                            <tr>
                                 <th class="rightBorder">Entity</th>
                                 <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)"
                                     [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
@@ -334,6 +369,14 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <tr *ngIf="isShowScaling">
+                                <th style="font-weight:300" class="bottomBorder" (mouseenter)="onMouseOver(5, -1, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == -1}">Scaling vector</th>
+                                <td *ngFor="let val of scalingVector; let i = index" class="bottomBorder"
+                                    [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == i || hoveredRow == -1), rightBorder: i == primary[0].length - 1 || i == expanded[0].length - 1 || i == processName.length - 1}">
+                                    <input type="number" disabled value="{{scalingVector[i]}}"/>
+                                </td>
+                                <td style="text-align:center" class="bottomBorder">-----</td>
+                            </tr>
                             <tr *ngFor="let row of resultEnvironmental; let i = index">
                                 <th style="font-weight:300" (mouseenter)="onMouseOver(5, i, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == i}">{{environmentalflow[i]}}</th>
                                 <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)"
