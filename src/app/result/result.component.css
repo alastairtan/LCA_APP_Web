@@ -40,12 +40,12 @@ table {
     width: var(--expanded-width);
 }
 
-#finalTable, #finalTable2, #demandTable, #invertedTable, #environmentTable {
+#finalTable, #finalTable2, #demandTable, #invertedTable, #environmentTable, #scaledEnvironmentTable {
     width: 100%;
 }
 
 td, th {
-    border: 1px solid #dddddd;
+    border: 1px solid #bbb;
     text-align: left;
     padding: 3px 5px;
     position: relative;
@@ -206,5 +206,5 @@ body.loading .modal {
 }
 
 tr:nth-child(even) {
-    background: #dddddd;
+    background: #ddd;
 }

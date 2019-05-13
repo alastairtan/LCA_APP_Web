@@ -232,7 +232,7 @@
 
                 <div id="demandScaling" class="toExport" *ngIf="isShowScaling">
                     <p class="subtitle">
-                        Demand and Scaling vector
+                        Demand vector
                     </p>
                     <div class="row">
                         <div class="col-md-4 demandButtonContainer">
@@ -392,11 +392,14 @@
                     <p class="matrix-title">
                         Environmental Matrix
                     </p>
+                    <p class="subtitle" *ngIf="isShowScaling">
+                        Unscaled environmental matrix
+                    </p>
                     <table id="environmentTable" (mouseleave)="onMouseOver(0, null, null)">
                         <thead>
                             <tr>
                                 <th class="rightBorder">#</th>
-                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(3, null, j)"
+                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)"
                                     style="text-align: center"
                                     [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1 || j == processName.length - 1,
                                     primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
@@ -418,7 +421,7 @@
                                 <th style="font-weight:300" class="bottomBorder" (mouseenter)="onMouseOver(5, -1, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == -1}">Scaling vector</th>
                                 <td *ngFor="let val of scalingVector; let i = index" class="bottomBorder"
                                     [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == i || hoveredRow == -1), rightBorder: i == primary[0].length - 1 || i == expanded[0].length - 1 || i == processName.length - 1}">
-                                    <input type="number" disabled value="{{scalingVector[i]}}"/>
+                                    <input type="number" disabled value="{{scalingVector[i]}}" />
                                 </td>
                                 <td style="text-align:center" class="bottomBorder">-----</td>
                             </tr>
@@ -427,9 +430,45 @@
                                 <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)"
                                     [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
                                                 highlightedDblClick: hoveredTable == 5 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
-                                    {{isHideZero && col == 0 ? "" : col}}
+                                    {{isHideZero && col == 0 ? "" : normalizeFloat(col)}}
                                 </td>
-                                <td *ngIf="isShowScaling" class="leftBorder">{{cumulativeEnvironmental[i]}}</td>
+                                <td style="text-align:center" *ngIf="isShowScaling" class="leftBorder">-----</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="subtitle" *ngIf="isShowScaling">
+                        Scaled environmental matrix
+                    </p>
+                    <table id="scaledEnvironmentTable" *ngIf="isShowScaling" (mouseleave)="onMouseOver(0, null, null)">
+                        <thead>
+                            <tr>
+                                <th class="rightBorder">#</th>
+                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)"
+                                    style="text-align: center"
+                                    [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1 || j == processName.length - 1,
+                                    primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
+                                        {{j + 1}}
+                                    </th>
+                            </tr>
+                            <tr>
+                                <th class="rightBorder">Entity</th>
+                                <th *ngFor="let name of processName; let j = index" (mouseenter)="onMouseOver(5, null, j)"
+                                    [ngClass]="{rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
+                                    primaryProcess: j < primary[0].length, expandedProcess: j >= primary[0].length && j < expanded[0].length, allocatedProcess: j >= expanded[0].length}">
+                                    {{name}}
+                                </th>
+                                <th *ngIf="isShowScaling" class="lastColumn">Cumulative</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of resultEnvironmental; let i = index">
+                                <th style="font-weight:300" (mouseenter)="onMouseOver(5, i, null)" [ngClass]="{highlighted: hoveredTable == 5 && hoveredRow == i}">{{environmentalflow[i]}}</th>
+                                <td *ngFor="let col of row; let j = index" (mouseenter)="onMouseOver(5, i, j)"
+                                    [ngClass]="{highlighted: hoveredTable == 5 && (hoveredCol == j || hoveredRow == i), rightBorder: j == primary[0].length - 1 || j == expanded[0].length - 1,
+                                                highlightedDblClick: hoveredTable == 5 && col != 0 && (hoveredCol == j && hoveredRow == i)}" (dblclick)="navToInput(j, 2, col, environmentalflow[i])">
+                                    {{isHideZero && col == 0 ? "" : normalizeFloat(col * scalingVector[j])}}
+                                </td>
+                                <td class="leftBorder">{{cumulativeEnvironmental[i]}}</td>
                             </tr>
                         </tbody>
                     </table>
