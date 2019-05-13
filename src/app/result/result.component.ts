@@ -144,6 +144,7 @@ export class ResultComponent implements OnInit {
 
         //generating primary matrix
         this.transformingDataIntoMatrix(this.economicflow, this.process, this.result);
+        this.fetchDemandVector();
         this.primary = this.clone(this.result,false);
         this.primaryProcessName = this.clone(this.processName,true);
         this.geratingEnvironmentalMatrix();
@@ -167,7 +168,8 @@ export class ResultComponent implements OnInit {
         switch (event.key) {
             //Arrow key events for ease of navigation
             case 'Home':
-                console.log(this.hoveredTable);
+                console.log(this.demandVector.getRawValue());
+                console.log(this.project.demandVector);
                 break;
             case 'End':
                 console.log(this.invertedMatrix);
@@ -272,14 +274,25 @@ export class ResultComponent implements OnInit {
                 }
             }
             result.push(row);
-            if (label == this.economicflow) {
-                var valueFormGroup = new FormGroup({
-                    value: new FormControl(0)
-                });
-                this.demandVector.push(valueFormGroup);
-            }
         }
         this.rowCount = this.economicflow.length;
+    }
+
+    fetchDemandVector() {
+        for (var i = 0; i < this.economicflow.length; i++) {
+            var demandValue = 0;
+            if (i < this.project.demandVector.length) {
+                demandValue = this.project.demandVector[i];
+            }
+            var valueFormGroup = new FormGroup({
+                value: new FormControl(demandValue)
+            });
+            this.demandVector.push(valueFormGroup);
+        }
+        this.project.demandVector = [];
+        for (var i = 0; i < this.demandVector.value.length; i++) {
+            this.project.demandVector.push(this.demandVector.value[i]['value'])
+        }
     }
 
     /**
@@ -577,7 +590,9 @@ export class ResultComponent implements OnInit {
      * @param newValue new value of the row
      */
     updateDemand(index, newValue) {
-        this.demandVector.at(index).setValue({ value: parseFloat(newValue) });
+        var floatValue = parseFloat(newValue);
+        this.demandVector.at(index).setValue({ value: floatValue });
+        this.project.demandVector[index] = floatValue;
     }
 
     /**
@@ -708,27 +723,6 @@ export class ResultComponent implements OnInit {
                 this.cumulativeEnvironmental[i] = this.normalizeFloat(this.cumulativeEnvironmental[i]);
             }
         }
-        
-    }
-
-    scenario1Example() {
-        var scenario1 = new Matrix([
-            [1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0.94, -1, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0.06, 0, -1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0.9, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0.1, 0, 0, -1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0.278, 0, 0, -1, 0, 0, 0],
-            [0, 0, 0, 0, 0.98, -1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0.02, 0, 0, 0, 0, -1, 0],
-            [0, 0, 0, 0, 0, 0.7, 0, 0, 0, 0, -1],
-            [0, 0, 0, 0, 0, 0.541, 0, 0, -1, 0, 0]
-        ]);
-        var inverted1 = inverse(scenario1);
-        var demand1 = Matrix.columnVector([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]);
-        var scaling1 = inverted1.mmul(demand1);
-        console.log(scaling1);
     }
 
     /**

@@ -13,6 +13,7 @@ export class Project {
     systemExclusion: string;
     lifeCycleStages: string[];
     processNodes: Rect[];
+    demandVector: number[];
     processDimension: number;
     dimensionArray: number[];
     separatorArray: Line[];
@@ -28,6 +29,7 @@ export class Project {
         this.systemExclusion = '';
         this.lifeCycleStages = [];
         this.processNodes = [];
+        this.demandVector = [];
         this.image = '';
         this.processDimension = null;
         this.dimensionArray = [];
@@ -70,6 +72,9 @@ export class Project {
                 this.processNodes.push(rectObj);
             }
         }
+        if (projectData.demandVector != undefined) {
+            this.demandVector = projectData.demandVector;
+        }
         if (projectData.dimensionArray != undefined) {
             this.dimensionArray = projectData.dimensionArray;
         }
@@ -105,6 +110,11 @@ export class Project {
         var len2 = this.processNodes.length;
         for (var i = 0; i < len2 && isEqual; i += 1) {
             isEqual = isEqual && (this.processNodes[i].equals(other.processNodes[i]));
+        }
+        //Compare the demand vector
+        isEqual = isEqual && this.demandVector.length == other.demandVector.length;
+        for (var i = 0; isEqual && i < this.demandVector.length; i++) {
+            isEqual = isEqual && (this.demandVector[i] == other.demandVector[i]);
         }
         return isEqual;
     }
