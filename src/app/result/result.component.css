@@ -40,7 +40,7 @@ table {
     width: var(--expanded-width);
 }
 
-#finalTable, #finalTable2, #demandTable, #invertedTable, #environmentTable {
+#finalTable, #finalTable2, #demandTable, #invertedTable, #environmentTable, #scaledEnvironmentTable {
     width: 100%;
 }
 
